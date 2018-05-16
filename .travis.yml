@@ -4,7 +4,7 @@ services:
 - docker
 language: go
 go:
-- 1.8.1
+- 1.9.6
 
 install:
 # This script is used by the Travis build to install a cookie for
@@ -18,7 +18,8 @@ script:
 - make test
 - make vendor-status
 - make vet
-- make website-test
+# We cannot add them back since the symbolic link is missing on the terraform website
+# - make website-test
 
 branches:
   only:
