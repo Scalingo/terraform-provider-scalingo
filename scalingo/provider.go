@@ -10,18 +10,19 @@ func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_token": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_API_TOKEN", nil),
 			},
 			"api_url": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "https://api.scalingo.com/",
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_API_URL", "https://api.scalingo.com/"),
 			},
 			"auth_api_url": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "https://auth.scalingo.com/",
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_AUTH_URL", "https://auth.scalingo.com/"),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{

@@ -177,10 +177,8 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 		d.Set("all_environment", allEnvironment)
 		d.SetPartial("all_environment")
 
-		_, err = client.AppsRestart(d.Id(), nil)
-		if err != nil {
-			return err
-		}
+		// Ignore the restart error, here the error is probably linked to the application status, which mean that the environment will be applied later.
+		client.AppsRestart(d.Id(), nil)
 	}
 
 	d.Partial(false)

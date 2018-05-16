@@ -31,8 +31,8 @@ resource "scalingo_app" "my_app" {
 
 The following arguments are supported:
 
-- `api_key` - (Required) Scalingo API token.
-- `api_url` - (Optional) URL of the Scalingo API. If not set, this will default to `https://api.scalingo.com/`
-- `auth_url` - (Optional) URL of Scalingo's authentication API. If not set, this will default to `https://auth.scalingo.com/`
+- `api_key` - (Required) Scalingo API token. This can also be sourced from the `SCALINGO_API_TOKEN` environment variable.
+- `api_url` - (Optional) URL of the Scalingo API. This can also be sourced from the `SCALINGO_API_URL` environment variable. If not set, this will default to `https://api.scalingo.com/`.
+- `auth_url` - (Optional) URL of Scalingo's authentication API. This can also be sourced from the `SCALINGO_AUTH_URL` environment variable. If not set, this will default to `https://auth.scalingo.com/`
 
 

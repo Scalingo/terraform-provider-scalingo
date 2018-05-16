@@ -57,7 +57,7 @@ func resourceAddonCreate(d *schema.ResourceData, meta interface{}) error {
 
 	addon, err := client.AddonProvision(appId, providerId, planId)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	d.Set("resource_id", addon.Addon.ResourceID)
