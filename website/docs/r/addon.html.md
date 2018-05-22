@@ -3,12 +3,12 @@ layout: "scalingo"
 page_title: "Scalingo: scalingo_addon"
 sidebar_current: "docs-scalingo-resource-addon"
 description: |-
-  Provides a Scalingo Add-On resource. These can be attach services to a Scalingo app.
+  Provides a Scalingo Add-On resource. These can be attached to a Scalingo app.
 ---
 
 # scalingo_addon
 
-Provides a Scalingo Add-On resource. These can be attach services to a Scalingo app.
+Provides a Scalingo Add-On resource. These can be attached to a Scalingo app.
 
 ## Example Usage
 
