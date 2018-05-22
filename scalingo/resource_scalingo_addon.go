@@ -89,8 +89,6 @@ func resourceAddonUpdate(d *schema.ResourceData, meta interface{}) error {
 	appId := d.Get("app").(string)
 	providerId := d.Get("provider_id").(string)
 
-	d.Partial(true)
-
 	if d.HasChange("plan") {
 		planId, err := addonPlanID(client, providerId, d.Get("plan").(string))
 		if err != nil {
@@ -103,11 +101,8 @@ func resourceAddonUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		d.Set("plan_id", res.Addon.PlanID)
-		d.SetPartial("plan")
-		d.SetPartial("plan_id")
 	}
 
-	d.Partial(false)
 	return nil
 }
 

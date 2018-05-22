@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/Scalingo/go-scalingo"
   packages = [".","billing","debug","io"]
-  revision = "b1a1f7bec6aaec90e90a1b6e35ecff2554f44197"
-  version = "v1.2.0"
+  revision = "376affbebafdcb10edd1a5653c326cc0bad5cd90"
+  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/agext/levenshtein"
@@ -297,6 +297,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4b12239461ee1dff17e6bb435d33e7e2bb749b304177f2f5975441a15c43e92c"
+  inputs-digest = "ac8e260b637c5f256743a6de56d47674a8c6029489f4ce2281ef89c301b781b6"
   solver-name = "gps-cdcl"
   solver-version = 1

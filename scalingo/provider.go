@@ -26,9 +26,10 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"scalingo_app":    resourceScalingoApp(),
-			"scalingo_domain": resourceScalingoDomain(),
-			"scalingo_addon":  resourceScalingoAddon(),
+			"scalingo_addon":       resourceScalingoAddon(),
+			"scalingo_app":         resourceScalingoApp(),
+			"scalingo_domain":      resourceScalingoDomain(),
+			"scalingo_github_link": resourceScalingoGithubLink(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

@@ -40,10 +40,10 @@ func resourceScalingoApp() *schema.Resource {
 func resourceAppCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*scalingo.Client)
 
-	app_name := d.Get("name").(string)
+	appName := d.Get("name").(string)
 
 	app, err := client.AppsCreate(scalingo.AppsCreateOpts{
-		Name: app_name,
+		Name: appName,
 	})
 
 	if err != nil {
