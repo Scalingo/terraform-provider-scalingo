@@ -34,6 +34,10 @@ func resourceScalingoApp() *schema.Resource {
 				Computed: true,
 			},
 		},
+
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 	}
 }
 

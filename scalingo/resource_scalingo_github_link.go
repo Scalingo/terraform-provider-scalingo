@@ -63,6 +63,10 @@ func resourceScalingoGithubLink() *schema.Resource {
 				Optional: true,
 			},
 		},
+
+		Importer: &schema.ResourceImporter{
+			State: resourceGithubLinkImport,
+		},
 	}
 }
 
@@ -219,6 +223,7 @@ func resourceGithubLinkRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	d.SetId(link.ID)
 	d.Set("auto_deploy", link.AutoDeployEnabled)
 	d.Set("review_apps", link.DeployReviewAppsEnabled)
 	d.Set("destroy_review_app_on_close", link.DestroyOnCloseEnabled)
@@ -226,6 +231,7 @@ func resourceGithubLinkRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("destroy_closed_review_app_after", int(link.HoursBeforeDeleteOnClose))
 	d.Set("destroy_stale_review_app_after", int(link.HoursBeforeDeleteStale))
 	d.Set("branch", link.GithubBranch)
+	d.Set("source", link.GithubSource)
 
 	return nil
 }
@@ -239,4 +245,10 @@ func resourceGithubLinkDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func resourceGithubLinkImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	d.Set("app", d.Id())
+
+	return []*schema.ResourceData{d}, nil
 }

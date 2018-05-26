@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"errors"
+	"strings"
 
 	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -37,6 +38,10 @@ func resourceScalingoAddon() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+		},
+
+		Importer: &schema.ResourceImporter{
+			State: resourceAddonImport,
 		},
 	}
 }
@@ -78,6 +83,7 @@ func resourceAddonRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("resource_id", addon.ResourceID)
 	d.Set("plan", addon.Plan.Name)
 	d.Set("plan_id", addon.PlanID)
+	d.Set("provider_id", addon.AddonProvider.ID)
 	d.SetId(addon.ID)
 
 	return nil
@@ -135,4 +141,18 @@ func addonPlanID(client *scalingo.Client, providerId, name string) (string, erro
 	}
 
 	return "", errors.New("Invalid plan name, possible values are: " + planList)
+}
+
+func resourceAddonImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	ids := strings.Split(d.Id(), ":")
+	if len(ids) != 2 {
+		return nil, errors.New("address should have the following format: <appid>:<addonid>")
+	}
+
+	d.SetId(ids[1])
+	d.Set("app", ids[0])
+
+	resourceAddonRead(d, meta)
+
+	return []*schema.ResourceData{d}, nil
 }

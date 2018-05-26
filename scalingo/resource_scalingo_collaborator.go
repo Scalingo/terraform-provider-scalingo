@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"errors"
+	"strings"
 
 	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -32,6 +33,10 @@ func resourceScalingoCollaborator() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+		},
+
+		Importer: &schema.ResourceImporter{
+			State: resourceCollaboratorImport,
 		},
 	}
 }
@@ -91,4 +96,28 @@ func resourceCollaboratorDelete(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	return nil
+}
+
+func resourceCollaboratorImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*scalingo.Client)
+
+	ids := strings.Split(d.Id(), ":")
+	if len(ids) != 2 {
+		return nil, errors.New("address should have the following format: <appid>:<email>")
+	}
+
+	collaborators, err := client.CollaboratorsList(ids[0])
+	if err != nil {
+		return nil, err
+	}
+
+	for _, collaborator := range collaborators {
+		if collaborator.Email == ids[1] || collaborator.ID == ids[1] {
+			d.SetId(collaborator.ID)
+			d.Set("app", ids[0])
+			return []*schema.ResourceData{d}, nil
+		}
+	}
+
+	return nil, errors.New("not found")
 }
