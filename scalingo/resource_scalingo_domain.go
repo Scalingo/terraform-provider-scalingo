@@ -1,6 +1,9 @@
 package scalingo
 
 import (
+	"errors"
+	"strings"
+
 	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -10,6 +13,9 @@ func resourceScalingoDomain() *schema.Resource {
 		Create: resourceDomainCreate,
 		Read:   resourceDomainRead,
 		Delete: resourceDomainDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceDomainImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"common_name": &schema.Schema{
@@ -70,4 +76,15 @@ func resourceDomainDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func resourceDomainImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	if !strings.Contains(d.Id(), "/") {
+		return nil, errors.New("schema must be app_id/domain_id")
+	}
+	split := strings.Split(d.Id(), "/")
+	d.Set("app", split[0])
+	d.SetId(split[1])
+
+	return []*schema.ResourceData{d}, nil
 }
