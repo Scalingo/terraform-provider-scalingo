@@ -79,10 +79,10 @@ func resourceDomainDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDomainImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	if !strings.Contains(d.Id(), "/") {
-		return nil, errors.New("schema must be app_id/domain_id")
+	if !strings.Contains(d.Id(), ":") {
+		return nil, errors.New("schema must be app_id:domain_id")
 	}
-	split := strings.Split(d.Id(), "/")
+	split := strings.Split(d.Id(), ":")
 	d.Set("app", split[0])
 	d.SetId(split[1])
 
