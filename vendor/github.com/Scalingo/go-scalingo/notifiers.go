@@ -24,9 +24,10 @@ type NotifierParams struct {
 	PlatformID     string
 
 	// Options
-	PhoneNumber string // SMS notifier
-	Email       string // Email notifier
-	WebhookURL  string // Webhook and Slack notifier
+	PhoneNumber string   // SMS notifier
+	Emails      []string // Email notifier
+	UserIDs     []string // Email notifier
+	WebhookURL  string   // Webhook and Slack notifier
 }
 
 // The struct that will be serialized in all notifier's request
@@ -45,7 +46,7 @@ type notifiersRequestRes struct {
 
 func (c *Client) NotifiersList(app string) (Notifiers, error) {
 	var notifiersRes notifiersRequestRes
-	err := c.subresourceList(app, "notifiers", nil, &notifiersRes)
+	err := c.ScalingoAPI().SubresourceList("apps", app, "notifiers", nil, &notifiersRes)
 	if err != nil {
 		return nil, errgo.Mask(err)
 	}
@@ -61,7 +62,7 @@ func (c *Client) NotifierProvision(app, notifierType string, params NotifierPara
 	notifier := NewOutputNotifier(notifierType, params)
 	notifierRequestParams := &notifierRequestParams{notifier}
 
-	err := c.subresourceAdd(app, "notifiers", notifierRequestParams, &notifierRes)
+	err := c.ScalingoAPI().SubresourceAdd("apps", app, "notifiers", notifierRequestParams, &notifierRes)
 
 	if err != nil {
 		return nil, errgo.Mask(err, errgo.Any)
@@ -71,7 +72,7 @@ func (c *Client) NotifierProvision(app, notifierType string, params NotifierPara
 
 func (c *Client) NotifierByID(app, ID string) (*Notifier, error) {
 	var notifierRes notifierRequestRes
-	err := c.subresourceGet(app, "notifiers", ID, nil, &notifierRes)
+	err := c.ScalingoAPI().SubresourceGet("apps", app, "notifiers", ID, nil, &notifierRes)
 	if err != nil {
 		return nil, errgo.Mask(err)
 	}
@@ -86,7 +87,7 @@ func (c *Client) NotifierUpdate(app, ID, notifierType string, params NotifierPar
 
 	debug.Printf("[Notifier params]\n%+v", notifier)
 
-	err := c.subresourceUpdate(app, "notifiers", ID, notifierRequestParams, &notifierRes)
+	err := c.ScalingoAPI().SubresourceUpdate("apps", app, "notifiers", ID, notifierRequestParams, &notifierRes)
 	if err != nil {
 		return nil, errgo.Mask(err, errgo.Any)
 	}
@@ -94,5 +95,5 @@ func (c *Client) NotifierUpdate(app, ID, notifierType string, params NotifierPar
 }
 
 func (c *Client) NotifierDestroy(app, ID string) error {
-	return c.subresourceDelete(app, "notifiers", ID)
+	return c.ScalingoAPI().SubresourceDelete("apps", app, "notifiers", ID)
 }
