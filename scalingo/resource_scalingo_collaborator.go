@@ -77,7 +77,8 @@ func resourceCollaboratorRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if !found {
-		return errors.New("not found")
+		d.MarkNewResource()
+		return nil
 	}
 
 	d.Set("username", collaborator.Username)

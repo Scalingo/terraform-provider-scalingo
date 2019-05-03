@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	httpclient "github.com/Scalingo/go-scalingo/http"
 	"gopkg.in/errgo.v1"
 )
 
@@ -23,16 +24,20 @@ type AppsService interface {
 	AppsDestroy(name string, currentName string) error
 	AppsRename(name string, newName string) (*App, error)
 	AppsTransfer(name string, email string) (*App, error)
+	AppsSetStack(name string, stackID string) (*App, error)
 	AppsRestart(app string, scope *AppsRestartParams) (*http.Response, error)
 	AppsCreate(opts AppsCreateOpts) (*App, error)
 	AppsStats(app string) (*AppStatsRes, error)
 	AppsPs(app string) ([]ContainerType, error)
 	AppsScale(app string, params *AppsScaleParams) (*http.Response, error)
+	AppsForceHTTPS(name string, enable bool) (*App, error)
+	AppsStickySession(name string, enable bool) (*App, error)
 }
 
 var _ AppsService = (*Client)(nil)
 
 type ContainerType struct {
+	AppID   string `json:"app_id"`
 	Name    string `json:"name"`
 	Amount  int    `json:"amount"`
 	Command string `json:"command"`
@@ -103,19 +108,13 @@ func (app App) String() string {
 }
 
 func (c *Client) AppsList() ([]*App, error) {
-	req := &APIRequest{
-		Client:   c,
+	appsMap := map[string][]*App{}
+
+	req := &httpclient.APIRequest{
 		Endpoint: "/apps",
 	}
 
-	res, err := req.Do()
-	if err != nil {
-		return []*App{}, errgo.Mask(err, errgo.Any)
-	}
-	defer res.Body.Close()
-
-	appsMap := map[string][]*App{}
-	err = ParseJSON(res, &appsMap)
+	err := c.ScalingoAPI().DoRequest(req, &appsMap)
 	if err != nil {
 		return []*App{}, errgo.Mask(err, errgo.Any)
 	}
@@ -123,161 +122,139 @@ func (c *Client) AppsList() ([]*App, error) {
 }
 
 func (c *Client) AppsShow(appName string) (*App, error) {
-	req := &APIRequest{
-		Client:   c,
+	var appMap map[string]*App
+	req := &httpclient.APIRequest{
 		Endpoint: "/apps/" + appName,
 	}
-	res, err := req.Do()
+	err := c.ScalingoAPI().DoRequest(req, &appMap)
 	if err != nil {
 		return nil, errgo.Mask(err, errgo.Any)
 	}
-	defer res.Body.Close()
-	var appMap map[string]*App
-	err = ParseJSON(res, &appMap)
 
-	if err != nil {
-		return nil, errgo.Mask(err, errgo.Any)
-	}
 	return appMap["app"], nil
 }
 
 func (c *Client) AppsDestroy(name string, currentName string) error {
-	req := &APIRequest{
-		Client:   c,
+	req := &httpclient.APIRequest{
 		Method:   "DELETE",
 		Endpoint: "/apps/" + name,
-		Expected: Statuses{204},
+		Expected: httpclient.Statuses{204},
 		Params: map[string]interface{}{
 			"current_name": currentName,
 		},
 	}
-	res, err := req.Do()
+	err := c.ScalingoAPI().DoRequest(req, nil)
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
 
 	return nil
 }
 
 func (c *Client) AppsRename(name string, newName string) (*App, error) {
-	req := &APIRequest{
-		Client:   c,
+	var appRes *AppResponse
+	req := &httpclient.APIRequest{
 		Method:   "POST",
 		Endpoint: "/apps/" + name + "/rename",
-		Expected: Statuses{200},
+		Expected: httpclient.Statuses{200},
 		Params: map[string]interface{}{
 			"current_name": name,
 			"new_name":     newName,
 		},
 	}
-	res, err := req.Do()
+	err := c.ScalingoAPI().DoRequest(req, &appRes)
 	if err != nil {
 		return nil, err
-	}
-	defer res.Body.Close()
-
-	var appRes *AppResponse
-	err = ParseJSON(res, &appRes)
-	if err != nil {
-		return nil, errgo.Mask(err, errgo.Any)
 	}
 
 	return appRes.App, nil
 }
 
 func (c *Client) AppsTransfer(name string, email string) (*App, error) {
-	req := &APIRequest{
-		Client:   c,
+	var appRes *AppResponse
+	req := &httpclient.APIRequest{
 		Method:   "PATCH",
 		Endpoint: "/apps/" + name,
-		Expected: Statuses{200},
+		Expected: httpclient.Statuses{200},
 		Params: map[string]interface{}{
 			"app": map[string]string{
 				"owner": email,
 			},
 		},
 	}
-	res, err := req.Do()
+	err := c.ScalingoAPI().DoRequest(req, &appRes)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 
-	var appRes *AppResponse
-	err = ParseJSON(res, &appRes)
+	return appRes.App, nil
+}
+
+func (c *Client) AppsSetStack(app string, stackID string) (*App, error) {
+	req := &httpclient.APIRequest{
+		Method:   "PATCH",
+		Endpoint: "/apps/" + app,
+		Expected: httpclient.Statuses{200},
+		Params: map[string]interface{}{
+			"app": map[string]string{
+				"stack_id": stackID,
+			},
+		},
+	}
+
+	var appRes AppResponse
+	err := c.ScalingoAPI().DoRequest(req, &appRes)
 	if err != nil {
-		return nil, errgo.Mask(err, errgo.Any)
+		return nil, errgo.Notef(err, "fail to request Scalingo API")
 	}
 
 	return appRes.App, nil
 }
 
 func (c *Client) AppsRestart(app string, scope *AppsRestartParams) (*http.Response, error) {
-	req := &APIRequest{
-		Client:   c,
+	req := &httpclient.APIRequest{
 		Method:   "POST",
 		Endpoint: "/apps/" + app + "/restart",
-		Expected: Statuses{202},
+		Expected: httpclient.Statuses{202},
 		Params:   scope,
 	}
-	return req.Do()
+
+	return c.ScalingoAPI().Do(req)
 }
 
 func (c *Client) AppsCreate(opts AppsCreateOpts) (*App, error) {
-	req := &APIRequest{
-		Client:   c,
+	var appRes *AppResponse
+	req := &httpclient.APIRequest{
 		Method:   "POST",
 		Endpoint: "/apps",
-		Expected: Statuses{201},
+		Expected: httpclient.Statuses{201},
 		Params:   map[string]interface{}{"app": opts},
 	}
-	res, err := req.Do()
+	err := c.ScalingoAPI().DoRequest(req, &appRes)
 	if err != nil {
 		return nil, errgo.Mask(err, errgo.Any)
 	}
-	defer res.Body.Close()
-
-	var appRes *AppResponse
-	err = ParseJSON(res, &appRes)
-	if err != nil {
-		return nil, errgo.Mask(err, errgo.Any)
-	}
-
 	return appRes.App, nil
 }
 
 func (c *Client) AppsStats(app string) (*AppStatsRes, error) {
-	req := &APIRequest{
-		Client:   c,
+	var stats AppStatsRes
+	req := &httpclient.APIRequest{
 		Endpoint: "/apps/" + app + "/stats",
 	}
-	res, err := req.Do()
+	err := c.ScalingoAPI().DoRequest(req, &stats)
 	if err != nil {
 		return nil, errgo.Mask(err)
 	}
-
-	var stats AppStatsRes
-	err = ParseJSON(res, &stats)
-	if err != nil {
-		return nil, errgo.Mask(err)
-	}
-
 	return &stats, nil
 }
 
 func (c *Client) AppsPs(app string) ([]ContainerType, error) {
-	req := &APIRequest{
-		Client:   c,
+	var containersRes AppsPsRes
+	req := &httpclient.APIRequest{
 		Endpoint: "/apps/" + app + "/containers",
 	}
-	res, err := req.Do()
-	if err != nil {
-		return nil, errgo.Mask(err)
-	}
-
-	var containersRes AppsPsRes
-	err = ParseJSON(res, &containersRes)
+	err := c.ScalingoAPI().DoRequest(req, &containersRes)
 	if err != nil {
 		return nil, errgo.Mask(err)
 	}
@@ -286,14 +263,41 @@ func (c *Client) AppsPs(app string) ([]ContainerType, error) {
 }
 
 func (c *Client) AppsScale(app string, params *AppsScaleParams) (*http.Response, error) {
-	req := &APIRequest{
-		Client:   c,
+	req := &httpclient.APIRequest{
 		Method:   "POST",
 		Endpoint: "/apps/" + app + "/scale",
 		Params:   params,
 		// Return 200 if app is scaled before deployment
 		// Otherwise async job is triggered, it's 202
-		Expected: Statuses{200, 202},
+		Expected: httpclient.Statuses{200, 202},
 	}
-	return req.Do()
+	return c.ScalingoAPI().Do(req)
+}
+
+func (c *Client) AppsForceHTTPS(name string, enable bool) (*App, error) {
+	return c.appsUpdate(name, map[string]interface{}{
+		"force_https": enable,
+	})
+}
+
+func (c *Client) AppsStickySession(name string, enable bool) (*App, error) {
+	return c.appsUpdate(name, map[string]interface{}{
+		"sticky_session": enable,
+	})
+}
+
+func (c *Client) appsUpdate(name string, params map[string]interface{}) (*App, error) {
+	var appRes *AppResponse
+	req := &httpclient.APIRequest{
+		Method:   "PUT",
+		Endpoint: "/apps/" + name,
+		Expected: httpclient.Statuses{200},
+		Params:   params,
+	}
+	err := c.ScalingoAPI().DoRequest(req, &appRes)
+	if err != nil {
+		return nil, err
+	}
+
+	return appRes.App, nil
 }

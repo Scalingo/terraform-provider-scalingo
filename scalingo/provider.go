@@ -44,7 +44,7 @@ func providerConfigure(data *schema.ResourceData) (interface{}, error) {
 
 	client := scalingo.NewClient(scalingo.ClientConfig{
 		APIToken:     api_token,
-		Endpoint:     api_url,
+		APIEndpoint:  api_url,
 		AuthEndpoint: auth_api_url,
 	})
 

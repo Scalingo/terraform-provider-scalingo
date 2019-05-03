@@ -3,6 +3,7 @@ package scalingo
 import (
 	"errors"
 	"strings"
+	"time"
 
 	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -60,13 +61,18 @@ func resourceAddonCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("plan_id", planId)
 
-	addon, err := client.AddonProvision(appId, providerId, planId)
+	res, err := client.AddonProvision(appId, providerId, planId)
 	if err != nil {
 		return err
 	}
 
-	d.Set("resource_id", addon.Addon.ResourceID)
-	d.SetId(addon.Addon.ID)
+	err = waitUntilProvisionned(client, res.Addon)
+	if err != nil {
+		return err
+	}
+
+	d.Set("resource_id", res.Addon.ResourceID)
+	d.SetId(res.Addon.ID)
 	return nil
 }
 
@@ -77,6 +83,10 @@ func resourceAddonRead(d *schema.ResourceData, meta interface{}) error {
 
 	addon, err := client.AddonShow(appId, d.Id())
 	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			d.MarkNewResource()
+			return nil
+		}
 		return err
 	}
 
@@ -102,6 +112,11 @@ func resourceAddonUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		res, err := client.AddonUpgrade(appId, d.Id(), planId)
+		if err != nil {
+			return err
+		}
+
+		err = waitUntilProvisionned(client, res.Addon)
 		if err != nil {
 			return err
 		}
@@ -155,4 +170,26 @@ func resourceAddonImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 	resourceAddonRead(d, meta)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func waitUntilProvisionned(client *scalingo.Client, addon scalingo.Addon) error {
+	var err error
+	timer := time.NewTimer(5 * time.Minute)
+	ticker := time.NewTicker(5 * time.Second)
+	for addon.Status != scalingo.AddonStatusRunning {
+		addon, err = client.AddonShow(addon.AppID, addon.ID)
+		if err != nil {
+			return err
+		}
+		// Do not wait for next tick to get out of the loop
+		if addon.Status == scalingo.AddonStatusRunning {
+			return nil
+		}
+		select {
+		case <-timer.C:
+			return errors.New("addon provisioning timed out")
+		case <-ticker.C:
+		}
+	}
+	return nil
 }

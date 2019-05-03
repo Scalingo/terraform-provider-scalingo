@@ -181,8 +181,17 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 		d.Set("all_environment", allEnvironment)
 		d.SetPartial("all_environment")
 
-		// Ignore the restart error, here the error is probably linked to the application status, which mean that the environment will be applied later.
-		client.AppsRestart(d.Id(), nil)
+		// Ignore the restart error, here the error is probably linked to the
+		// application status, which mean that the environment will be applied
+		// later.
+		// If the restart occured, wait synchronously until the end of the restart
+		// to validate that everything went fine
+		res, err := client.AppsRestart(d.Id(), nil)
+		if err == nil && res.StatusCode == 202 {
+			defer res.Body.Close()
+			location := res.Header.Get("Location")
+			err = waitOperation(client, location)
+		}
 	}
 
 	d.Partial(false)
