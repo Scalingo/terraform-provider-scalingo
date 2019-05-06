@@ -13,7 +13,7 @@ func resourceScalingoApp() *schema.Resource {
 		Delete: resourceAppDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -32,6 +32,26 @@ func resourceScalingoApp() *schema.Resource {
 			"git_url": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"containers": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"amount": &schema.Schema{
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"size": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
 			},
 		},
 
@@ -118,6 +138,12 @@ func resourceAppRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("all_environment", allEnvironment)
 	d.Set("environment", environment)
 
+	containers, err := client.AppsPs(d.Id())
+	if err != nil {
+		return err
+	}
+	d.Set("containers", flattenAppContainers(containers))
+
 	return nil
 }
 
@@ -126,9 +152,9 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 	d.Partial(true)
 
 	if d.HasChange("name") {
-		old_name, new_name := d.GetChange("name")
+		oldName, newName := d.GetChange("name")
 
-		app, err := client.AppsRename(old_name.(string), new_name.(string))
+		app, err := client.AppsRename(oldName.(string), newName.(string))
 		if err != nil {
 			return err
 		}
@@ -182,7 +208,7 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 		d.SetPartial("all_environment")
 
 		// Ignore the restart error, here the error is probably linked to the
-		// application status, which mean that the environment will be applied
+		// application status, which means that the environment will be applied
 		// later.
 		// If the restart occured, wait synchronously until the end of the restart
 		// to validate that everything went fine
@@ -209,4 +235,16 @@ func resourceAppDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func flattenAppContainers(in []scalingo.ContainerType) []map[string]interface{} {
+	var out = make([]map[string]interface{}, len(in), len(in))
+	for i, ct := range in {
+		container := make(map[string]interface{})
+		container["name"] = ct.Name
+		container["amount"] = ct.Amount
+		container["size"] = ct.Size
+		out[i] = container
+	}
+	return out
 }
