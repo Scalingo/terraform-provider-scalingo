@@ -39,22 +39,23 @@ func resourceScalingoContainerType() *schema.Resource {
 }
 
 func resourceContainerTypeCreate(d *schema.ResourceData, meta interface{}) error {
-	/*
-		client := meta.(*scalingo.Client)
+	client := meta.(*scalingo.Client)
 
-		appID := d.Get("app").(string)
-		client.AppsScale(appID, &scalingo.AppsScaleParams{})
+	appID := d.Get("app").(string)
+	ctName := d.Get("name").(string)
 
-			collaborator, err := client.ContainerTypeAdd(d.Get("app").(string), d.Get("email").(string))
-			if err != nil {
-				return err
-			}
+	_, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
+		Containers: []scalingo.ContainerType{{
+			Name:   ctName,
+			Size:   d.Get("size").(string),
+			Amount: d.Get("amount").(int),
+		}},
+	})
+	if err != nil {
+		return err
+	}
 
-			d.Set("username", collaborator.Username)
-			d.Set("status", collaborator.Status)
-
-			d.SetId(collaborator.ID)
-	*/
+	d.SetId(ctName)
 
 	return nil
 }
