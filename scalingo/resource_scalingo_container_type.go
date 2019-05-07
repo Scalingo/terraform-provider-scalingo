@@ -69,20 +69,29 @@ func resourceContainerTypeRead(d *schema.ResourceData, meta interface{}) error {
 
 	appID := d.Get("app").(string)
 	ctName := d.Get("name").(string)
+	log.Printf("[DEBUG] Application ID: %s", appID)
+	log.Printf("[DEBUG] Container type name: %s", ctName)
 	d.SetId(ctName)
 
 	containers, err := client.AppsPs(appID)
 	if err != nil {
+		log.Printf("[INFO] Error %#v", err)
 		return err
 	}
+
+	log.Printf("[INFO] Successfuly fetched current formation")
 	for _, ct := range containers {
+		log.Printf("[DEBUG] Current container type: %s", ct.Name)
+
 		if ctName == ct.Name {
+			log.Printf("[DEBUG] Found container type in formation")
 			d.Set("amount", ct.Amount)
 			d.Set("size", ct.Size)
 			break
 		}
 	}
 
+	log.Printf("[DEBUG] At the end of the loop")
 	return nil
 }
 
@@ -126,10 +135,26 @@ func resourceContainerTypeImport(d *schema.ResourceData, meta interface{}) ([]*s
 	log.Printf("[DEBUG] Application ID: %s", appID)
 	log.Printf("[DEBUG] Container type name: %s", ctName)
 
-	d.SetId(ctName)
-	d.Set("app", appID)
+	client := meta.(*scalingo.Client)
+	containers, err := client.AppsPs(appID)
+	if err != nil {
+		return nil, err
+	}
 
-	resourceContainerTypeRead(d, meta)
+	for _, ct := range containers {
+		log.Printf("[DEBUG] Current container type: %s", ct.Name)
 
-	return []*schema.ResourceData{d}, nil
+		if ctName == ct.Name {
+			log.Printf("[DEBUG] Found the container type to import")
+			d.SetId(ctName)
+			d.Set("name", ctName)
+			d.Set("app", appID)
+			d.Set("amount", ct.Amount)
+			d.Set("size", ct.Size)
+			return []*schema.ResourceData{d}, nil
+		}
+	}
+
+	log.Printf("[DEBUG] No container type found")
+	return nil, errors.New("not found")
 }
