@@ -38,14 +38,14 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConfigure(data *schema.ResourceData) (interface{}, error) {
-	api_url := data.Get("api_url").(string)
-	auth_api_url := data.Get("auth_api_url").(string)
-	api_token := data.Get("api_token").(string)
+	apiURL := data.Get("api_url").(string)
+	authAPIURL := data.Get("auth_api_url").(string)
+	apiToken := data.Get("api_token").(string)
 
 	client := scalingo.NewClient(scalingo.ClientConfig{
-		APIToken:     api_token,
-		APIEndpoint:  api_url,
-		AuthEndpoint: auth_api_url,
+		APIToken:     apiToken,
+		APIEndpoint:  apiURL,
+		AuthEndpoint: authAPIURL,
 	})
 
 	return client, nil
