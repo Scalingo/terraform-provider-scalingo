@@ -1,6 +1,10 @@
 package scalingo
 
 import (
+	"errors"
+	"log"
+	"strings"
+
 	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -33,7 +37,7 @@ func resourceScalingoContainerType() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceContainerTypeImport,
 		},
 	}
 }
@@ -101,4 +105,31 @@ func resourceContainerTypeDelete(d *schema.ResourceData, meta interface{}) error
 	*/
 
 	return nil
+}
+
+// resourceContainerTypeImport is called when importing a new container_type
+// resource. The ID must be "appID:containerTypeName" such as
+// "5a155aa8f112e20010779b7a:web".
+//
+// Usage:
+// $ terraform import terraform ID appID:containerTypeName
+//
+// Example:
+// $ terraform import module.vpn-addon-service.module.app.module.app.scalingo_container_type.default 5a155aa8f112e20010779b7a:web
+func resourceContainerTypeImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	ids := strings.Split(d.Id(), ":")
+	if len(ids) != 2 {
+		return nil, errors.New("address should have the following format: <app ID>:<container type name>")
+	}
+	appID := ids[0]
+	ctName := ids[1]
+	log.Printf("[DEBUG] Application ID: %s", appID)
+	log.Printf("[DEBUG] Container type name: %s", ctName)
+
+	d.SetId(ctName)
+	d.Set("app", appID)
+
+	resourceContainerTypeRead(d, meta)
+
+	return []*schema.ResourceData{d}, nil
 }
