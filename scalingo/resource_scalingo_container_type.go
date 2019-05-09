@@ -14,6 +14,7 @@ func resourceScalingoContainerType() *schema.Resource {
 		Create: resourceContainerTypeCreate,
 		Read:   resourceContainerTypeRead,
 		Update: resourceContainerTypeUpdate,
+		Delete: resourceContainerTypeDelete,
 
 		Schema: map[string]*schema.Schema{
 			"app": &schema.Schema{
@@ -116,6 +117,30 @@ func resourceContainerTypeUpdate(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
+func resourceContainerTypeDelete(d *schema.ResourceData, meta interface{}) error {
+	ids := strings.Split(d.Id(), ":")
+	if len(ids) != 2 {
+		return errors.New("ID should have the following format: <app ID>:<container type name>")
+	}
+	appID := ids[0]
+	ctName := ids[1]
+	log.Printf("[DEBUG] Application ID: %s", appID)
+	log.Printf("[DEBUG] Container type name: %s", ctName)
+
+	client := meta.(*scalingo.Client)
+	_, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
+		Containers: []scalingo.ContainerType{{
+			Name:   ctName,
+			Amount: 0,
+		}},
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // resourceContainerTypeImport is called when importing a new container_type
 // resource. The ID must be "appID:containerTypeName" such as
 // "5a155aa8f112e20010779b7a:web".
@@ -128,7 +153,7 @@ func resourceContainerTypeUpdate(d *schema.ResourceData, meta interface{}) error
 func resourceContainerTypeImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
-		return nil, errors.New("address should have the following format: <app ID>:<container type name>")
+		return nil, errors.New("ID should have the following format: <app ID>:<container type name>")
 	}
 	appID := ids[0]
 	ctName := ids[1]
