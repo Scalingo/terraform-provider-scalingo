@@ -59,7 +59,7 @@ func resourceContainerTypeCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	d.SetId(ctName)
+	d.SetId(appID + ":" + ctName)
 
 	return nil
 }
@@ -71,7 +71,7 @@ func resourceContainerTypeRead(d *schema.ResourceData, meta interface{}) error {
 	ctName := d.Get("name").(string)
 	log.Printf("[DEBUG] Application ID: %s", appID)
 	log.Printf("[DEBUG] Container type name: %s", ctName)
-	d.SetId(ctName)
+	d.SetId(appID + ":" + ctName)
 
 	containers, err := client.AppsPs(appID)
 	if err != nil {
@@ -146,7 +146,7 @@ func resourceContainerTypeImport(d *schema.ResourceData, meta interface{}) ([]*s
 
 		if ctName == ct.Name {
 			log.Printf("[DEBUG] Found the container type to import")
-			d.SetId(ctName)
+			d.SetId(appID + ":" + ctName)
 			d.Set("name", ctName)
 			d.Set("app", appID)
 			d.Set("amount", ct.Amount)
