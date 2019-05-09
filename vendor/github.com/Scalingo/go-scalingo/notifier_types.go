@@ -18,6 +18,7 @@ type Notifier struct {
 	Name           string                 `json:"name,omitempty"`
 	Type           NotifierType           `json:"type"`
 	SendAllEvents  *bool                  `json:"send_all_events,omitempty"`
+	SendAllAlerts  *bool                  `json:"send_all_alerts,omitempty"`
 	SelectedEvents []EventTypeStruct      `json:"selected_events,omitempty"`
 	TypeData       map[string]interface{} `json:"-"`
 	RawTypeData    json.RawMessage        `json:"type_data"`
@@ -29,9 +30,16 @@ type Notifier struct {
 // Struct used to serialize a notifier
 type NotifierOutput struct {
 	*Notifier
-	SelectedEvents []string    `json:"selected_events,omitempty"`
-	TypeData       interface{} `json:"type_data,omitempty"`
-	RawTypeData    omit        `json:",omitempty"` // Will always be empty and not serialized
+	SelectedEvents []string               `json:"selected_events,omitempty"`
+	TypeData       NotifierTypeDataParams `json:"type_data,omitempty"`
+	RawTypeData    omit                   `json:",omitempty"` // Will always be empty and not serialized
+}
+
+type NotifierTypeDataParams struct {
+	WebhookURL  string   `json:"webhook_url,omitempty"`
+	Emails      []string `json:"emails,omitempty"`
+	UserIDs     []string `json:"user_ids,omitempty"`
+	PhoneNumber string   `json:"phone_number,omitempty"`
 }
 
 type NotifierType string
@@ -48,6 +56,7 @@ type DetailedNotifier interface {
 	GetName() string
 	GetType() NotifierType
 	GetSendAllEvents() bool
+	GetSendAllAlerts() bool
 	GetSelectedEvents() []EventTypeStruct
 	IsActive() bool
 	When() string
@@ -76,6 +85,10 @@ func (not *Notifier) GetType() NotifierType {
 
 func (not *Notifier) GetSendAllEvents() bool {
 	return *not.SendAllEvents
+}
+
+func (not *Notifier) GetSendAllAlerts() bool {
+	return *not.SendAllAlerts
 }
 
 func (not *Notifier) GetSelectedEvents() []EventTypeStruct {
@@ -220,11 +233,23 @@ func NewDetailedNotifier(notifierType string, params NotifierParams) DetailedNot
 	return specializedNotifier
 }
 
-func NewOutputNotifier(notifierType string, params NotifierParams) NotifierOutput {
-	detailedNotifier := NewDetailedNotifier(notifierType, params)
+// newOutputNotifier prepares the payload to send to the API to
+// create or update a notifier
+func newOutputNotifier(params NotifierParams) NotifierOutput {
 	res := NotifierOutput{
-		Notifier:       detailedNotifier.GetNotifier(),
-		TypeData:       detailedNotifier.TypeDataPtr(),
+		Notifier: &Notifier{
+			Active:        params.Active,
+			Name:          params.Name,
+			PlatformID:    params.PlatformID,
+			SendAllAlerts: params.SendAllAlerts,
+			SendAllEvents: params.SendAllEvents,
+		},
+		TypeData: NotifierTypeDataParams{
+			Emails:      params.Emails,
+			UserIDs:     params.UserIDs,
+			WebhookURL:  params.WebhookURL,
+			PhoneNumber: params.PhoneNumber,
+		},
 		SelectedEvents: params.SelectedEvents,
 	}
 	return res
