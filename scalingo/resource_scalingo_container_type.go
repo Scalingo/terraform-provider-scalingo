@@ -14,7 +14,6 @@ func resourceScalingoContainerType() *schema.Resource {
 		Create: resourceContainerTypeCreate,
 		Read:   resourceContainerTypeRead,
 		Update: resourceContainerTypeUpdate,
-		Delete: resourceContainerTypeDelete,
 
 		Schema: map[string]*schema.Schema{
 			"app": &schema.Schema{
@@ -90,28 +89,29 @@ func resourceContainerTypeRead(d *schema.ResourceData, meta interface{}) error {
 			break
 		}
 	}
-
-	log.Printf("[DEBUG] At the end of the loop")
 	return nil
 }
 
 func resourceContainerTypeUpdate(d *schema.ResourceData, meta interface{}) error {
-	/*
-		client := meta.(*scalingo.Client)
-	*/
+	client := meta.(*scalingo.Client)
 
-	return nil
-}
+	appID := d.Get("app").(string)
+	ctName := d.Get("name").(string)
+	log.Printf("[DEBUG] Application ID: %s", appID)
+	log.Printf("[DEBUG] Container type name: %s", ctName)
 
-func resourceContainerTypeDelete(d *schema.ResourceData, meta interface{}) error {
-	/*
-		client := meta.(*scalingo.Client)
+	_, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
+		Containers: []scalingo.ContainerType{{
+			Name:   ctName,
+			Size:   d.Get("size").(string),
+			Amount: d.Get("amount").(int),
+		}},
+	})
+	if err != nil {
+		return err
+	}
 
-		err := client.ContainerTypeRemove(d.Get("app").(string), d.Id())
-		if err != nil {
-			return err
-		}
-	*/
+	log.Printf("[DEBUG] Scaled the application")
 
 	return nil
 }
