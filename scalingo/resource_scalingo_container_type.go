@@ -75,7 +75,7 @@ func resourceContainerTypeRead(d *schema.ResourceData, meta interface{}) error {
 
 	containers, err := client.AppsPs(appID)
 	if err != nil {
-		log.Printf("[INFO] Error %#v", err)
+		log.Printf("[INFO] Error getting current formation %#v", err)
 		return err
 	}
 
@@ -90,6 +90,7 @@ func resourceContainerTypeRead(d *schema.ResourceData, meta interface{}) error {
 			break
 		}
 	}
+
 	return nil
 }
 
@@ -176,6 +177,7 @@ func resourceContainerTypeImport(d *schema.ResourceData, meta interface{}) ([]*s
 			d.Set("app", appID)
 			d.Set("amount", ct.Amount)
 			d.Set("size", ct.Size)
+
 			return []*schema.ResourceData{d}, nil
 		}
 	}

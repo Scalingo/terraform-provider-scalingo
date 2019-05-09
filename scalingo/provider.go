@@ -30,6 +30,7 @@ func Provider() terraform.ResourceProvider {
 			"scalingo_app":            resourceScalingoApp(),
 			"scalingo_collaborator":   resourceScalingoCollaborator(),
 			"scalingo_container_type": resourceScalingoContainerType(),
+			"scalingo_autoscaler":     resourceScalingoAutoscaler(),
 			"scalingo_domain":         resourceScalingoDomain(),
 			"scalingo_github_link":    resourceScalingoGithubLink(),
 			"scalingo_run":            resourceScalingoRun(),
