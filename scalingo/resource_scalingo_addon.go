@@ -50,18 +50,18 @@ func resourceScalingoAddon() *schema.Resource {
 func resourceAddonCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*scalingo.Client)
 
-	providerId := d.Get("provider_id").(string)
+	providerID := d.Get("provider_id").(string)
 	planName := d.Get("plan").(string)
-	appId := d.Get("app").(string)
+	appID := d.Get("app").(string)
 
-	planId, err := addonPlanID(client, providerId, planName)
+	planID, err := addonPlanID(client, providerID, planName)
 	if err != nil {
 		return err
 	}
 
-	d.Set("plan_id", planId)
+	d.Set("plan_id", planID)
 
-	res, err := client.AddonProvision(appId, providerId, planId)
+	res, err := client.AddonProvision(appID, providerID, planID)
 	if err != nil {
 		return err
 	}
@@ -79,9 +79,9 @@ func resourceAddonCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceAddonRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*scalingo.Client)
 
-	appId := d.Get("app").(string)
+	appID := d.Get("app").(string)
 
-	addon, err := client.AddonShow(appId, d.Id())
+	addon, err := client.AddonShow(appID, d.Id())
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			d.MarkNewResource()
@@ -102,16 +102,16 @@ func resourceAddonRead(d *schema.ResourceData, meta interface{}) error {
 func resourceAddonUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*scalingo.Client)
 
-	appId := d.Get("app").(string)
-	providerId := d.Get("provider_id").(string)
+	appID := d.Get("app").(string)
+	providerID := d.Get("provider_id").(string)
 
 	if d.HasChange("plan") {
-		planId, err := addonPlanID(client, providerId, d.Get("plan").(string))
+		planID, err := addonPlanID(client, providerID, d.Get("plan").(string))
 		if err != nil {
 			return err
 		}
 
-		res, err := client.AddonUpgrade(appId, d.Id(), planId)
+		res, err := client.AddonUpgrade(appID, d.Id(), planID)
 		if err != nil {
 			return err
 		}
@@ -130,9 +130,9 @@ func resourceAddonUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceAddonDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*scalingo.Client)
 
-	appId := d.Get("app").(string)
+	appID := d.Get("app").(string)
 
-	err := client.AddonDestroy(appId, d.Id())
+	err := client.AddonDestroy(appID, d.Id())
 	if err != nil {
 		return err
 	}
@@ -140,8 +140,8 @@ func resourceAddonDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func addonPlanID(client *scalingo.Client, providerId, name string) (string, error) {
-	plans, err := client.AddonProviderPlansList(providerId)
+func addonPlanID(client *scalingo.Client, providerID, name string) (string, error) {
+	plans, err := client.AddonProviderPlansList(providerID)
 	if err != nil {
 		return "", err
 	}

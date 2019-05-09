@@ -13,7 +13,7 @@ func resourceScalingoApp() *schema.Resource {
 		Delete: resourceAppDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -126,9 +126,9 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 	d.Partial(true)
 
 	if d.HasChange("name") {
-		old_name, new_name := d.GetChange("name")
+		oldName, newName := d.GetChange("name")
 
-		app, err := client.AppsRename(old_name.(string), new_name.(string))
+		app, err := client.AppsRename(oldName.(string), newName.(string))
 		if err != nil {
 			return err
 		}
@@ -182,7 +182,7 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 		d.SetPartial("all_environment")
 
 		// Ignore the restart error, here the error is probably linked to the
-		// application status, which mean that the environment will be applied
+		// application status, which means that the environment will be applied
 		// later.
 		// If the restart occured, wait synchronously until the end of the restart
 		// to validate that everything went fine

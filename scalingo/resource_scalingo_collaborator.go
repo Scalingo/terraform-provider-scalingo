@@ -104,18 +104,20 @@ func resourceCollaboratorImport(d *schema.ResourceData, meta interface{}) ([]*sc
 
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
-		return nil, errors.New("address should have the following format: <appid>:<email>")
+		return nil, errors.New("address should have the following format: <appid>:<collaborator ID>")
 	}
+	appID := ids[0]
+	collaboratorID := ids[1] // can be either the email address or the ID
 
-	collaborators, err := client.CollaboratorsList(ids[0])
+	collaborators, err := client.CollaboratorsList(appID)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, collaborator := range collaborators {
-		if collaborator.Email == ids[1] || collaborator.ID == ids[1] {
+		if collaborator.Email == collaboratorID || collaborator.ID == collaboratorID {
 			d.SetId(collaborator.ID)
-			d.Set("app", ids[0])
+			d.Set("app", appID)
 			return []*schema.ResourceData{d}, nil
 		}
 	}
