@@ -2,7 +2,6 @@ package scalingo
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/Scalingo/go-scalingo/debug"
 )
@@ -10,29 +9,11 @@ import (
 // Used to omit attributes
 type omit *struct{}
 
-// Sruct used to represent a notifier.
-type Notifier struct {
-	ID             string                 `json:"id"`
-	AppID          string                 `json:"app_id"`
-	Active         *bool                  `json:"active,omitempty"`
-	Name           string                 `json:"name,omitempty"`
-	Type           NotifierType           `json:"type"`
-	SendAllEvents  *bool                  `json:"send_all_events,omitempty"`
-	SendAllAlerts  *bool                  `json:"send_all_alerts,omitempty"`
-	SelectedEvents []EventTypeStruct      `json:"selected_events,omitempty"`
-	TypeData       map[string]interface{} `json:"-"`
-	RawTypeData    json.RawMessage        `json:"type_data"`
-	PlatformID     string                 `json:"platform_id"`
-	CreatedAt      time.Time              `json:"created_at"`
-	UpdatedAt      time.Time              `json:"updated_at"`
-}
-
 // Struct used to serialize a notifier
 type NotifierOutput struct {
 	*Notifier
-	SelectedEvents []string               `json:"selected_events,omitempty"`
-	TypeData       NotifierTypeDataParams `json:"type_data,omitempty"`
-	RawTypeData    omit                   `json:",omitempty"` // Will always be empty and not serialized
+	TypeData    NotifierTypeDataParams `json:"type_data,omitempty"`
+	RawTypeData omit                   `json:",omitempty"` // Will always be empty and not serialized
 }
 
 type NotifierTypeDataParams struct {
@@ -57,7 +38,7 @@ type DetailedNotifier interface {
 	GetType() NotifierType
 	GetSendAllEvents() bool
 	GetSendAllAlerts() bool
-	GetSelectedEvents() []EventTypeStruct
+	GetSelectedEventIDs() []string
 	IsActive() bool
 	When() string
 	TypeDataPtr() interface{}
@@ -91,8 +72,8 @@ func (not *Notifier) GetSendAllAlerts() bool {
 	return *not.SendAllAlerts
 }
 
-func (not *Notifier) GetSelectedEvents() []EventTypeStruct {
-	return not.SelectedEvents
+func (not *Notifier) GetSelectedEventIDs() []string {
+	return not.SelectedEventIDs
 }
 
 func (not *Notifier) IsActive() bool {
@@ -238,11 +219,12 @@ func NewDetailedNotifier(notifierType string, params NotifierParams) DetailedNot
 func newOutputNotifier(params NotifierParams) NotifierOutput {
 	res := NotifierOutput{
 		Notifier: &Notifier{
-			Active:        params.Active,
-			Name:          params.Name,
-			PlatformID:    params.PlatformID,
-			SendAllAlerts: params.SendAllAlerts,
-			SendAllEvents: params.SendAllEvents,
+			Active:           params.Active,
+			Name:             params.Name,
+			PlatformID:       params.PlatformID,
+			SendAllAlerts:    params.SendAllAlerts,
+			SendAllEvents:    params.SendAllEvents,
+			SelectedEventIDs: params.SelectedEventIDs,
 		},
 		TypeData: NotifierTypeDataParams{
 			Emails:      params.Emails,
@@ -250,7 +232,6 @@ func newOutputNotifier(params NotifierParams) NotifierOutput {
 			WebhookURL:  params.WebhookURL,
 			PhoneNumber: params.PhoneNumber,
 		},
-		SelectedEvents: params.SelectedEvents,
 	}
 	return res
 }

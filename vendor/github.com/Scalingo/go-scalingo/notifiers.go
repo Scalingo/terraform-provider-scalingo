@@ -1,6 +1,9 @@
 package scalingo
 
 import (
+	"encoding/json"
+	"time"
+
 	"github.com/Scalingo/go-scalingo/debug"
 	errgo "gopkg.in/errgo.v1"
 )
@@ -15,14 +18,31 @@ type NotifiersService interface {
 
 var _ NotifiersService = (*Client)(nil)
 
+// Struct used to represent a notifier.
+type Notifier struct {
+	ID               string                 `json:"id"`
+	AppID            string                 `json:"app_id"`
+	Active           *bool                  `json:"active,omitempty"`
+	Name             string                 `json:"name,omitempty"`
+	Type             NotifierType           `json:"type"`
+	SendAllEvents    *bool                  `json:"send_all_events,omitempty"`
+	SendAllAlerts    *bool                  `json:"send_all_alerts,omitempty"`
+	SelectedEventIDs []string               `json:"selected_event_ids,omitempty"`
+	TypeData         map[string]interface{} `json:"-"`
+	RawTypeData      json.RawMessage        `json:"type_data"`
+	PlatformID       string                 `json:"platform_id"`
+	CreatedAt        time.Time              `json:"created_at"`
+	UpdatedAt        time.Time              `json:"updated_at"`
+}
+
 // NotifierParams will be given as a parameter in notifiers function's
 type NotifierParams struct {
-	Active         *bool
-	Name           string
-	SendAllEvents  *bool
-	SendAllAlerts  *bool
-	SelectedEvents []string
-	PlatformID     string
+	Active           *bool
+	Name             string
+	SendAllEvents    *bool
+	SendAllAlerts    *bool
+	SelectedEventIDs []string
+	PlatformID       string
 
 	// Options
 	PhoneNumber string   // SMS notifier

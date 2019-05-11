@@ -25,6 +25,9 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_AUTH_URL", "https://auth.scalingo.com/"),
 			},
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"scalingo_notification_platform": dataSourceScNotificationPlatform(),
+		},
 		ResourcesMap: map[string]*schema.Resource{
 			"scalingo_addon":          resourceScalingoAddon(),
 			"scalingo_app":            resourceScalingoApp(),
@@ -32,6 +35,7 @@ func Provider() terraform.ResourceProvider {
 			"scalingo_container_type": resourceScalingoContainerType(),
 			"scalingo_domain":         resourceScalingoDomain(),
 			"scalingo_github_link":    resourceScalingoGithubLink(),
+			"scalingo_notifier":       resourceScalingoNotifier(),
 			"scalingo_run":            resourceScalingoRun(),
 		},
 		ConfigureFunc: providerConfigure,
