@@ -147,7 +147,7 @@ func resourceScNotifierImport(d *schema.ResourceData, meta interface{}) ([]*sche
 func readNotifierParamsFromResource(d *schema.ResourceData, c scalingo.API) (scalingo.NotifierParams, error) {
 	types, err := c.EventTypesList()
 	if err != nil {
-		return scalingo.NotifierParams{}, fmt.Errorf("fail to list even types: %v", err)
+		return scalingo.NotifierParams{}, fmt.Errorf("fail to list event types: %v", err)
 	}
 
 	sendAllEvents := d.Get("send_all_events").(bool)
