@@ -195,7 +195,7 @@ func readNotifierParamsFromResource(d *schema.ResourceData, c scalingo.API) (sca
 func setFromScNotifier(d *schema.ResourceData, c scalingo.API, notifier *scalingo.Notifier) error {
 	types, err := c.EventTypesList()
 	if err != nil {
-		return fmt.Errorf("fail to list even types: %v", err)
+		return fmt.Errorf("fail to list event types: %v", err)
 	}
 
 	d.SetId(notifier.ID)
