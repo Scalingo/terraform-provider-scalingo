@@ -57,6 +57,7 @@ func dataSourceScNotificationPlatformRead(d *schema.ResourceData, meta interface
 	for _, p := range platforms {
 		if p.Name == name {
 			selected = p
+			break
 		}
 	}
 
