@@ -30,7 +30,7 @@ func dataSourceScNotificationPlatform() *schema.Resource {
 				Computed: true,
 			},
 			"available_event_ids": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
