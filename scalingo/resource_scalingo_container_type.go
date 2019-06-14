@@ -119,26 +119,6 @@ func resourceContainerTypeUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceContainerTypeDelete(d *schema.ResourceData, meta interface{}) error {
-	ids := strings.Split(d.Id(), ":")
-	if len(ids) != 2 {
-		return errors.New("ID should have the following format: <app ID>:<container type name>")
-	}
-	appID := ids[0]
-	ctName := ids[1]
-	log.Printf("[DEBUG] Application ID: %s", appID)
-	log.Printf("[DEBUG] Container type name: %s", ctName)
-
-	client := meta.(*scalingo.Client)
-	_, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
-		Containers: []scalingo.ContainerType{{
-			Name:   ctName,
-			Amount: 0,
-		}},
-	})
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
