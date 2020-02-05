@@ -69,7 +69,8 @@ type AppsPsRes struct {
 
 type AppsCreateOpts struct {
 	Name      string `json:"name"`
-	ParentApp string `json:"parent_id"`
+	ParentApp string `json:"parent_id,omitempty"`
+	StackID   string `json:"stack_id,omitempty"`
 }
 
 type AppResponse struct {
@@ -91,16 +92,20 @@ type App struct {
 		ID       string `json:"id"`
 		Username string `json:"username"`
 		Email    string `json:"email"`
-		Billable bool   `json:"billable"`
 	} `json:"owner"`
 	GitUrl         string     `json:"git_url"`
 	Url            string     `json:"url"`
+	BaseURL        string     `json:"base_url"`
 	Status         AppStatus  `json:"status"`
 	LastDeployedAt *time.Time `json:"last_deployed_at"`
 	LastDeployedBy string     `json:"last_deployed_by"`
 	CreatedAt      *time.Time `json:"created_at"`
 	UpdatedAt      *time.Time `json:"update_at"`
 	Links          *AppLinks  `json:"links"`
+	StackID        string     `json:"stack_id"`
+	StickySession  bool       `json:"sticky_session"`
+	ForceHTTPS     bool       `json:"force_https"`
+	RouterLogs     bool       `json:"router_logs"`
 }
 
 func (app App) String() string {

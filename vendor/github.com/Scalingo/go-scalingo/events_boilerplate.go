@@ -1,8 +1,8 @@
 package scalingo
 
-// This file has been generated, and is used for event specialization management
-// You should not edit it by hand except when adding a new type of event
-
+func (e *EventNewUserType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
 func (e *EventNewAppType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
@@ -27,10 +27,22 @@ func (e *EventCrashType) TypeDataPtr() interface{} {
 func (e *EventDeploymentType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
-func (e *EventLinkGithubType) TypeDataPtr() interface{} {
+func (e *EventLinkSCMType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
-func (e *EventUnlinkGithubType) TypeDataPtr() interface{} {
+func (e *EventUnlinkSCMType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+func (e *EventNewIntegrationType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+func (e *EventDeleteIntegrationType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+func (e *EventAuthorizeGithubType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+func (e *EventRevokeGithubType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
 func (e *EventRunType) TypeDataPtr() interface{} {
@@ -84,15 +96,6 @@ func (e *EventEditVariableType) TypeDataPtr() interface{} {
 func (e *EventEditVariablesType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
-func (e *EventNewNotificationType) TypeDataPtr() interface{} {
-	return &e.TypeData
-}
-func (e *EventEditNotificationType) TypeDataPtr() interface{} {
-	return &e.TypeData
-}
-func (e *EventDeleteNotificationType) TypeDataPtr() interface{} {
-	return &e.TypeData
-}
 func (e *EventDeleteVariableType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
@@ -103,12 +106,6 @@ func (e *EventAddPaymentMethodType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
 func (e *EventAddVoucherType) TypeDataPtr() interface{} {
-	return &e.TypeData
-}
-func (e *EventAuthorizeGithubType) TypeDataPtr() interface{} {
-	return &e.TypeData
-}
-func (e *EventRevokeGithubType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
 func (e *EventNewKeyType) TypeDataPtr() interface{} {
@@ -133,5 +130,11 @@ func (e *EventNewAutoscalerType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
 func (e *EventDeleteAutoscalerType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+func (e *EventLinkGithubType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+func (e *EventUnlinkGithubType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }

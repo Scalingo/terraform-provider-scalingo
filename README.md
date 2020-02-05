@@ -21,11 +21,36 @@ Requirements
 Usage
 ---------------------
 
+### Configuring with variables
+
 ```
+variable "scalingo_api_token" {}
+
 provider "scalingo" {
-  api_token = "MY_API_TOKEN"
+  api_token = "${var.scalingo_api_token}"
+  region = "osc-fr1"
 }
 ```
+
+```bash
+export TF_VAR_scaling_api_token=tk-1234567890
+terraform plan
+```
+
+### Configuration with environment variables
+
+```
+provider "scalingo" {}
+```
+
+```bash
+export SCALINGO_REGION=osc-fr1
+export SCALINGO_API_TOKEN=tk-1234567890
+
+terraform plan
+```
+
+
 
 Building The Provider
 ---------------------

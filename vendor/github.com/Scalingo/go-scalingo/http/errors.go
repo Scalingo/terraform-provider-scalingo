@@ -13,6 +13,7 @@ import (
 type (
 	BadRequestError struct {
 		ErrMessage string `json:"error"`
+		Code       string `json:"code"`
 	}
 
 	PaymentRequiredError struct {
@@ -24,6 +25,11 @@ type (
 	NotFoundError struct {
 		Resource string `json:"resource"`
 		Err      string `json:"error"`
+	}
+
+	ForbiddenError struct {
+		Err  string `json:"error"`
+		Code string `json:"code"`
 	}
 
 	UnprocessableEntity struct {
@@ -70,8 +76,12 @@ func (err NotFoundError) Error() string {
 		return fmt.Sprintf("The application was not found, did you make a typo?")
 	} else if err.Resource == "container_type" {
 		return fmt.Sprintf("This type of container was not found, please ensure it is present in your Procfile\n→ http://doc.scalingo.com/internals/procfile")
-	} else {
+	} else if err.Resource != "" {
 		return fmt.Sprintf("The %s was not found", err.Resource)
+	} else {
+		// Sometimes the API does not return a resource in the body, but the error
+		// message is self-explained.
+		return err.Err
 	}
 }
 
@@ -83,40 +93,51 @@ func (err UnprocessableEntity) Error() string {
 	return strings.Join(errArray, "\n")
 }
 
+func (err ForbiddenError) Error() string {
+	return fmt.Sprintf("Request forbidden (403): %v", err.Err)
+}
+
 func NewRequestFailedError(res *http.Response, req *APIRequest) error {
 	debug.Printf("APIRequest Error: [%d] %s %s%s", res.StatusCode, req.Method, req.URL, req.Endpoint)
 	defer res.Body.Close()
 	switch res.StatusCode {
 	case 400:
 		var badRequestError BadRequestError
-		err := ParseJSON(res, &badRequestError)
+		err := parseJSON(res, &badRequestError)
 		if err != nil {
-			return errgo.Mask(err, errgo.Any)
+			return err
 		}
 		return &RequestFailedError{Code: res.StatusCode, APIError: badRequestError, Req: req}
 	case 401:
 		var apiErr APIError
-		ParseJSON(res, &apiErr)
+		parseJSON(res, &apiErr)
 		return &RequestFailedError{Code: res.StatusCode, APIError: errgo.New("unauthorized - you are not authorized to do this operation"), Req: req, Message: apiErr.Error}
 	case 402:
 		var paymentRequiredErr PaymentRequiredError
-		err := ParseJSON(res, &paymentRequiredErr)
+		err := parseJSON(res, &paymentRequiredErr)
 		if err != nil {
-			return errgo.Mask(err, errgo.Any)
+			return err
 		}
 		return &RequestFailedError{Code: res.StatusCode, APIError: paymentRequiredErr, Req: req}
+	case 403:
+		var forbiddenError ForbiddenError
+		err := parseJSON(res, &forbiddenError)
+		if err != nil {
+			return err
+		}
+		return &RequestFailedError{Code: res.StatusCode, APIError: forbiddenError, Req: req}
 	case 404:
 		var notFoundErr NotFoundError
-		err := ParseJSON(res, &notFoundErr)
+		err := parseJSON(res, &notFoundErr)
 		if err != nil {
-			return errgo.Mask(err, errgo.Any)
+			return err
 		}
 		return &RequestFailedError{Code: res.StatusCode, APIError: notFoundErr, Req: req}
 	case 422:
 		var unprocessableError UnprocessableEntity
-		err := ParseJSON(res, &unprocessableError)
+		err := parseJSON(res, &unprocessableError)
 		if err != nil {
-			return errgo.Mask(err, errgo.Any)
+			return err
 		}
 		return &RequestFailedError{Code: res.StatusCode, APIError: unprocessableError, Req: req}
 	case 500:

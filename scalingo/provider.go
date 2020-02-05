@@ -1,6 +1,8 @@
 package scalingo
 
 import (
+	"fmt"
+
 	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
@@ -17,12 +19,22 @@ func Provider() terraform.ResourceProvider {
 			"api_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_API_URL", "https://api.scalingo.com/"),
+				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_API_URL", nil),
+			},
+			"db_api_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_DB_API_URL", nil),
 			},
 			"auth_api_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_AUTH_URL", "https://auth.scalingo.com/"),
+				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_AUTH_URL", nil),
+			},
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_REGION", "osc-fr1"),
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -46,13 +58,20 @@ func Provider() terraform.ResourceProvider {
 func providerConfigure(data *schema.ResourceData) (interface{}, error) {
 	apiURL := data.Get("api_url").(string)
 	authAPIURL := data.Get("auth_api_url").(string)
+	dbAPIURL := data.Get("db_api_url").(string)
 	apiToken := data.Get("api_token").(string)
+	region := data.Get("region").(string)
 
-	client := scalingo.NewClient(scalingo.ClientConfig{
-		APIToken:     apiToken,
-		APIEndpoint:  apiURL,
-		AuthEndpoint: authAPIURL,
+	client, err := scalingo.New(scalingo.ClientConfig{
+		Region:              region,
+		APIToken:            apiToken,
+		APIEndpoint:         apiURL,
+		DatabaseAPIEndpoint: dbAPIURL,
+		AuthEndpoint:        authAPIURL,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("fail to initialize Scalingo client: %v", err)
+	}
 
 	return client, nil
 }

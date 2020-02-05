@@ -61,7 +61,10 @@ func resourceAddonCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("plan_id", planID)
 
-	res, err := client.AddonProvision(appID, providerID, planID)
+	res, err := client.AddonProvision(appID, scalingo.AddonProvisionParams{
+		AddonProviderID: providerID,
+		PlanID:          planID,
+	})
 	if err != nil {
 		return err
 	}
@@ -92,7 +95,7 @@ func resourceAddonRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("resource_id", addon.ResourceID)
 	d.Set("plan", addon.Plan.Name)
-	d.Set("plan_id", addon.PlanID)
+	d.Set("plan_id", addon.Plan.ID)
 	d.Set("provider_id", addon.AddonProvider.ID)
 	d.SetId(addon.ID)
 
@@ -111,7 +114,9 @@ func resourceAddonUpdate(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
-		res, err := client.AddonUpgrade(appID, d.Id(), planID)
+		res, err := client.AddonUpgrade(appID, d.Id(), scalingo.AddonUpgradeParams{
+			PlanID: planID,
+		})
 		if err != nil {
 			return err
 		}
@@ -121,7 +126,7 @@ func resourceAddonUpdate(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
-		d.Set("plan_id", res.Addon.PlanID)
+		d.Set("plan_id", res.Addon.Plan.ID)
 	}
 
 	return nil
