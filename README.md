@@ -45,7 +45,7 @@ provider "scalingo" {}
 
 ```bash
 export SCALINGO_REGION=osc-fr1
-export SCALINGO_API_TOKEN=tk-1234567890
+export SCALINGO_API_TOKEN=tk-us-1234567890
 
 terraform plan
 ```
