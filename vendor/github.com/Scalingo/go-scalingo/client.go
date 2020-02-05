@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Scalingo/go-scalingo/http"
+	errgo "gopkg.in/errgo.v1"
 )
 
 type API interface {
@@ -24,9 +25,10 @@ type API interface {
 	LogsArchivesService
 	LogsService
 	NotificationPlatformsService
-	NotificationsService
 	NotifiersService
 	OperationsService
+	RegionsService
+	RegionMigrationsService
 	RunsService
 	SignUpService
 	SourcesService
@@ -55,17 +57,48 @@ type ClientConfig struct {
 	AuthEndpoint        string
 	DatabaseAPIEndpoint string
 	APIToken            string
+	Region              string
+	UserAgent           string
 
 	// StaticTokenGenerator is present for retrocompatibility with legacy tokens
 	// DEPRECATED, Use standard APIToken field for normal operations
 	StaticTokenGenerator *StaticTokenGenerator
 }
 
-func NewClient(cfg ClientConfig) *Client {
-	client := &Client{
+func New(cfg ClientConfig) (*Client, error) {
+	// Apply defaults
+	if cfg.AuthEndpoint == "" {
+		cfg.AuthEndpoint = "https://auth.scalingo.com"
+	}
+	if cfg.UserAgent == "" {
+		cfg.UserAgent = "go-scalingo v" + Version
+	}
+
+	// If there's no region defined return the client as is
+	if cfg.Region == "" {
+		return &Client{
+			config: cfg,
+		}, nil
+	}
+
+	// if a region was defined, create a temp client to query the auth service for region list
+	// then create the real client
+	tmpClient := &Client{
 		config: cfg,
 	}
-	return client
+
+	region, err := tmpClient.getRegion(cfg.Region)
+	if err == ErrRegionNotFound {
+		return nil, err
+	} else if err != nil {
+		return nil, errgo.Notef(err, "fail to get region informations")
+	}
+
+	cfg.APIEndpoint = region.API
+	cfg.DatabaseAPIEndpoint = region.DatabaseAPI
+	return &Client{
+		config: cfg,
+	}, nil
 }
 
 func (c *Client) ScalingoAPI() http.Client {
@@ -82,6 +115,7 @@ func (c *Client) ScalingoAPI() http.Client {
 	}
 
 	return http.NewClient(http.ScalingoAPI, http.ClientConfig{
+		UserAgent:      c.config.UserAgent,
 		Timeout:        c.config.Timeout,
 		TLSConfig:      c.config.TLSConfig,
 		APIVersion:     "1",
@@ -106,7 +140,11 @@ func (c *Client) AuthAPI() http.Client {
 	if c.authClient != nil {
 		return c.authClient
 	}
+
 	var tokenGenerator http.TokenGenerator
+	if c.config.StaticTokenGenerator != nil {
+		tokenGenerator = c.config.StaticTokenGenerator
+	}
 	if len(c.config.APIToken) != 0 {
 		tokenGenerator = http.NewAPITokenGenerator(c, c.config.APIToken)
 	}

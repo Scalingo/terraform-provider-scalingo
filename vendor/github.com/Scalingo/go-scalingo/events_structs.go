@@ -64,6 +64,7 @@ type EventUser struct {
 type EventTypeName string
 
 const (
+	EventNewUser            EventTypeName = "new_user"
 	EventNewApp             EventTypeName = "new_app"
 	EventEditApp            EventTypeName = "edit_app"
 	EventDeleteApp          EventTypeName = "delete_app"
@@ -74,8 +75,12 @@ const (
 	EventStopApp            EventTypeName = "stop_app"
 	EventCrash              EventTypeName = "crash"
 	EventDeployment         EventTypeName = "deployment"
-	EventLinkGithub         EventTypeName = "link_github"
-	EventUnlinkGithub       EventTypeName = "unlink_github"
+	EventLinkSCM            EventTypeName = "link_scm"
+	EventUnlinkSCM          EventTypeName = "unlink_scm"
+	EventNewIntegration     EventTypeName = "new_integration"
+	EventDeleteIntegration  EventTypeName = "delete_integration"
+	EventAuthorizeGithub    EventTypeName = "authorize_github"
+	EventRevokeGithub       EventTypeName = "revoke_github"
 	EventRun                EventTypeName = "run"
 	EventNewDomain          EventTypeName = "new_domain"
 	EventEditDomain         EventTypeName = "edit_domain"
@@ -93,14 +98,9 @@ const (
 	EventEditVariable       EventTypeName = "edit_variable"
 	EventEditVariables      EventTypeName = "edit_variables"
 	EventDeleteVariable     EventTypeName = "delete_variable"
-	EventNewNotification    EventTypeName = "new_notification"
-	EventEditNotification   EventTypeName = "edit_notification"
-	EventDeleteNotification EventTypeName = "delete_notification"
 	EventAddCredit          EventTypeName = "add_credit"
 	EventAddPaymentMethod   EventTypeName = "add_payment_method"
 	EventAddVoucher         EventTypeName = "add_voucher"
-	EventAuthorizeGithub    EventTypeName = "authorize_github"
-	EventRevokeGithub       EventTypeName = "revoke_github"
 	EventNewKey             EventTypeName = "new_key"
 	EventDeleteKey          EventTypeName = "delete_key"
 	EventPaymentAttempt     EventTypeName = "payment_attempt"
@@ -109,7 +109,25 @@ const (
 	EventDeleteAlert        EventTypeName = "delete_alert"
 	EventNewAutoscaler      EventTypeName = "new_autoscaler"
 	EventDeleteAutoscaler   EventTypeName = "delete_autoscaler"
+	EventAddonUpdated       EventTypeName = "addon_updated"
+
+	// EventLinkGithub and EventUnlinkGithub events are kept for
+	// retro-compatibility. They are replaced by SCM events.
+	EventLinkGithub   EventTypeName = "link_github"
+	EventUnlinkGithub EventTypeName = "unlink_github"
 )
+
+type EventNewUserType struct {
+	Event
+	TypeData EventNewUserTypeData `json:"type_data"`
+}
+
+func (ev *EventNewUserType) String() string {
+	return fmt.Sprintf("You joined Scalingo. Hooray!")
+}
+
+type EventNewUserTypeData struct {
+}
 
 type EventNewAppType struct {
 	Event
@@ -195,9 +213,8 @@ type EventRestartType struct {
 func (ev *EventRestartType) String() string {
 	if len(ev.TypeData.Scope) != 0 {
 		return fmt.Sprintf("containers %v have been restarted", ev.TypeData.Scope)
-	} else {
-		return fmt.Sprintf("containers have been restarted")
 	}
+	return fmt.Sprintf("containers have been restarted")
 }
 
 type EventRestartTypeData struct {
@@ -299,11 +316,47 @@ type EventLinkGithubTypeData struct {
 
 type EventUnlinkGithubType struct {
 	Event
-	TypeData EventLinkGithubTypeData `json:"type_data"`
+	TypeData EventUnlinkGithubTypeData `json:"type_data"`
 }
 
 func (ev *EventUnlinkGithubType) String() string {
 	return fmt.Sprintf("app has been unlinked from Github repository '%s'", ev.TypeData.RepoName)
+}
+
+type EventUnlinkGithubTypeData struct {
+	RepoName         string `json:"repo_name"`
+	UnlinkerUsername string `json:"unlinker_username"`
+	GithubSource     string `json:"github_source"`
+}
+
+type EventLinkSCMType struct {
+	Event
+	TypeData EventLinkSCMTypeData `json:"type_data"`
+}
+
+func (ev *EventLinkSCMType) String() string {
+	return fmt.Sprintf("app has been linked to repository '%s'", ev.TypeData.RepoName)
+}
+
+type EventLinkSCMTypeData struct {
+	RepoName       string `json:"repo_name"`
+	LinkerUsername string `json:"linker_username"`
+	Source         string `json:"source"`
+}
+
+type EventUnlinkSCMType struct {
+	Event
+	TypeData EventUnlinkSCMTypeData `json:"type_data"`
+}
+
+func (ev *EventUnlinkSCMType) String() string {
+	return fmt.Sprintf("app has been unlinked from repository '%s'", ev.TypeData.RepoName)
+}
+
+type EventUnlinkSCMTypeData struct {
+	RepoName         string `json:"repo_name"`
+	UnlinkerUsername string `json:"unlinker_username"`
+	Source           string `json:"source"`
 }
 
 type EventRunType struct {
@@ -631,47 +684,6 @@ type EventDeleteVariableTypeData struct {
 	EventVariable
 }
 
-type EventNotification struct {
-	NotificationType string `json:"notification_type"`
-	Active           bool   `json:"active"`
-	WebhookURL       string `json:"webhook_url"`
-}
-
-func (n *EventNotification) String() string {
-	state := "disabled"
-	if n.Active {
-		state = "enabled"
-	}
-	return fmt.Sprintf("%s: %s (%s)", n.NotificationType, n.WebhookURL, state)
-}
-
-type EventNewNotificationType struct {
-	Event
-	TypeData EventNotification `json:"type_data"`
-}
-
-func (ev *EventNewNotificationType) String() string {
-	return ev.TypeData.String()
-}
-
-type EventEditNotificationType struct {
-	Event
-	TypeData EventNotification `json:"type_data"`
-}
-
-func (ev *EventEditNotificationType) String() string {
-	return ev.TypeData.String()
-}
-
-type EventDeleteNotificationType struct {
-	Event
-	TypeData EventNotification `json:"type_data"`
-}
-
-func (ev *EventDeleteNotificationType) String() string {
-	return ev.TypeData.String()
-}
-
 type EventPaymentAttemptTypeData struct {
 	Amount        float32 `json:"amount"`
 	PaymentMethod string  `json:"payment_method"`
@@ -806,10 +818,38 @@ func (ev *EventDeleteAutoscalerType) String() string {
 	return fmt.Sprintf("Alert deleted about %s on container %s", d.Metric, d.ContainerType)
 }
 
+type EventAddonUpdatedTypeData struct {
+	AddonID           string `json:"addon_id"`
+	AddonPlanName     string `json:"addon_plan_name"`
+	AddonResourceID   string `json:"addon_resource_id"`
+	AddonProviderID   string `json:"addon_provider_id"`
+	AddonProviderName string `json:"addon_provider_name"`
+
+	// Status has only two items when is updated, the old value and the new value, in this order
+	Status []AddonStatus `json:"status"`
+	// AttributesChanged contain names of changed attributes
+	AttributesChanged []string `json:"attributes_changed"`
+}
+
+type EventAddonUpdatedType struct {
+	Event
+	TypeData EventAddonUpdatedTypeData `json:"type_data"`
+}
+
+func (ev *EventAddonUpdatedType) String() string {
+	d := ev.TypeData
+	return fmt.Sprintf(
+		"Addon %s %s updated, status %v -> %v",
+		d.AddonProviderName, d.AddonResourceID, d.Status[0], d.Status[1],
+	)
+}
+
 func (pev *Event) Specialize() DetailedEvent {
 	var e DetailedEvent
 	ev := *pev
 	switch ev.Type {
+	case EventNewUser:
+		e = &EventNewUserType{Event: ev}
 	case EventNewApp:
 		e = &EventNewAppType{Event: ev}
 	case EventEditApp:
@@ -828,10 +868,18 @@ func (pev *Event) Specialize() DetailedEvent {
 		e = &EventScaleType{Event: ev}
 	case EventCrash:
 		e = &EventCrashType{Event: ev}
-	case EventLinkGithub:
-		e = &EventLinkGithubType{Event: ev}
-	case EventUnlinkGithub:
-		e = &EventUnlinkGithubType{Event: ev}
+	case EventLinkSCM:
+		e = &EventLinkSCMType{Event: ev}
+	case EventUnlinkSCM:
+		e = &EventUnlinkSCMType{Event: ev}
+	case EventNewIntegration:
+		e = &EventNewIntegrationType{Event: ev}
+	case EventDeleteIntegration:
+		e = &EventDeleteIntegrationType{Event: ev}
+	case EventAuthorizeGithub:
+		e = &EventAuthorizeGithubType{Event: ev}
+	case EventRevokeGithub:
+		e = &EventRevokeGithubType{Event: ev}
 	case EventDeployment:
 		e = &EventDeploymentType{Event: ev}
 	case EventRun:
@@ -868,20 +916,12 @@ func (pev *Event) Specialize() DetailedEvent {
 		e = &EventEditVariablesType{Event: ev}
 	case EventDeleteVariable:
 		e = &EventDeleteVariableType{Event: ev}
-	case EventNewNotification:
-		e = &EventNewNotificationType{Event: ev}
-	case EventEditNotification:
-		e = &EventEditNotificationType{Event: ev}
-	case EventDeleteNotification:
-		e = &EventDeleteNotificationType{Event: ev}
 	case EventAddCredit:
 		e = &EventAddCreditType{Event: ev}
 	case EventAddPaymentMethod:
 		e = &EventAddPaymentMethodType{Event: ev}
 	case EventAddVoucher:
 		e = &EventAddVoucherType{Event: ev}
-	case EventAuthorizeGithub:
-		e = &EventAuthorizeGithubType{Event: ev}
 	case EventNewKey:
 		e = &EventNewKeyType{Event: ev}
 	case EventDeleteKey:
@@ -898,6 +938,14 @@ func (pev *Event) Specialize() DetailedEvent {
 		e = &EventNewAutoscalerType{Event: ev}
 	case EventDeleteAutoscaler:
 		e = &EventDeleteAutoscalerType{Event: ev}
+	case EventAddonUpdated:
+		e = &EventAddonUpdatedType{Event: ev}
+	// Deprecated events. Replaced by equivalent with SCM in the name instead of
+	// Github
+	case EventLinkGithub:
+		e = &EventLinkGithubType{Event: ev}
+	case EventUnlinkGithub:
+		e = &EventUnlinkGithubType{Event: ev}
 	default:
 		return pev
 	}
