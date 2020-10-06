@@ -8,12 +8,13 @@ import (
 )
 
 const (
-	RegionMigrationStatusScheduled        RegionMigrationStatus = "scheduled"
+	RegionMigrationStatusCreated          RegionMigrationStatus = "created"
 	RegionMigrationStatusPreflightSuccess RegionMigrationStatus = "preflight-success"
 	RegionMigrationStatusPreflightError   RegionMigrationStatus = "preflight-error"
 	RegionMigrationStatusRunning          RegionMigrationStatus = "running"
 	RegionMigrationStatusPrepared         RegionMigrationStatus = "prepared"
 	RegionMigrationStatusDataMigrated     RegionMigrationStatus = "data-migrated"
+	RegionMigrationStatusAborting         RegionMigrationStatus = "aborting"
 	RegionMigrationStatusAborted          RegionMigrationStatus = "aborted"
 	RegionMigrationStatusError            RegionMigrationStatus = "error"
 	RegionMigrationStatusDone             RegionMigrationStatus = "done"
@@ -47,6 +48,7 @@ type RegionMigration struct {
 	DstAppName  string                `json:"dst_app_name"`
 	AppID       string                `json:"app_id"`
 	NewAppID    string                `json:"new_app_id"`
+	Source      string                `json:"source"`
 	Destination string                `json:"destination"`
 	Status      RegionMigrationStatus `json:"status"`
 	StartedAt   time.Time             `json:"started_at"`

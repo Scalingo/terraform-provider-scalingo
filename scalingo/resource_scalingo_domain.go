@@ -6,6 +6,7 @@ import (
 
 	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform/helper/schema"
+	"gopkg.in/errgo.v1"
 )
 
 func resourceScalingoDomain() *schema.Resource {
@@ -56,7 +57,7 @@ func resourceDomainRead(d *schema.ResourceData, meta interface{}) error {
 
 	domain, err := client.DomainsShow(appId, d.Id())
 	if err != nil {
-		return err
+		return errgo.Notef(err, "fail to get domain %v of app %v", d.Id(), appId)
 	}
 
 	d.SetId(domain.ID)

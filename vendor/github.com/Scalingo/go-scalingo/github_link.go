@@ -1,9 +1,14 @@
 package scalingo
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Scalingo/go-scalingo/http"
+)
+
+var (
+	GithubLinkNotFoundErr = errors.New("No github SCM Repo Link")
 )
 
 type GithubLinkService interface {
@@ -63,6 +68,10 @@ func (c *Client) GithubLinkShow(app string) (*GithubLink, error) {
 	err := c.ScalingoAPI().SubresourceList("apps", app, "github_repo_links", nil, &link)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(link.GithubLinks) == 0 {
+		return nil, GithubLinkNotFoundErr
 	}
 
 	return link.GithubLinks[0], nil

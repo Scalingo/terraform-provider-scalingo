@@ -5,6 +5,7 @@ import (
 
 	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform/helper/schema"
+	"gopkg.in/errgo.v1"
 )
 
 func resourceScalingoGithubLink() *schema.Resource {
@@ -221,7 +222,7 @@ func resourceGithubLinkRead(d *schema.ResourceData, meta interface{}) error {
 
 	link, err := client.GithubLinkShow(app)
 	if err != nil {
-		return err
+		return errgo.Notef(err, "error when fetching github repo link for app %v", app)
 	}
 	d.SetId(link.ID)
 	d.Set("auto_deploy", link.AutoDeployEnabled)

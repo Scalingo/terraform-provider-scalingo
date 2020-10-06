@@ -25,6 +25,7 @@ type DeploymentStatus string
 
 const (
 	StatusSuccess      DeploymentStatus = "success"
+	StatusQueued       DeploymentStatus = "queued"
 	StatusBuilding     DeploymentStatus = "building"
 	StatusStarting     DeploymentStatus = "starting"
 	StatusPushing      DeploymentStatus = "pushing"
@@ -58,12 +59,28 @@ type DeploymentsCreateRes struct {
 	Deployment *Deployment `json:"deployment"`
 }
 
+func (d *Deployment) HasFailed() bool {
+	return HasFailedString(d.Status)
+}
+
+func HasFailedString(status DeploymentStatus) bool {
+	if !IsFinishedString(status) {
+		return false
+	}
+
+	if status == StatusSuccess {
+		return false
+	}
+	return true
+}
+
 func (d *Deployment) IsFinished() bool {
 	return IsFinishedString(d.Status)
 }
 
 func IsFinishedString(status DeploymentStatus) bool {
-	return status != StatusBuilding && status != StatusStarting && status != StatusPushing
+	return status != StatusBuilding && status != StatusStarting &&
+		status != StatusPushing && status != StatusQueued
 }
 
 type DeploymentList struct {

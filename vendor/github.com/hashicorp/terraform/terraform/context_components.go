@@ -2,6 +2,10 @@ package terraform
 
 import (
 	"fmt"
+
+	"github.com/hashicorp/terraform/addrs"
+	"github.com/hashicorp/terraform/providers"
+	"github.com/hashicorp/terraform/provisioners"
 )
 
 // contextComponentFactory is the interface that Context uses
@@ -12,42 +16,41 @@ type contextComponentFactory interface {
 	// ResourceProvider creates a new ResourceProvider with the given
 	// type. The "uid" is a unique identifier for this provider being
 	// initialized that can be used for internal tracking.
-	ResourceProvider(typ, uid string) (ResourceProvider, error)
+	ResourceProvider(typ, uid string) (providers.Interface, error)
 	ResourceProviders() []string
 
 	// ResourceProvisioner creates a new ResourceProvisioner with the
 	// given type. The "uid" is a unique identifier for this provisioner
 	// being initialized that can be used for internal tracking.
-	ResourceProvisioner(typ, uid string) (ResourceProvisioner, error)
+	ResourceProvisioner(typ, uid string) (provisioners.Interface, error)
 	ResourceProvisioners() []string
 }
 
 // basicComponentFactory just calls a factory from a map directly.
 type basicComponentFactory struct {
-	providers    map[string]ResourceProviderFactory
-	provisioners map[string]ResourceProvisionerFactory
+	providers    map[addrs.Provider]providers.Factory
+	provisioners map[string]ProvisionerFactory
 }
 
 func (c *basicComponentFactory) ResourceProviders() []string {
-	result := make([]string, len(c.providers))
-	for k, _ := range c.providers {
-		result = append(result, k)
+	var result []string
+	for k := range c.providers {
+		result = append(result, k.LegacyString())
 	}
-
 	return result
 }
 
 func (c *basicComponentFactory) ResourceProvisioners() []string {
-	result := make([]string, len(c.provisioners))
-	for k, _ := range c.provisioners {
+	var result []string
+	for k := range c.provisioners {
 		result = append(result, k)
 	}
 
 	return result
 }
 
-func (c *basicComponentFactory) ResourceProvider(typ, uid string) (ResourceProvider, error) {
-	f, ok := c.providers[typ]
+func (c *basicComponentFactory) ResourceProvider(typ, uid string) (providers.Interface, error) {
+	f, ok := c.providers[addrs.NewLegacyProvider(typ)]
 	if !ok {
 		return nil, fmt.Errorf("unknown provider %q", typ)
 	}
@@ -55,7 +58,7 @@ func (c *basicComponentFactory) ResourceProvider(typ, uid string) (ResourceProvi
 	return f()
 }
 
-func (c *basicComponentFactory) ResourceProvisioner(typ, uid string) (ResourceProvisioner, error) {
+func (c *basicComponentFactory) ResourceProvisioner(typ, uid string) (provisioners.Interface, error) {
 	f, ok := c.provisioners[typ]
 	if !ok {
 		return nil, fmt.Errorf("unknown provisioner %q", typ)

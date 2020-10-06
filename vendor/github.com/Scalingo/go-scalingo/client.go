@@ -22,6 +22,7 @@ type API interface {
 	EventsService
 	KeysService
 	LoginService
+	LogDrainsService
 	LogsArchivesService
 	LogsService
 	NotificationPlatformsService
@@ -54,8 +55,11 @@ type ClientConfig struct {
 	Timeout             time.Duration
 	TLSConfig           *tls.Config
 	APIEndpoint         string
+	APIPrefix           string
 	AuthEndpoint        string
+	AuthPrefix          string
 	DatabaseAPIEndpoint string
+	DatabaseAPIPrefix   string
 	APIToken            string
 	Region              string
 	UserAgent           string
@@ -113,12 +117,16 @@ func (c *Client) ScalingoAPI() http.Client {
 	if len(c.config.APIToken) != 0 {
 		tokenGenerator = http.NewAPITokenGenerator(c, c.config.APIToken)
 	}
+	prefix := "/v1"
+	if c.config.APIPrefix != "" {
+		prefix = c.config.APIPrefix
+	}
 
 	return http.NewClient(http.ScalingoAPI, http.ClientConfig{
 		UserAgent:      c.config.UserAgent,
 		Timeout:        c.config.Timeout,
 		TLSConfig:      c.config.TLSConfig,
-		APIVersion:     "1",
+		APIConfig:      http.APIConfig{Prefix: prefix},
 		TokenGenerator: tokenGenerator,
 		Endpoint:       c.config.APIEndpoint,
 	})
@@ -128,9 +136,15 @@ func (c *Client) DBAPI(app, addon string) http.Client {
 	if c.dbClient != nil {
 		return c.dbClient
 	}
+
+	prefix := "/api"
+	if c.config.DatabaseAPIPrefix != "" {
+		prefix = c.config.DatabaseAPIPrefix
+	}
 	return http.NewClient(http.DBAPI, http.ClientConfig{
 		Timeout:        c.config.Timeout,
 		TLSConfig:      c.config.TLSConfig,
+		APIConfig:      http.APIConfig{Prefix: prefix},
 		TokenGenerator: http.NewAddonTokenGenerator(app, addon, c),
 		Endpoint:       c.config.DatabaseAPIEndpoint,
 	})
@@ -149,10 +163,14 @@ func (c *Client) AuthAPI() http.Client {
 		tokenGenerator = http.NewAPITokenGenerator(c, c.config.APIToken)
 	}
 
+	prefix := "/v1"
+	if c.config.AuthPrefix != "" {
+		prefix = c.config.AuthPrefix
+	}
 	return http.NewClient(http.AuthAPI, http.ClientConfig{
 		Timeout:        c.config.Timeout,
 		TLSConfig:      c.config.TLSConfig,
-		APIVersion:     "1",
+		APIConfig:      http.APIConfig{Prefix: prefix},
 		TokenGenerator: tokenGenerator,
 		Endpoint:       c.config.AuthEndpoint,
 	})
