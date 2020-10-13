@@ -132,6 +132,29 @@ func (e *EventNewAutoscalerType) TypeDataPtr() interface{} {
 func (e *EventDeleteAutoscalerType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
+func (e *EventAddonUpdatedType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+func (e *EventStartRegionMigrationType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+
+func (e *EventNewLogDrainType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+
+func (e *EventDeleteLogDrainType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+
+func (e *EventNewAddonLogDrainType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+
+func (e *EventDeleteAddonLogDrainType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+
 func (e *EventLinkGithubType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }

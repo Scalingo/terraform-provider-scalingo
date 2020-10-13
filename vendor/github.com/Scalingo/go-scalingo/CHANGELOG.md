@@ -1,6 +1,86 @@
 # Changelog
 
-## ToBeReleased
+## To Be Released
+
+## 4.8.0
+
+* Make the API prefix version configurable for all APIs
+* Deserialize app.Region returned by API
+* Fix panic GithubLinkShow when an app does not have one
+* Migrate to go mod
+
+## 4.7.2
+
+* Add EventNewLogDrainType and EventDeleteLogDrainType event
+* Add EventNewAddonLogDrainType and EventDeleteAddonLogDrainType event
+
+## 4.7.1
+
+* Add support for optionally authenticated routes
+
+## 4.7.0
+
+* Add support for route `PATCH /users/stop_free_trial`
+* Deprecate the use of `UpdateUser` to stop a user free trial
+
+## 4.6.0
+
+* Add `queued` deployment status and add it to `IsFinishedString`
+
+## v4.5.8
+
+* Add `LogDrainAddonRemove` function to remove a log drain from an addon
+
+## v4.5.7
+
+* Add `LogDrainAddonAdd` function to add a log drain to an addon
+
+## v4.5.6
+
+* Add `LogDrainsAddonList` function to list log drains of an addon
+
+## v4.5.5
+
+* Update GET /log_drains route to return object instead of array
+
+## v4.5.4
+
+* Fix infinite recursion on some events
+
+## v4.5.3
+
+* Add `LogDrainRemove` function to remove log drain from an application
+
+## v4.5.2
+
+* Add `LogDrainsAdd` function to add log drains to an application
+
+## v4.5.1
+
+* Add `HasFailed` and `HasFailedString` to deployments
+
+## v4.5.0
+
+* Add `LogDrainsService` service
+* Add `LogDrainsList` function to list log drains of an application
+
+## v4.4.1
+
+* Fix support for `addon_updated` and `start_region_migration` event types
+* Fix who created a `restart` or `edit_variable` event types
+
+## v4.4.0
+
+* Rename `scheduled` to `created` in RegionMigrationStatus list
+* Add `aborting` status to the list of RegionMigrationStatus
+
+## v4.3.1
+
+* Add `Source` field to RegionMigration
+
+## v4.3.0
+
+* Add StartRegionMigration event
 
 ## v4.2.0
 

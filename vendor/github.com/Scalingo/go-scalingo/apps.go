@@ -86,9 +86,10 @@ type AppLinks struct {
 }
 
 type App struct {
-	Id    string `json:"id"`
-	Name  string `json:"name"`
-	Owner struct {
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Region string `json:"region"`
+	Owner  struct {
 		ID       string `json:"id"`
 		Username string `json:"username"`
 		Email    string `json:"email"`

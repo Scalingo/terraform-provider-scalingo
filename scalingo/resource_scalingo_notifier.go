@@ -77,9 +77,10 @@ func resourceScalingoNotifier() *schema.Resource {
 // resourceScNotifierRead performs the Scalingo API lookup
 func resourceScNotifierRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*scalingo.Client)
-	notifier, err := client.NotifierByID(d.Get("app").(string), d.Id())
+	app := d.Get("app").(string)
+	notifier, err := client.NotifierByID(app, d.Id())
 	if err != nil {
-		return fmt.Errorf("fail to find notifier: %v", err)
+		return fmt.Errorf("fail to find notifier %v of app %v: %v", app, d.Id(), err)
 	}
 	err = setFromScNotifier(d, client, notifier)
 	if err != nil {

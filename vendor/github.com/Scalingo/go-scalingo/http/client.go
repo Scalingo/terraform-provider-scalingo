@@ -15,21 +15,8 @@ const (
 	DBAPI       = "DATABASES_API"
 )
 
-var apisConfig = map[string]apiConfig{
-	AuthAPI: {
-		HasVersionPrefix: true,
-	},
-	ScalingoAPI: {
-		HasVersionPrefix: true,
-	},
-	DBAPI: {
-		Prefix: "/api",
-	},
-}
-
-type apiConfig struct {
-	HasVersionPrefix bool
-	Prefix           string
+type APIConfig struct {
+	Prefix string
 }
 
 type Client interface {
@@ -48,6 +35,7 @@ type Client interface {
 	Do(req *APIRequest) (*http.Response, error)
 
 	TokenGenerator() TokenGenerator
+	IsAuthenticatedClient() bool
 	BaseURL() string
 	HTTPClient() *http.Client
 }
@@ -56,7 +44,7 @@ type ClientConfig struct {
 	UserAgent      string
 	Timeout        time.Duration
 	TLSConfig      *tls.Config
-	APIVersion     string
+	APIConfig      APIConfig
 	Endpoint       string
 	TokenGenerator TokenGenerator
 }
@@ -65,7 +53,7 @@ type client struct {
 	tokenGenerator TokenGenerator
 	endpoint       string
 	userAgent      string
-	apiConfig      apiConfig
+	apiConfig      APIConfig
 	httpClient     *http.Client
 	prefix         string
 }
@@ -78,28 +66,12 @@ func NewClient(api string, cfg ClientConfig) Client {
 		cfg.TLSConfig = &tls.Config{}
 	}
 
-	config := apisConfig[api]
-
-	if cfg.APIVersion == "" {
-		cfg.APIVersion = defaultAPIVersion
-	}
-
-	var prefix string
-
-	if config.HasVersionPrefix {
-		prefix = fmt.Sprintf("/v%v", cfg.APIVersion)
-	}
-
-	if config.Prefix != "" {
-		prefix = config.Prefix
-	}
-
 	c := client{
-		prefix:         prefix,
+		prefix:         cfg.APIConfig.Prefix,
 		endpoint:       cfg.Endpoint,
 		tokenGenerator: cfg.TokenGenerator,
 		userAgent:      cfg.UserAgent,
-		apiConfig:      config,
+		apiConfig:      cfg.APIConfig,
 		httpClient: &http.Client{
 			Timeout: cfg.Timeout,
 			Transport: &http.Transport{
@@ -214,6 +186,10 @@ func (c *client) DoRequest(req *APIRequest, data interface{}) error {
 		return errgo.Notef(err, "fail to parse JSON of subresource response")
 	}
 	return nil
+}
+
+func (c *client) IsAuthenticatedClient() bool {
+	return c.tokenGenerator != nil
 }
 
 func (c *client) TokenGenerator() TokenGenerator {
