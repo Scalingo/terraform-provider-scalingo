@@ -1,3 +1,7 @@
+# 0.3.0
+
+* Compatibility with Terraform 0.13
+
 # 0.2.0
 
 * Compatibility with terraform 0.12.20
