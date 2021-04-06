@@ -1,3 +1,8 @@
+# 0.4.0
+
+* Migration to official terraform SDK
+  https://www.terraform.io/docs/extend/guides/v1-upgrade-guide.html
+
 # 0.3.0
 
 * Compatibility with Terraform 0.13

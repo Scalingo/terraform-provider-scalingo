@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Scalingo/go-scalingo"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceScNotificationPlatform() *schema.Resource {
