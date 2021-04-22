@@ -1,3 +1,7 @@
+# 0.4.1
+
+* Update terraform SDK from 1.7.0 to 1.17.0
+
 # 0.4.0
 
 * Migration to official terraform SDK
