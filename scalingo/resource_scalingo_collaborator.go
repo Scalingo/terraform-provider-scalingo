@@ -4,8 +4,9 @@ import (
 	"errors"
 	"strings"
 
-	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
+	scalingo "github.com/Scalingo/go-scalingo"
 )
 
 func resourceScalingoCollaborator() *schema.Resource {

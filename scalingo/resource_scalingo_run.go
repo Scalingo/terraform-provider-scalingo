@@ -3,15 +3,16 @@ package scalingo
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
-	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
+	scalingo "github.com/Scalingo/go-scalingo"
 )
 
 func resourceScalingoRun() *schema.Resource {
@@ -111,7 +112,7 @@ func resourceRunCreate(d *schema.ResourceData, meta interface{}) error {
 
 	connection, _ := conn.Hijack()
 
-	output, err := ioutil.ReadAll(connection)
+	output, err := io.ReadAll(connection)
 	if err != nil {
 		return err
 	}

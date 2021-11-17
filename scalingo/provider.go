@@ -3,9 +3,10 @@ package scalingo
 import (
 	"fmt"
 
-	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+
+	scalingo "github.com/Scalingo/go-scalingo"
 )
 
 func Provider() terraform.ResourceProvider {

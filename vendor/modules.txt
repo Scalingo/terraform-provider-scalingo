@@ -15,6 +15,7 @@ github.com/Masterminds/semver
 # github.com/Masterminds/sprig v2.22.0+incompatible
 github.com/Masterminds/sprig
 # github.com/Scalingo/go-scalingo v1.5.4-0.20201006151217-91760b279c98
+## explicit
 github.com/Scalingo/go-scalingo
 github.com/Scalingo/go-scalingo/billing
 github.com/Scalingo/go-scalingo/debug
@@ -89,6 +90,8 @@ github.com/bgentry/speakeasy
 github.com/dgrijalva/jwt-go
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
+# github.com/go-test/deep v1.0.5
+## explicit
 # github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
 github.com/golang/groupcache/lru
 # github.com/golang/mock v1.4.4
@@ -133,6 +136,8 @@ github.com/hashicorp/go-safetemp
 github.com/hashicorp/go-uuid
 # github.com/hashicorp/go-version v1.3.0
 github.com/hashicorp/go-version
+# github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce
+## explicit
 # github.com/hashicorp/hcl/v2 v2.8.2
 github.com/hashicorp/hcl/v2
 github.com/hashicorp/hcl/v2/ext/customdecode
@@ -145,6 +150,7 @@ github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
 # github.com/hashicorp/terraform-plugin-sdk v1.17.2
+## explicit
 github.com/hashicorp/terraform-plugin-sdk/helper/hashcode
 github.com/hashicorp/terraform-plugin-sdk/helper/schema
 github.com/hashicorp/terraform-plugin-sdk/httpclient
@@ -442,4 +448,5 @@ google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/pluginpb
 # gopkg.in/errgo.v1 v1.0.1
+## explicit
 gopkg.in/errgo.v1

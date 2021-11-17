@@ -3,9 +3,10 @@ package scalingo
 import (
 	"errors"
 
-	scalingo "github.com/Scalingo/go-scalingo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"gopkg.in/errgo.v1"
+
+	scalingo "github.com/Scalingo/go-scalingo"
 )
 
 func resourceScalingoGithubLink() *schema.Resource {
