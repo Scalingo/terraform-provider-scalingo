@@ -86,6 +86,13 @@ func resourceAppCreate(d *schema.ResourceData, meta interface{}) error {
 		d.Set("all_environment", allEnvironment)
 	}
 
+	if forceHttps := d.Get("force_https").(bool); forceHttps {
+		_, err := client.AppsForceHTTPS(app.Id, forceHttps)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
