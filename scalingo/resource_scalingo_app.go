@@ -202,8 +202,8 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("force_https") {
-		_, newSetting := d.GetChange("force_https")
-		_, err := client.AppsForceHTTPS(d.Id(), newSetting.(bool))
+		_, forceHttps := d.GetChange("force_https")
+		_, err := client.AppsForceHTTPS(d.Id(), forceHttps.(bool))
 		if err != nil {
 			return err
 		}
