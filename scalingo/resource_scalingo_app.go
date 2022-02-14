@@ -34,6 +34,11 @@ func resourceScalingoApp() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"force_https": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
@@ -81,6 +86,13 @@ func resourceAppCreate(d *schema.ResourceData, meta interface{}) error {
 		d.Set("all_environment", allEnvironment)
 	}
 
+	if forceHttps := d.Get("force_https").(bool); forceHttps {
+		_, err := client.AppsForceHTTPS(app.Id, forceHttps)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -98,6 +110,7 @@ func resourceAppRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", app.Name)
 	d.Set("url", app.Url)
 	d.Set("git_url", app.GitUrl)
+	d.Set("force_https", app.ForceHTTPS)
 
 	variables, err := client.VariablesList(d.Id())
 	if err != nil {
@@ -192,6 +205,14 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 			defer res.Body.Close()
 			location := res.Header.Get("Location")
 			err = waitOperation(client, location)
+		}
+	}
+
+	if d.HasChange("force_https") {
+		_, forceHttps := d.GetChange("force_https")
+		_, err := client.AppsForceHTTPS(d.Id(), forceHttps.(bool))
+		if err != nil {
+			return err
 		}
 	}
 

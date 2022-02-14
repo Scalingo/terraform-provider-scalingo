@@ -61,3 +61,5 @@ endif
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
 
+clean:
+	rm -f $(GOPATH)/terraform-provider-scalingo
