@@ -1,0 +1,8 @@
+dependencies = []
+description = "Terraform Provider allowing to control resources created on Scalingo"
+destination_server = []
+flags = ["devops", "sdk", "tools"]
+languages = ["go"]
+owner = "john@scalingo.com"
+team = "SRE"
+version = "0.4.1"
