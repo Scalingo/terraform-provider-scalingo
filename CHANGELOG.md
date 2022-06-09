@@ -2,7 +2,11 @@
 
 ## To be Released
 
+## v0.4.2
+
 * chore(go): use go 1.17
+* feat(force-https): add support for force-https setting
+* Bump github.com/hashicorp/terraform-plugin-sdk from 1.17.0 to 1.17.2
 
 ## 0.4.1
 

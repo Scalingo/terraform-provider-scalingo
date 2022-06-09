@@ -106,3 +106,7 @@ $ make testacc
 
 Please read the README in the `scalingo-terraform` to get more information about
 that.
+
+## Release a New Version
+
+Instructions on this [Notion page](https://www.notion.so/scalingooriginal/New-Terraform-Provider-Release-40cd0af66b1f48148fb641ea138a22e5).
