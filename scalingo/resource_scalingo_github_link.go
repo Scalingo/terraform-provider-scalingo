@@ -3,7 +3,7 @@ package scalingo
 import (
 	"errors"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/errgo.v1"
 
 	scalingo "github.com/Scalingo/go-scalingo"
@@ -141,7 +141,7 @@ func resourceGithubLinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	autoDeploy := d.Get("auto_deploy").(bool)
 	deployOnBranchChange := d.Get("deploy_on_branch_change").(bool)
 
-	if len(branch) == 0 && (deployOnBranchChange || autoDeploy) {
+	if branch == "" && (deployOnBranchChange || autoDeploy) {
 		return errors.New("Branch must be set when deploy_on_branch_change or auto_deploy is enabled")
 	}
 
@@ -180,8 +180,6 @@ func resourceGithubLinkUpdate(d *schema.ResourceData, meta interface{}) error {
 		changed = true
 	}
 
-	d.Partial(true)
-
 	if (d.HasChange("branch") || d.HasChange("deploy_on_branch_change")) && deployOnBranchChange {
 		err := client.GithubLinkManualDeploy(app, d.Id(), branch)
 		if err != nil {
@@ -189,7 +187,6 @@ func resourceGithubLinkUpdate(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		d.Set("branch", branch)
-		d.SetPartial("branch")
 	}
 
 	if changed {
@@ -205,13 +202,6 @@ func resourceGithubLinkUpdate(d *schema.ResourceData, meta interface{}) error {
 		d.Set("destroy_stale_review_app", link.DestroyOnStaleEnabled)
 		d.Set("destroy_closed_review_app_after", int(link.HoursBeforeDeleteOnClose))
 		d.Set("destroy_stale_review_app_after", int(link.HoursBeforeDeleteStale))
-		d.SetPartial("branch")
-		d.SetPartial("auto_deploy")
-		d.SetPartial("review_apps")
-		d.SetPartial("destroy_review_app_on_close")
-		d.SetPartial("destroy_stale_review_app")
-		d.SetPartial("destroy_closed_review_app_after")
-		d.SetPartial("destroy_stale_review_app_after")
 	}
 	d.Partial(false)
 

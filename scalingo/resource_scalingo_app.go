@@ -1,7 +1,7 @@
 package scalingo
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	scalingo "github.com/Scalingo/go-scalingo"
 )
@@ -148,10 +148,6 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 		d.Set("url", app.Url)
 		d.Set("git_url", app.GitUrl)
-
-		d.SetPartial("name")
-		d.SetPartial("url")
-		d.SetPartial("git_url")
 	}
 
 	if d.HasChange("environment") {
@@ -185,15 +181,12 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
-		d.SetPartial("environment")
-
 		allEnvironment, err := appEnvironment(client, d.Id())
 		if err != nil {
 			return err
 		}
 
 		d.Set("all_environment", allEnvironment)
-		d.SetPartial("all_environment")
 
 		// Ignore the restart error, here the error is probably linked to the
 		// application status, which means that the environment will be applied
