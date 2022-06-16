@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/pkg/errors"
 
 	scalingo "github.com/Scalingo/go-scalingo/v4"
 )
@@ -39,6 +40,10 @@ func resourceScalingoApp() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"stack_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
@@ -52,9 +57,16 @@ func resourceAppCreate(d *schema.ResourceData, meta interface{}) error {
 
 	appName := d.Get("name").(string)
 
-	app, err := client.AppsCreate(scalingo.AppsCreateOpts{
+	createOpts := scalingo.AppsCreateOpts{
 		Name: appName,
-	})
+	}
+
+	stackId := d.Get("stack_id").(string)
+	if stackId != "" {
+		createOpts.StackID = stackId
+	}
+
+	app, err := client.AppsCreate(createOpts)
 
 	if err != nil {
 		return err
@@ -63,6 +75,7 @@ func resourceAppCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(app.Id)
 	d.Set("url", app.Url)
 	d.Set("git_url", app.GitUrl)
+	d.Set("stack_id", app.StackID)
 
 	if d.Get("environment") != nil {
 		environment := d.Get("environment").(map[string]interface{})
@@ -111,6 +124,7 @@ func resourceAppRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("url", app.Url)
 	d.Set("git_url", app.GitUrl)
 	d.Set("force_https", app.ForceHTTPS)
+	d.Set("stack_id", app.StackID)
 
 	variables, err := client.VariablesList(d.Id())
 	if err != nil {
@@ -205,6 +219,14 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, err := client.AppsForceHTTPS(d.Id(), forceHttps.(bool))
 		if err != nil {
 			return err
+		}
+	}
+
+	if d.HasChange("stack_id") {
+		_, stackId := d.GetChange("stack_id")
+		_, err := client.AppsSetStack(d.Id(), stackId.(string))
+		if err != nil {
+			return errors.Wrap(err, "fail to set stack id")
 		}
 	}
 

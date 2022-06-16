@@ -39,6 +39,7 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"scalingo_notification_platform": dataSourceScNotificationPlatform(),
+			"scalingo_stack":                 dataSourceScStack(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"scalingo_addon":          resourceScalingoAddon(),
