@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/errgo.v1"
 
-	scalingo "github.com/Scalingo/go-scalingo"
+	scalingo "github.com/Scalingo/go-scalingo/v4"
 )
 
 func resourceScalingoDomain() *schema.Resource {
