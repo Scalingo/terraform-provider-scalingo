@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* chore(terraform-plugin-sdk) Upgrade to SDK v2
+
 ## v0.4.2
 
 * chore(go): use go 1.17
