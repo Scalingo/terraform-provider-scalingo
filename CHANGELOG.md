@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* chore(go-scalingo) Upgrade to go-scalingo v4
 * chore(terraform-plugin-sdk) Upgrade to SDK v2
 
 ## v0.4.2
