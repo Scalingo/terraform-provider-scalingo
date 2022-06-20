@@ -2,8 +2,8 @@ package scalingo
 
 import scalingo "github.com/Scalingo/go-scalingo/v4"
 
-func appEnvironment(client *scalingo.Client, appId string) (map[string]interface{}, error) {
-	variables, err := client.VariablesList(appId)
+func appEnvironment(client *scalingo.Client, appID string) (map[string]interface{}, error) {
+	variables, err := client.VariablesList(appID)
 	if err != nil {
 		return nil, err
 	}

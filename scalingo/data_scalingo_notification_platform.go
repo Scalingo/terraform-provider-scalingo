@@ -1,9 +1,9 @@
 package scalingo
 
 import (
-	"errors"
-	"fmt"
+	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/Scalingo/go-scalingo/v4"
@@ -11,7 +11,7 @@ import (
 
 func dataSourceScNotificationPlatform() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceScNotificationPlatformRead,
+		ReadContext: dataSourceScNotificationPlatformRead,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -41,17 +41,17 @@ func dataSourceScNotificationPlatform() *schema.Resource {
 }
 
 // dataSourceScNotificationPlatformRead performs the Scalingo API lookup
-func dataSourceScNotificationPlatformRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func dataSourceScNotificationPlatformRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
 	platforms, err := client.NotificationPlatformsList()
 	if err != nil {
-		return fmt.Errorf("fail to read notification platforms: %v", err)
+		return diag.FromErr(err)
 	}
 
 	name, ok := d.Get("name").(string)
 	if !ok || name == "" {
-		return errors.New("name attribute is mandatory")
+		return diag.Errorf("name attribute is mandatory")
 	}
 
 	var selected *scalingo.NotificationPlatform
@@ -63,15 +63,20 @@ func dataSourceScNotificationPlatformRead(d *schema.ResourceData, meta interface
 	}
 
 	if selected == nil {
-		return fmt.Errorf("notification platform '%v' not found", name)
+		return diag.Errorf("notification platform '%v' not found", name)
 	}
 
 	d.SetId(selected.ID)
-	d.Set("name", selected.Name)
-	d.Set("display_name", selected.DisplayName)
-	d.Set("description", selected.Description)
-	d.Set("logo_url", selected.LogoURL)
-	d.Set("available_event_ids", selected.AvailableEventIDs)
+	err = SetAll(d, map[string]interface{}{
+		"name":                selected.Name,
+		"display_name":        selected.DisplayName,
+		"description":         selected.Description,
+		"logo_url":            selected.LogoURL,
+		"available_event_ids": selected.AvailableEventIDs,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

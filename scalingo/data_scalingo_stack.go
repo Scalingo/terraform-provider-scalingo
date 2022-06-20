@@ -35,7 +35,7 @@ func dataSourceScStack() *schema.Resource {
 }
 
 func dataSourceScStackRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*scalingo.Client)
+	client, _ := meta.(*scalingo.Client)
 
 	name, ok := d.Get("name").(string)
 	if !ok || name == "" {
@@ -61,10 +61,15 @@ func dataSourceScStackRead(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	d.SetId(selected.ID)
-	d.Set("name", selected.Name)
-	d.Set("description", selected.Description)
-	d.Set("base_image", selected.BaseImage)
-	d.Set("default", selected.Default)
+	err = SetAll(d, map[string]interface{}{
+		"name":        selected.Name,
+		"description": selected.Description,
+		"base_image":  selected.BaseImage,
+		"default":     selected.Default,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
