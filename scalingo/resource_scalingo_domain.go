@@ -1,31 +1,32 @@
 package scalingo
 
 import (
+	"context"
 	"errors"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"gopkg.in/errgo.v1"
 
 	scalingo "github.com/Scalingo/go-scalingo/v4"
 )
 
 func resourceScalingoDomain() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDomainCreate,
-		Read:   resourceDomainRead,
-		Delete: resourceDomainDelete,
+		CreateContext: resourceDomainCreate,
+		ReadContext:   resourceDomainRead,
+		DeleteContext: resourceDomainDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceDomainImporter,
+			StateContext: resourceDomainImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
-			"common_name": &schema.Schema{
+			"common_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"app": &schema.Schema{
+			"app": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -34,59 +35,72 @@ func resourceScalingoDomain() *schema.Resource {
 	}
 }
 
-func resourceDomainCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceDomainCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	domainName := d.Get("common_name").(string)
-	appId := d.Get("app").(string)
+	domainName, _ := d.Get("common_name").(string)
+	appID, _ := d.Get("app").(string)
 
-	domain, err := client.DomainsAdd(appId, scalingo.Domain{
+	domain, err := client.DomainsAdd(appID, scalingo.Domain{
 		Name: domainName,
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(domain.ID)
 
 	return nil
 }
 
-func resourceDomainRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceDomainRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appId := d.Get("app").(string)
+	appID, _ := d.Get("app").(string)
 
-	domain, err := client.DomainsShow(appId, d.Id())
+	domain, err := client.DomainsShow(appID, d.Id())
 	if err != nil {
-		return errgo.Notef(err, "fail to get domain %v of app %v", d.Id(), appId)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(domain.ID)
-	d.Set("common_name", domain.Name)
-
-	return nil
-}
-
-func resourceDomainDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
-
-	appId := d.Get("app").(string)
-
-	err := client.DomainsRemove(appId, d.Id())
+	err = d.Set("common_name", domain.Name)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceDomainImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDomainDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+
+	appID, _ := d.Get("app").(string)
+
+	err := client.DomainsRemove(appID, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+func resourceDomainImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	if !strings.Contains(d.Id(), ":") {
 		return nil, errors.New("schema must be app_id:domain_id")
 	}
 	split := strings.Split(d.Id(), ":")
-	d.Set("app", split[0])
 	d.SetId(split[1])
+
+	err := d.Set("app", split[0])
+	if err != nil {
+		return nil, err
+	}
+
+	diags := resourceDomainRead(ctx, d, meta)
+	err = DiagnosticError(diags)
+	if err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

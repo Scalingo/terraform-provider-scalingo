@@ -1,10 +1,12 @@
 package scalingo
 
 import (
+	"context"
 	"errors"
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	scalingo "github.com/Scalingo/go-scalingo/v4"
@@ -12,44 +14,44 @@ import (
 
 func resourceScalingoContainerType() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceContainerTypeCreate,
-		Read:   resourceContainerTypeRead,
-		Update: resourceContainerTypeUpdate,
-		Delete: resourceContainerTypeDelete,
+		CreateContext: resourceContainerTypeCreate,
+		ReadContext:   resourceContainerTypeRead,
+		UpdateContext: resourceContainerTypeUpdate,
+		DeleteContext: resourceContainerTypeDelete,
 
 		Schema: map[string]*schema.Schema{
-			"app": &schema.Schema{
+			"app": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"amount": &schema.Schema{
+			"amount": {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"size": &schema.Schema{
+			"size": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: resourceContainerTypeImport,
+			StateContext: resourceContainerTypeImport,
 		},
 	}
 }
 
-func resourceContainerTypeCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceContainerTypeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appID := d.Get("app").(string)
-	ctName := d.Get("name").(string)
+	appID, _ := d.Get("app").(string)
+	ctName, _ := d.Get("name").(string)
 
-	_, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
+	resp, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
 		Containers: []scalingo.ContainerType{{
 			Name:   ctName,
 			Size:   d.Get("size").(string),
@@ -57,37 +59,43 @@ func resourceContainerTypeCreate(d *schema.ResourceData, meta interface{}) error
 		}},
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
+	defer resp.Body.Close()
 
 	d.SetId(appID + ":" + ctName)
 
 	return nil
 }
 
-func resourceContainerTypeRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceContainerTypeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appID := d.Get("app").(string)
-	ctName := d.Get("name").(string)
+	appID, _ := d.Get("app").(string)
+	ctName, _ := d.Get("name").(string)
 	log.Printf("[DEBUG] Application ID: %s", appID)
 	log.Printf("[DEBUG] Container type name: %s", ctName)
 	d.SetId(appID + ":" + ctName)
 
-	containers, err := client.AppsPs(appID)
+	containers, err := client.AppsContainerTypes(appID)
 	if err != nil {
 		log.Printf("[INFO] Error getting current formation %#v", err)
-		return err
+		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Successfuly fetched current formation")
+	log.Printf("[INFO] Successfully fetched current formation")
 	for _, ct := range containers {
 		log.Printf("[DEBUG] Current container type: %s", ct.Name)
 
 		if ctName == ct.Name {
 			log.Printf("[DEBUG] Found container type in formation")
-			d.Set("amount", ct.Amount)
-			d.Set("size", ct.Size)
+			err = SetAll(d, map[string]interface{}{
+				"amount": ct.Amount,
+				"size":   ct.Size,
+			})
+			if err != nil {
+				return diag.FromErr(err)
+			}
 			break
 		}
 	}
@@ -95,15 +103,15 @@ func resourceContainerTypeRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceContainerTypeUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceContainerTypeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appID := d.Get("app").(string)
-	ctName := d.Get("name").(string)
+	appID, _ := d.Get("app").(string)
+	ctName, _ := d.Get("name").(string)
 	log.Printf("[DEBUG] Application ID: %s", appID)
 	log.Printf("[DEBUG] Container type name: %s", ctName)
 
-	_, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
+	resp, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
 		Containers: []scalingo.ContainerType{{
 			Name:   ctName,
 			Size:   d.Get("size").(string),
@@ -111,15 +119,16 @@ func resourceContainerTypeUpdate(d *schema.ResourceData, meta interface{}) error
 		}},
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
+	defer resp.Body.Close()
 
 	log.Printf("[DEBUG] Scaled the application")
 
 	return nil
 }
 
-func resourceContainerTypeDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceContainerTypeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }
 
@@ -132,7 +141,7 @@ func resourceContainerTypeDelete(d *schema.ResourceData, meta interface{}) error
 //
 // Example:
 // $ terraform import module.vpn-addon-service.module.app.module.app.scalingo_container_type.default 5a155aa8f112e20010779b7a:web
-func resourceContainerTypeImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceContainerTypeImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
 		return nil, errors.New("ID should have the following format: <app ID>:<container type name>")
@@ -142,8 +151,8 @@ func resourceContainerTypeImport(d *schema.ResourceData, meta interface{}) ([]*s
 	log.Printf("[DEBUG] Application ID: %s", appID)
 	log.Printf("[DEBUG] Container type name: %s", ctName)
 
-	client := meta.(*scalingo.Client)
-	containers, err := client.AppsPs(appID)
+	client, _ := meta.(*scalingo.Client)
+	containers, err := client.AppsContainerTypes(appID)
 	if err != nil {
 		return nil, err
 	}
@@ -154,10 +163,15 @@ func resourceContainerTypeImport(d *schema.ResourceData, meta interface{}) ([]*s
 		if ctName == ct.Name {
 			log.Printf("[DEBUG] Found the container type to import")
 			d.SetId(appID + ":" + ctName)
-			d.Set("name", ctName)
-			d.Set("app", appID)
-			d.Set("amount", ct.Amount)
-			d.Set("size", ct.Size)
+			err = SetAll(d, map[string]interface{}{
+				"name":   ctName,
+				"app":    appID,
+				"amount": ct.Amount,
+				"size":   ct.Size,
+			})
+			if err != nil {
+				return nil, err
+			}
 
 			return []*schema.ResourceData{d}, nil
 		}

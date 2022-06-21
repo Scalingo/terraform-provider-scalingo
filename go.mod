@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/Scalingo/go-scalingo/v4 v4.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.17.0
+	github.com/pkg/errors v0.8.1
 	gopkg.in/errgo.v1 v1.0.1
 )
 

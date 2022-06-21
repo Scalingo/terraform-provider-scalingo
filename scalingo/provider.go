@@ -39,6 +39,7 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"scalingo_notification_platform": dataSourceScNotificationPlatform(),
+			"scalingo_stack":                 dataSourceScStack(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"scalingo_addon":          resourceScalingoAddon(),
@@ -56,11 +57,11 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(data *schema.ResourceData) (interface{}, error) {
-	apiURL := data.Get("api_url").(string)
-	authAPIURL := data.Get("auth_api_url").(string)
-	dbAPIURL := data.Get("db_api_url").(string)
-	apiToken := data.Get("api_token").(string)
-	region := data.Get("region").(string)
+	apiURL, _ := data.Get("api_url").(string)
+	authAPIURL, _ := data.Get("auth_api_url").(string)
+	dbAPIURL, _ := data.Get("db_api_url").(string)
+	apiToken, _ := data.Get("api_token").(string)
+	region, _ := data.Get("region").(string)
 
 	client, err := scalingo.New(scalingo.ClientConfig{
 		Region:              region,

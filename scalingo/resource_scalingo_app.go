@@ -1,6 +1,9 @@
 package scalingo
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	scalingo "github.com/Scalingo/go-scalingo/v4"
@@ -8,10 +11,10 @@ import (
 
 func resourceScalingoApp() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAppCreate,
-		Read:   resourceAppRead,
-		Update: resourceAppUpdate,
-		Delete: resourceAppDelete,
+		CreateContext: resourceAppCreate,
+		ReadContext:   resourceAppRead,
+		UpdateContext: resourceAppUpdate,
+		DeleteContext: resourceAppDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -39,33 +42,50 @@ func resourceScalingoApp() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"stack_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }
 
-func resourceAppCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appName := d.Get("name").(string)
+	appName, _ := d.Get("name").(string)
 
-	app, err := client.AppsCreate(scalingo.AppsCreateOpts{
+	createOpts := scalingo.AppsCreateOpts{
 		Name: appName,
-	})
+	}
+
+	stackID, _ := d.Get("stack_id").(string)
+	if stackID != "" {
+		createOpts.StackID = stackID
+	}
+
+	app, err := client.AppsCreate(createOpts)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(app.Id)
-	d.Set("url", app.Url)
-	d.Set("git_url", app.GitUrl)
+	err = SetAll(d, map[string]interface{}{
+		"url":      app.Url,
+		"git_url":  app.GitUrl,
+		"stack_id": app.StackID,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.Get("environment") != nil {
-		environment := d.Get("environment").(map[string]interface{})
+		environment, _ := d.Get("environment").(map[string]interface{})
 		var variables scalingo.Variables
 		for name, value := range environment {
 			variables = append(variables, &scalingo.Variable{
@@ -76,48 +96,57 @@ func resourceAppCreate(d *schema.ResourceData, meta interface{}) error {
 
 		_, _, err := client.VariableMultipleSet(d.Id(), variables)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		allEnvironment, err := appEnvironment(client, app.Id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
-		d.Set("all_environment", allEnvironment)
+		err = d.Set("all_environment", allEnvironment)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
-	if forceHttps := d.Get("force_https").(bool); forceHttps {
-		_, err := client.AppsForceHTTPS(app.Id, forceHttps)
+	if forceHTTPS, _ := d.Get("force_https").(bool); forceHTTPS {
+		_, err := client.AppsForceHTTPS(app.Id, forceHTTPS)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	return nil
 }
 
-func resourceAppRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
 	id := d.Id()
 
 	app, err := client.AppsShow(id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(app.Id)
-	d.Set("name", app.Name)
-	d.Set("url", app.Url)
-	d.Set("git_url", app.GitUrl)
-	d.Set("force_https", app.ForceHTTPS)
+	err = SetAll(d, map[string]interface{}{
+		"name":        app.Name,
+		"url":         app.Url,
+		"git_url":     app.GitUrl,
+		"force_https": app.ForceHTTPS,
+		"stack_id":    app.StackID,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	variables, err := client.VariablesList(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	currentEnvironment := d.Get("environment").(map[string]interface{})
+	currentEnvironment, _ := d.Get("environment").(map[string]interface{})
 
 	environment := make(map[string]interface{})
 	allEnvironment := make(map[string]interface{})
@@ -129,34 +158,45 @@ func resourceAppRead(d *schema.ResourceData, meta interface{}) error {
 		allEnvironment[variable.Name] = variable.Value
 	}
 
-	d.Set("all_environment", allEnvironment)
-	d.Set("environment", environment)
+	err = SetAll(d, map[string]interface{}{
+		"all_environment": allEnvironment,
+		"environment":     environment,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
-func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
 	if d.HasChange("name") {
 		oldName, newName := d.GetChange("name")
 
 		app, err := client.AppsRename(oldName.(string), newName.(string))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
-		d.Set("url", app.Url)
-		d.Set("git_url", app.GitUrl)
+
+		err = SetAll(d, map[string]interface{}{
+			"url":     app.Url,
+			"git_url": app.GitUrl,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if d.HasChange("environment") {
 		oldVariables, newVariables := d.GetChange("environment")
 		diff := MapDiff(oldVariables.(map[string]interface{}), newVariables.(map[string]interface{}))
-		variables := newVariables.(map[string]interface{})
+		variables, _ := newVariables.(map[string]interface{})
 
 		err := deleteVariablesByName(client, d.Id(), diff.Deleted)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		var variablesToSet scalingo.Variables
@@ -177,49 +217,71 @@ func resourceAppUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, _, err = client.VariableMultipleSet(d.Id(), variablesToSet)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		allEnvironment, err := appEnvironment(client, d.Id())
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
-		d.Set("all_environment", allEnvironment)
+		err = d.Set("all_environment", allEnvironment)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-		// Ignore the restart error, here the error is probably linked to the
-		// application status, which means that the environment will be applied
-		// later.
-		// If the restart occured, wait synchronously until the end of the restart
-		// to validate that everything went fine
-		res, err := client.AppsRestart(d.Id(), nil)
-		if err == nil && res.StatusCode == 202 {
-			defer res.Body.Close()
-			location := res.Header.Get("Location")
-			err = waitOperation(client, location)
+		err = restartApp(client, d.Id())
+		if err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("force_https") {
-		_, forceHttps := d.GetChange("force_https")
-		_, err := client.AppsForceHTTPS(d.Id(), forceHttps.(bool))
+		_, ForceHTTPS := d.GetChange("force_https")
+		_, err := client.AppsForceHTTPS(d.Id(), ForceHTTPS.(bool))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("stack_id") {
+		_, stackID := d.GetChange("stack_id")
+		_, err := client.AppsSetStack(d.Id(), stackID.(string))
+		if err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
 	return nil
 }
 
-func resourceAppDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAppDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
 	id := d.Id()
-	name := d.Get("name").(string)
+	name, _ := d.Get("name").(string)
 
 	err := client.AppsDestroy(id, name)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func restartApp(client *scalingo.Client, id string) error {
+	// Ignore the restart error, here the error is probably linked to the
+	// application status, which means that the environment will be applied
+	// later.
+	// If the restart occurred, wait synchronously until the end of the restart
+	// to validate that everything went fine
+	res, err := client.AppsRestart(id, nil)
+	if err == nil && res.StatusCode == 202 {
+		defer res.Body.Close()
+		location := res.Header.Get("Location")
+		err = waitOperation(client, location)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

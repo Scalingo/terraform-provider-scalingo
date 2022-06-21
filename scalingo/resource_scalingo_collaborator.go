@@ -1,9 +1,11 @@
 package scalingo
 
 import (
+	"context"
 	"errors"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	scalingo "github.com/Scalingo/go-scalingo/v4"
@@ -11,9 +13,9 @@ import (
 
 func resourceScalingoCollaborator() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCollaboratorCreate,
-		Read:   resourceCollaboratorRead,
-		Delete: resourceCollaboratorDelete,
+		CreateContext: resourceCollaboratorCreate,
+		ReadContext:   resourceCollaboratorRead,
+		DeleteContext: resourceCollaboratorDelete,
 
 		Schema: map[string]*schema.Schema{
 			"app": {
@@ -37,33 +39,38 @@ func resourceScalingoCollaborator() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: resourceCollaboratorImport,
+			StateContext: resourceCollaboratorImport,
 		},
 	}
 }
 
-func resourceCollaboratorCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
 	collaborator, err := client.CollaboratorAdd(d.Get("app").(string), d.Get("email").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	d.Set("username", collaborator.Username)
-	d.Set("status", collaborator.Status)
-
 	d.SetId(collaborator.ID)
+
+	err = SetAll(d, map[string]interface{}{
+		"username": collaborator.Username,
+		"status":   collaborator.Status,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
-func resourceCollaboratorRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
 	collaborators, err := client.CollaboratorsList(d.Get("app").(string))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var collaborator scalingo.Collaborator
@@ -82,26 +89,31 @@ func resourceCollaboratorRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	d.Set("username", collaborator.Username)
-	d.Set("email", collaborator.Email)
-	d.Set("status", collaborator.Status)
-
-	return nil
-}
-
-func resourceCollaboratorDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
-
-	err := client.CollaboratorRemove(d.Get("app").(string), d.Id())
+	err = SetAll(d, map[string]interface{}{
+		"username": collaborator.Username,
+		"email":    collaborator.Email,
+		"status":   collaborator.Status,
+	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceCollaboratorImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*scalingo.Client)
+func resourceCollaboratorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+
+	err := client.CollaboratorRemove(d.Get("app").(string), d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+func resourceCollaboratorImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client, _ := meta.(*scalingo.Client)
 
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
@@ -118,7 +130,10 @@ func resourceCollaboratorImport(d *schema.ResourceData, meta interface{}) ([]*sc
 	for _, collaborator := range collaborators {
 		if collaborator.Email == collaboratorID || collaborator.ID == collaboratorID {
 			d.SetId(collaborator.ID)
-			d.Set("app", appID)
+			err = d.Set("app", appID)
+			if err != nil {
+				return nil, err
+			}
 			return []*schema.ResourceData{d}, nil
 		}
 	}

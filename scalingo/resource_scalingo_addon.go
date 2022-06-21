@@ -1,10 +1,12 @@
 package scalingo
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	scalingo "github.com/Scalingo/go-scalingo/v4"
@@ -12,13 +14,13 @@ import (
 
 func resourceScalingoAddon() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAddonCreate,
-		Read:   resourceAddonRead,
-		Update: resourceAddonUpdate,
-		Delete: resourceAddonDelete,
+		CreateContext: resourceAddonCreate,
+		ReadContext:   resourceAddonRead,
+		UpdateContext: resourceAddonUpdate,
+		DeleteContext: resourceAddonDelete,
 
 		Schema: map[string]*schema.Schema{
-			"provider_id": &schema.Schema{
+			"provider_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -43,47 +45,52 @@ func resourceScalingoAddon() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: resourceAddonImport,
+			StateContext: resourceAddonImport,
 		},
 	}
 }
 
-func resourceAddonCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	providerID := d.Get("provider_id").(string)
-	planName := d.Get("plan").(string)
-	appID := d.Get("app").(string)
+	providerID, _ := d.Get("provider_id").(string)
+	planName, _ := d.Get("plan").(string)
+	appID, _ := d.Get("app").(string)
 
 	planID, err := addonPlanID(client, providerID, planName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	d.Set("plan_id", planID)
+	if err := d.Set("plan_id", planID); err != nil {
+		return diag.FromErr(err)
+	}
 
 	res, err := client.AddonProvision(appID, scalingo.AddonProvisionParams{
 		AddonProviderID: providerID,
 		PlanID:          planID,
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = waitUntilProvisionned(client, res.Addon)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	d.Set("resource_id", res.Addon.ResourceID)
 	d.SetId(res.Addon.ID)
+	if err := d.Set("resource_id", res.Addon.ResourceID); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 
-func resourceAddonRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appID := d.Get("app").(string)
+	appID, _ := d.Get("app").(string)
 
 	addon, err := client.AddonShow(appID, d.Id())
 	if err != nil {
@@ -91,56 +98,64 @@ func resourceAddonRead(d *schema.ResourceData, meta interface{}) error {
 			d.MarkNewResource()
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
-	d.Set("resource_id", addon.ResourceID)
-	d.Set("plan", addon.Plan.Name)
-	d.Set("plan_id", addon.Plan.ID)
-	d.Set("provider_id", addon.AddonProvider.ID)
+	err = SetAll(d, map[string]interface{}{
+		"resource_id": addon.ResourceID,
+		"plan":        addon.Plan.Name,
+		"plan_id":     addon.Plan.ID,
+		"provider_id": addon.AddonProvider.ID,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId(addon.ID)
 
 	return nil
 }
 
-func resourceAddonUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appID := d.Get("app").(string)
-	providerID := d.Get("provider_id").(string)
+	appID, _ := d.Get("app").(string)
+	providerID, _ := d.Get("provider_id").(string)
 
 	if d.HasChange("plan") {
 		planID, err := addonPlanID(client, providerID, d.Get("plan").(string))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		res, err := client.AddonUpgrade(appID, d.Id(), scalingo.AddonUpgradeParams{
 			PlanID: planID,
 		})
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		err = waitUntilProvisionned(client, res.Addon)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
-		d.Set("plan_id", res.Addon.Plan.ID)
+		if err := d.Set("plan_id", res.Addon.Plan.ID); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil
 }
 
-func resourceAddonDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appID := d.Get("app").(string)
+	appID, _ := d.Get("app").(string)
 
 	err := client.AddonDestroy(appID, d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -164,17 +179,22 @@ func addonPlanID(client *scalingo.Client, providerID, name string) (string, erro
 	return "", errors.New("Invalid plan name, possible values are: " + planList)
 }
 
-func resourceAddonImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
 		return nil, errors.New("address should have the following format: <appid>:<addonid>")
 	}
 
 	d.SetId(ids[1])
-	d.Set("app", ids[0])
+	if err := d.Set("app", ids[0]); err != nil {
+		return nil, err
+	}
 
-	resourceAddonRead(d, meta)
-
+	diags := resourceAddonRead(ctx, d, meta)
+	err := DiagnosticError(diags)
+	if err != nil {
+		return nil, err
+	}
 	return []*schema.ResourceData{d}, nil
 }
 

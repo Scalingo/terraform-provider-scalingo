@@ -1,20 +1,20 @@
 package scalingo
 
 import (
-	"errors"
+	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"gopkg.in/errgo.v1"
 
 	scalingo "github.com/Scalingo/go-scalingo/v4"
 )
 
 func resourceScalingoGithubLink() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceGithubLinkCreate,
-		Read:   resourceGithubLinkRead,
-		Update: resourceGithubLinkUpdate,
-		Delete: resourceGithubLinkDelete,
+		CreateContext: resourceGithubLinkCreate,
+		ReadContext:   resourceGithubLinkRead,
+		UpdateContext: resourceGithubLinkUpdate,
+		DeleteContext: resourceGithubLinkDelete,
 
 		Schema: map[string]*schema.Schema{
 			"app": {
@@ -67,27 +67,27 @@ func resourceScalingoGithubLink() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: resourceGithubLinkImport,
+			StateContext: resourceGithubLinkImport,
 		},
 	}
 }
 
-func resourceGithubLinkCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceGithubLinkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	app := d.Get("app").(string)
-	source := d.Get("source").(string)
-	autoDeploy := d.Get("auto_deploy").(bool)
-	deployOnBranchChange := d.Get("deploy_on_branch_change").(bool)
-	branch := d.Get("branch").(string)
+	app, _ := d.Get("app").(string)
+	source, _ := d.Get("source").(string)
+	autoDeploy, _ := d.Get("auto_deploy").(bool)
+	deployOnBranchChange, _ := d.Get("deploy_on_branch_change").(bool)
+	branch, _ := d.Get("branch").(string)
 
-	if len(branch) == 0 && (deployOnBranchChange || autoDeploy) {
-		return errors.New("Branch must be set when deploy_on_branch_change or auto_deploy is enabled")
+	if branch == "" && (deployOnBranchChange || autoDeploy) {
+		return diag.Errorf("Branch must be set when deploy_on_branch_change or auto_deploy is enabled")
 	}
 
-	reviewApps := d.Get("review_apps").(bool)
-	destroyReviewAppOnClose := d.Get("destroy_review_app_on_close").(bool)
-	destroyStaledReviewApp := d.Get("destroy_stale_review_app").(bool)
+	reviewApps, _ := d.Get("review_apps").(bool)
+	destroyReviewAppOnClose, _ := d.Get("destroy_review_app_on_close").(bool)
+	destroyStaledReviewApp, _ := d.Get("destroy_stale_review_app").(bool)
 	destroyClosedReviewAppAfter := uint(d.Get("destroy_closed_review_app_after").(int))
 	destroyStaleReviewAppAfter := uint(d.Get("destroy_stale_review_app_after").(int))
 
@@ -113,16 +113,14 @@ func resourceGithubLinkCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	link, err := client.GithubLinkAdd(app, params)
-
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if deployOnBranchChange {
 		err := client.GithubLinkManualDeploy(app, link.ID, branch)
 		if err != nil {
-			d.Set("deploy_on_branch_change", false)
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -130,19 +128,19 @@ func resourceGithubLinkCreate(d *schema.ResourceData, meta interface{}) error {
 
 	return nil
 }
-func resourceGithubLinkUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceGithubLinkUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	app := d.Get("app").(string)
+	app, _ := d.Get("app").(string)
 
 	changed := false
 	params := scalingo.GithubLinkParams{}
-	branch := d.Get("branch").(string)
-	autoDeploy := d.Get("auto_deploy").(bool)
-	deployOnBranchChange := d.Get("deploy_on_branch_change").(bool)
+	branch, _ := d.Get("branch").(string)
+	autoDeploy, _ := d.Get("auto_deploy").(bool)
+	deployOnBranchChange, _ := d.Get("deploy_on_branch_change").(bool)
 
-	if len(branch) == 0 && (deployOnBranchChange || autoDeploy) {
-		return errors.New("Branch must be set when deploy_on_branch_change or auto_deploy is enabled")
+	if branch == "" && (deployOnBranchChange || autoDeploy) {
+		return diag.Errorf("Branch must be set when deploy_on_branch_change or auto_deploy is enabled")
 	}
 
 	if d.HasChange("branch") {
@@ -183,63 +181,85 @@ func resourceGithubLinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	if (d.HasChange("branch") || d.HasChange("deploy_on_branch_change")) && deployOnBranchChange {
 		err := client.GithubLinkManualDeploy(app, d.Id(), branch)
 		if err != nil {
-			d.Set("deploy_on_branch_change", false)
-			return err
+			return diag.FromErr(err)
 		}
-		d.Set("branch", branch)
+		err = d.Set("branch", branch)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if changed {
 		link, err := client.GithubLinkUpdate(app, d.Id(), params)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
-		d.Set("branch", link.GithubBranch)
-		d.Set("auto_deploy", link.AutoDeployEnabled)
-		d.Set("review_apps", link.DeployReviewAppsEnabled)
-		d.Set("destroy_review_app_on_close", link.DestroyOnCloseEnabled)
-		d.Set("destroy_stale_review_app", link.DestroyOnStaleEnabled)
-		d.Set("destroy_closed_review_app_after", int(link.HoursBeforeDeleteOnClose))
-		d.Set("destroy_stale_review_app_after", int(link.HoursBeforeDeleteStale))
+		err = SetAll(d, map[string]interface{}{
+			"branch":                          link.GithubBranch,
+			"auto_deploy":                     link.AutoDeployEnabled,
+			"review_apps":                     link.DeployReviewAppsEnabled,
+			"destroy_review_app_on_close":     link.DestroyOnCloseEnabled,
+			"destroy_stale_review_app":        link.DestroyOnStaleEnabled,
+			"destroy_closed_review_app_after": int(link.HoursBeforeDeleteOnClose),
+			"destroy_stale_review_app_after":  int(link.HoursBeforeDeleteStale),
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil
 }
-func resourceGithubLinkRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
-	app := d.Get("app").(string)
+func resourceGithubLinkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+	app, _ := d.Get("app").(string)
 
 	link, err := client.GithubLinkShow(app)
 	if err != nil {
-		return errgo.Notef(err, "error when fetching github repo link for app %v", app)
+		return diag.FromErr(err)
 	}
 	d.SetId(link.ID)
-	d.Set("auto_deploy", link.AutoDeployEnabled)
-	d.Set("review_apps", link.DeployReviewAppsEnabled)
-	d.Set("destroy_review_app_on_close", link.DestroyOnCloseEnabled)
-	d.Set("destroy_stale_review_app", link.DestroyOnStaleEnabled)
-	d.Set("destroy_closed_review_app_after", int(link.HoursBeforeDeleteOnClose))
-	d.Set("destroy_stale_review_app_after", int(link.HoursBeforeDeleteStale))
-	d.Set("branch", link.GithubBranch)
-	d.Set("source", link.GithubSource)
+
+	err = SetAll(d, map[string]interface{}{
+		"auto_deploy":                     link.AutoDeployEnabled,
+		"review_apps":                     link.DeployReviewAppsEnabled,
+		"destroy_review_app_on_close":     link.DestroyOnCloseEnabled,
+		"destroy_stale_review_app":        link.DestroyOnStaleEnabled,
+		"destroy_closed_review_app_after": int(link.HoursBeforeDeleteOnClose),
+		"destroy_stale_review_app_after":  int(link.HoursBeforeDeleteStale),
+		"branch":                          link.GithubBranch,
+		"source":                          link.GithubSource,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
-func resourceGithubLinkDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
-	app := d.Get("app").(string)
+func resourceGithubLinkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+	app, _ := d.Get("app").(string)
 
 	err := client.GithubLinkDelete(app, d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceGithubLinkImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	d.Set("app", d.Id())
+func resourceGithubLinkImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	err := d.Set("app", d.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	diags := resourceGithubLinkRead(ctx, d, meta)
+	err = DiagnosticError(diags)
+	if err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

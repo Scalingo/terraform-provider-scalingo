@@ -1,10 +1,12 @@
 package scalingo
 
 import (
+	"context"
 	"errors"
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	scalingo "github.com/Scalingo/go-scalingo/v4"
@@ -12,54 +14,54 @@ import (
 
 func resourceScalingoAutoscaler() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAutoscalerCreate,
-		Read:   resourceAutoscalerRead,
-		Update: resourceAutoscalerUpdate,
-		Delete: resourceAutoscalerDelete,
+		CreateContext: resourceAutoscalerCreate,
+		ReadContext:   resourceAutoscalerRead,
+		UpdateContext: resourceAutoscalerUpdate,
+		DeleteContext: resourceAutoscalerDelete,
 
 		Schema: map[string]*schema.Schema{
-			"app": &schema.Schema{
+			"app": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"container_type": &schema.Schema{
+			"container_type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"min_containers": &schema.Schema{
+			"min_containers": {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"max_containers": &schema.Schema{
+			"max_containers": {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"metric": &schema.Schema{
+			"metric": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"target": &schema.Schema{
+			"target": {
 				Type:     schema.TypeFloat,
 				Required: true,
 			},
-			"disabled": &schema.Schema{
+			"disabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: resourceAutoscalerImport,
+			StateContext: resourceAutoscalerImport,
 		},
 	}
 }
 
-func resourceAutoscalerCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAutoscalerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
-	appID := d.Get("app").(string)
+	appID, _ := d.Get("app").(string)
 	log.Printf("[DEBUG] Application ID: %s", appID)
 
 	autoscaler, err := client.AutoscalerAdd(appID, scalingo.AutoscalerAddParams{
@@ -70,7 +72,7 @@ func resourceAutoscalerCreate(d *schema.ResourceData, meta interface{}) error {
 		MaxContainers: d.Get("max_containers").(int),
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(autoscaler.ID)
@@ -78,36 +80,41 @@ func resourceAutoscalerCreate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAutoscalerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAutoscalerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
 	id := d.Id()
-	appID := d.Get("app").(string)
+	appID, _ := d.Get("app").(string)
 	log.Printf("[DEBUG] Autoscaler ID: %s", id)
 	log.Printf("[DEBUG] Application ID: %s", appID)
 
 	autoscaler, err := client.AutoscalerShow(appID, id)
 	if err != nil {
 		log.Printf("[INFO] Error getting autoscaler %#v", err)
-		return err
+		return diag.FromErr(err)
 	}
-	log.Printf("[INFO] Successfuly fetched autoscaler")
+	log.Printf("[INFO] Successfully fetched autoscaler")
 
-	d.Set("container_type", autoscaler.ContainerType)
-	d.Set("min_containers", autoscaler.MinContainers)
-	d.Set("max_containers", autoscaler.MaxContainers)
-	d.Set("metric", autoscaler.Metric)
-	d.Set("target", autoscaler.Target)
-	d.Set("disabled", autoscaler.Disabled)
+	err = SetAll(d, map[string]interface{}{
+		"container_type": autoscaler.ContainerType,
+		"min_containers": autoscaler.MinContainers,
+		"max_containers": autoscaler.MaxContainers,
+		"metric":         autoscaler.Metric,
+		"target":         autoscaler.Target,
+		"disabled":       autoscaler.Disabled,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
-func resourceAutoscalerUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*scalingo.Client)
+func resourceAutoscalerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
 
 	id := d.Id()
-	appID := d.Get("app").(string)
+	appID, _ := d.Get("app").(string)
 	log.Printf("[DEBUG] Autoscaler ID: %s", id)
 	log.Printf("[DEBUG] Application ID: %s", appID)
 	var params scalingo.AutoscalerUpdateParams
@@ -141,7 +148,7 @@ func resourceAutoscalerUpdate(d *schema.ResourceData, meta interface{}) error {
 	if changed {
 		_, err := client.AutoscalerUpdate(appID, id, params)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -150,16 +157,16 @@ func resourceAutoscalerUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAutoscalerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAutoscalerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	id := d.Id()
-	appID := d.Get("app").(string)
+	appID, _ := d.Get("app").(string)
 	log.Printf("[DEBUG] Autoscaler ID: %s", id)
 	log.Printf("[DEBUG] Application ID: %s", appID)
 
-	client := meta.(*scalingo.Client)
+	client, _ := meta.(*scalingo.Client)
 	err := client.AutoscalerRemove(appID, id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -174,7 +181,7 @@ func resourceAutoscalerDelete(d *schema.ResourceData, meta interface{}) error {
 //
 // Example:
 // $ terraform import module.api.scalingo_autoscaler.api_autoweb 5a155aa8f112e20010779b7a:sc-ac161a3d-d78b-4017-949b-19efb1e54083
-func resourceAutoscalerImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceAutoscalerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
 		return nil, errors.New("ID should have the following format: <app ID>:<autoscaler ID>")
@@ -185,9 +192,13 @@ func resourceAutoscalerImport(d *schema.ResourceData, meta interface{}) ([]*sche
 	log.Printf("[DEBUG] Autoscaler ID: %s", id)
 
 	d.SetId(id)
-	d.Set("app", appID)
+	err := d.Set("app", appID)
+	if err != nil {
+		return nil, err
+	}
 
-	err := resourceAutoscalerRead(d, meta)
+	diags := resourceAutoscalerRead(ctx, d, meta)
+	err = DiagnosticError(diags)
 	if err != nil {
 		return nil, err
 	}

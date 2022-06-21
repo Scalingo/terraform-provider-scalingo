@@ -17,7 +17,7 @@ func MapDiff(a map[string]interface{}, b map[string]interface{}) MapDiffRes {
 		}
 	}
 
-	for key, _ := range b {
+	for key := range b {
 		_, found := a[key]
 		if !found {
 			res.Added = append(res.Added, key)
