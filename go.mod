@@ -5,8 +5,6 @@ go 1.17
 require (
 	github.com/Scalingo/go-scalingo/v4 v4.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.17.0
-	github.com/pkg/errors v0.8.1
-	gopkg.in/errgo.v1 v1.0.1
 )
 
 require (
@@ -51,4 +49,5 @@ require (
 	google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d // indirect
 	google.golang.org/grpc v1.46.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
+	gopkg.in/errgo.v1 v1.0.1 // indirect
 )
