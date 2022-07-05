@@ -2,8 +2,7 @@ package scalingo
 
 import (
 	"context"
-	"errors"
-	"log"
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -59,7 +58,7 @@ func resourceContainerTypeCreate(ctx context.Context, d *schema.ResourceData, me
 		}},
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to scale application: %v", err)
 	}
 	defer resp.Body.Close()
 
@@ -73,28 +72,21 @@ func resourceContainerTypeRead(ctx context.Context, d *schema.ResourceData, meta
 
 	appID, _ := d.Get("app").(string)
 	ctName, _ := d.Get("name").(string)
-	log.Printf("[DEBUG] Application ID: %s", appID)
-	log.Printf("[DEBUG] Container type name: %s", ctName)
 	d.SetId(appID + ":" + ctName)
 
 	containers, err := client.AppsContainerTypes(appID)
 	if err != nil {
-		log.Printf("[INFO] Error getting current formation %#v", err)
-		return diag.FromErr(err)
+		return diag.Errorf("fail to list container types: %v", err)
 	}
 
-	log.Printf("[INFO] Successfully fetched current formation")
 	for _, ct := range containers {
-		log.Printf("[DEBUG] Current container type: %s", ct.Name)
-
 		if ctName == ct.Name {
-			log.Printf("[DEBUG] Found container type in formation")
 			err = SetAll(d, map[string]interface{}{
 				"amount": ct.Amount,
 				"size":   ct.Size,
 			})
 			if err != nil {
-				return diag.FromErr(err)
+				return diag.Errorf("fail to store container type informations: %v", err)
 			}
 			break
 		}
@@ -108,8 +100,6 @@ func resourceContainerTypeUpdate(ctx context.Context, d *schema.ResourceData, me
 
 	appID, _ := d.Get("app").(string)
 	ctName, _ := d.Get("name").(string)
-	log.Printf("[DEBUG] Application ID: %s", appID)
-	log.Printf("[DEBUG] Container type name: %s", ctName)
 
 	resp, err := client.AppsScale(appID, &scalingo.AppsScaleParams{
 		Containers: []scalingo.ContainerType{{
@@ -119,11 +109,9 @@ func resourceContainerTypeUpdate(ctx context.Context, d *schema.ResourceData, me
 		}},
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to scale application: %v", err)
 	}
 	defer resp.Body.Close()
-
-	log.Printf("[DEBUG] Scaled the application")
 
 	return nil
 }
@@ -144,24 +132,19 @@ func resourceContainerTypeDelete(ctx context.Context, d *schema.ResourceData, me
 func resourceContainerTypeImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
-		return nil, errors.New("ID should have the following format: <app ID>:<container type name>")
+		return nil, fmt.Errorf("ID should have the following format: <app ID>:<container type name>")
 	}
 	appID := ids[0]
 	ctName := ids[1]
-	log.Printf("[DEBUG] Application ID: %s", appID)
-	log.Printf("[DEBUG] Container type name: %s", ctName)
 
 	client, _ := meta.(*scalingo.Client)
 	containers, err := client.AppsContainerTypes(appID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to list container types: %v", err)
 	}
 
 	for _, ct := range containers {
-		log.Printf("[DEBUG] Current container type: %s", ct.Name)
-
 		if ctName == ct.Name {
-			log.Printf("[DEBUG] Found the container type to import")
 			d.SetId(appID + ":" + ctName)
 			err = SetAll(d, map[string]interface{}{
 				"name":   ctName,
@@ -170,13 +153,12 @@ func resourceContainerTypeImport(ctx context.Context, d *schema.ResourceData, me
 				"size":   ct.Size,
 			})
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("fail to store container informations: %v", err)
 			}
 
 			return []*schema.ResourceData{d}, nil
 		}
 	}
 
-	log.Printf("[DEBUG] No container type found")
-	return nil, errors.New("not found")
+	return nil, fmt.Errorf("not found")
 }

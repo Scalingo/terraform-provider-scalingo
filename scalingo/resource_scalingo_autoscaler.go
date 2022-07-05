@@ -2,8 +2,7 @@ package scalingo
 
 import (
 	"context"
-	"errors"
-	"log"
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -62,7 +61,6 @@ func resourceAutoscalerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	client, _ := meta.(*scalingo.Client)
 
 	appID, _ := d.Get("app").(string)
-	log.Printf("[DEBUG] Application ID: %s", appID)
 
 	autoscaler, err := client.AutoscalerAdd(appID, scalingo.AutoscalerAddParams{
 		ContainerType: d.Get("container_type").(string),
@@ -72,7 +70,7 @@ func resourceAutoscalerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		MaxContainers: d.Get("max_containers").(int),
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to get autoscaler informations: %v", err)
 	}
 
 	d.SetId(autoscaler.ID)
@@ -85,15 +83,11 @@ func resourceAutoscalerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	id := d.Id()
 	appID, _ := d.Get("app").(string)
-	log.Printf("[DEBUG] Autoscaler ID: %s", id)
-	log.Printf("[DEBUG] Application ID: %s", appID)
 
 	autoscaler, err := client.AutoscalerShow(appID, id)
 	if err != nil {
-		log.Printf("[INFO] Error getting autoscaler %#v", err)
-		return diag.FromErr(err)
+		return diag.Errorf("fail to get autoscaler: %v", err)
 	}
-	log.Printf("[INFO] Successfully fetched autoscaler")
 
 	err = SetAll(d, map[string]interface{}{
 		"container_type": autoscaler.ContainerType,
@@ -104,7 +98,7 @@ func resourceAutoscalerRead(ctx context.Context, d *schema.ResourceData, meta in
 		"disabled":       autoscaler.Disabled,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store autoscaler informations: %v", err)
 	}
 
 	return nil
@@ -115,8 +109,6 @@ func resourceAutoscalerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	id := d.Id()
 	appID, _ := d.Get("app").(string)
-	log.Printf("[DEBUG] Autoscaler ID: %s", id)
-	log.Printf("[DEBUG] Application ID: %s", appID)
 	var params scalingo.AutoscalerUpdateParams
 	changed := false
 
@@ -148,11 +140,9 @@ func resourceAutoscalerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if changed {
 		_, err := client.AutoscalerUpdate(appID, id, params)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to update autoscaler: %v", err)
 		}
 	}
-
-	log.Printf("[DEBUG] Autoscaler updated")
 
 	return nil
 }
@@ -160,13 +150,11 @@ func resourceAutoscalerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceAutoscalerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	id := d.Id()
 	appID, _ := d.Get("app").(string)
-	log.Printf("[DEBUG] Autoscaler ID: %s", id)
-	log.Printf("[DEBUG] Application ID: %s", appID)
 
 	client, _ := meta.(*scalingo.Client)
 	err := client.AutoscalerRemove(appID, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to destroy autoscaler: %v", err)
 	}
 
 	return nil
@@ -184,23 +172,21 @@ func resourceAutoscalerDelete(ctx context.Context, d *schema.ResourceData, meta 
 func resourceAutoscalerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
-		return nil, errors.New("ID should have the following format: <app ID>:<autoscaler ID>")
+		return nil, fmt.Errorf("ID should have the following format: <app ID>:<autoscaler ID>")
 	}
 	appID := ids[0]
 	id := ids[1]
-	log.Printf("[DEBUG] Application ID: %s", appID)
-	log.Printf("[DEBUG] Autoscaler ID: %s", id)
 
 	d.SetId(id)
 	err := d.Set("app", appID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to store app id: %v", err)
 	}
 
 	diags := resourceAutoscalerRead(ctx, d, meta)
 	err = DiagnosticError(diags)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to read autoscaler informations: %v", err)
 	}
 
 	return []*schema.ResourceData{d}, nil

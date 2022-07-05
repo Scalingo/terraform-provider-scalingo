@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -69,9 +70,8 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	app, err := client.AppsCreate(createOpts)
-
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to create app: %v", err)
 	}
 
 	d.SetId(app.Id)
@@ -81,7 +81,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		"stack_id": app.StackID,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store application attributes: %v", err)
 	}
 
 	if d.Get("environment") != nil {
@@ -96,23 +96,23 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		_, _, err := client.VariableMultipleSet(d.Id(), variables)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to set environement variables: %v", err)
 		}
 
 		allEnvironment, err := appEnvironment(client, app.Id)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to fetch application environment: %v", err)
 		}
 		err = d.Set("all_environment", allEnvironment)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to store application environment: %v", err)
 		}
 	}
 
 	if forceHTTPS, _ := d.Get("force_https").(bool); forceHTTPS {
 		_, err := client.AppsForceHTTPS(app.Id, forceHTTPS)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to force HTTPS: %v", err)
 		}
 	}
 
@@ -126,7 +126,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 	app, err := client.AppsShow(id)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to fetch application: %v", err)
 	}
 
 	d.SetId(app.Id)
@@ -138,12 +138,12 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		"stack_id":    app.StackID,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store application informations: %v", err)
 	}
 
 	variables, err := client.VariablesList(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to list application variables: %v", err)
 	}
 
 	currentEnvironment, _ := d.Get("environment").(map[string]interface{})
@@ -163,7 +163,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		"environment":     environment,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store application environment: %v", err)
 	}
 
 	return nil
@@ -177,15 +177,16 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		app, err := client.AppsRename(oldName.(string), newName.(string))
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to rename app: %v", err)
 		}
 
 		err = SetAll(d, map[string]interface{}{
+			"name":    app.Name,
 			"url":     app.Url,
 			"git_url": app.GitUrl,
 		})
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to store application metadata: %v", err)
 		}
 	}
 
@@ -196,7 +197,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		err := deleteVariablesByName(client, d.Id(), diff.Deleted)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to delete variables: %v", err)
 		}
 
 		var variablesToSet scalingo.Variables
@@ -217,22 +218,22 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		_, _, err = client.VariableMultipleSet(d.Id(), variablesToSet)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to set variables: %v", err)
 		}
 
 		allEnvironment, err := appEnvironment(client, d.Id())
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to get application environment: %v", err)
 		}
 
 		err = d.Set("all_environment", allEnvironment)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to store application environment: %v", err)
 		}
 
 		err = restartApp(client, d.Id())
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to restart app: %v", err)
 		}
 	}
 
@@ -240,7 +241,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, ForceHTTPS := d.GetChange("force_https")
 		_, err := client.AppsForceHTTPS(d.Id(), ForceHTTPS.(bool))
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to set force HTTPS: %v", err)
 		}
 	}
 
@@ -248,7 +249,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, stackID := d.GetChange("stack_id")
 		_, err := client.AppsSetStack(d.Id(), stackID.(string))
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to set application stack: %v", err)
 		}
 	}
 
@@ -263,7 +264,7 @@ func resourceAppDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	err := client.AppsDestroy(id, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to destroy app: %v", err)
 	}
 	return nil
 }
@@ -280,7 +281,7 @@ func restartApp(client *scalingo.Client, id string) error {
 		location := res.Header.Get("Location")
 		err = waitOperation(client, location)
 		if err != nil {
-			return err
+			return fmt.Errorf("fail to get wait for the operation to finish: %v", err)
 		}
 	}
 	return nil

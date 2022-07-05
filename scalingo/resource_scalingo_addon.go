@@ -2,7 +2,7 @@ package scalingo
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -59,7 +59,7 @@ func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	planID, err := addonPlanID(client, providerID, planName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to get addon plan id: %v", err)
 	}
 
 	if err := d.Set("plan_id", planID); err != nil {
@@ -71,17 +71,17 @@ func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		PlanID:          planID,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to provision addon: %v", err)
 	}
 
 	err = waitUntilProvisionned(client, res.Addon)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to wait for the addon to be provisionned: %v", err)
 	}
 
 	d.SetId(res.Addon.ID)
 	if err := d.Set("resource_id", res.Addon.ResourceID); err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store addon resource id: %v", err)
 	}
 
 	return nil
@@ -98,7 +98,7 @@ func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.MarkNewResource()
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.Errorf("fail to get addon details: %v", err)
 	}
 
 	err = SetAll(d, map[string]interface{}{
@@ -108,7 +108,7 @@ func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		"provider_id": addon.AddonProvider.ID,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store addon informations: %v", err)
 	}
 
 	d.SetId(addon.ID)
@@ -125,23 +125,23 @@ func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	if d.HasChange("plan") {
 		planID, err := addonPlanID(client, providerID, d.Get("plan").(string))
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to get addon plan id: %v", err)
 		}
 
 		res, err := client.AddonUpgrade(appID, d.Id(), scalingo.AddonUpgradeParams{
 			PlanID: planID,
 		})
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to upgrade addon: %v", err)
 		}
 
 		err = waitUntilProvisionned(client, res.Addon)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to wait for the addon to be provisionned: %v", err)
 		}
 
 		if err := d.Set("plan_id", res.Addon.Plan.ID); err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to store addon plan id: %v", err)
 		}
 	}
 
@@ -155,7 +155,7 @@ func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	err := client.AddonDestroy(appID, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to destroy addon: %v", err)
 	}
 
 	return nil
@@ -176,13 +176,13 @@ func addonPlanID(client *scalingo.Client, providerID, name string) (string, erro
 		planList += ", " + plan.Name
 	}
 
-	return "", errors.New("Invalid plan name, possible values are: " + planList)
+	return "", fmt.Errorf("Invalid plan name, possible values are: " + planList)
 }
 
 func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
-		return nil, errors.New("address should have the following format: <appid>:<addonid>")
+		return nil, fmt.Errorf("address should have the following format: <appid>:<addonid>")
 	}
 
 	d.SetId(ids[1])
@@ -213,7 +213,7 @@ func waitUntilProvisionned(client *scalingo.Client, addon scalingo.Addon) error 
 		}
 		select {
 		case <-timer.C:
-			return errors.New("addon provisioning timed out")
+			return fmt.Errorf("addon provisioning timed out")
 		case <-ticker.C:
 		}
 	}
