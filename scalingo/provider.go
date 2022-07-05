@@ -51,6 +51,7 @@ func Provider() *schema.Provider {
 			"scalingo_github_link":    resourceScalingoGithubLink(),
 			"scalingo_notifier":       resourceScalingoNotifier(),
 			"scalingo_run":            resourceScalingoRun(),
+			"scalingo_log_drain":      resourceScalingoLogDrain(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
