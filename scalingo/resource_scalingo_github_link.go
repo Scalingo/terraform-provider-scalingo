@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -114,13 +115,13 @@ func resourceGithubLinkCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	link, err := client.GithubLinkAdd(app, params)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to add github link: %v", err)
 	}
 
 	if deployOnBranchChange {
 		err := client.GithubLinkManualDeploy(app, link.ID, branch)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to trigger manual deploy: %v", err)
 		}
 	}
 
@@ -181,18 +182,18 @@ func resourceGithubLinkUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if (d.HasChange("branch") || d.HasChange("deploy_on_branch_change")) && deployOnBranchChange {
 		err := client.GithubLinkManualDeploy(app, d.Id(), branch)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to tigger manual deploy: %v", err)
 		}
 		err = d.Set("branch", branch)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to store new branch name: %v", err)
 		}
 	}
 
 	if changed {
 		link, err := client.GithubLinkUpdate(app, d.Id(), params)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to update github repo link: %v", err)
 		}
 
 		err = SetAll(d, map[string]interface{}{
@@ -205,7 +206,7 @@ func resourceGithubLinkUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			"destroy_stale_review_app_after":  int(link.HoursBeforeDeleteStale),
 		})
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.Errorf("fail to store github repo link informations: %v", err)
 		}
 	}
 
@@ -232,7 +233,7 @@ func resourceGithubLinkRead(ctx context.Context, d *schema.ResourceData, meta in
 		"source":                          link.GithubSource,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store github repo link informations: %v", err)
 	}
 
 	return nil
@@ -243,7 +244,7 @@ func resourceGithubLinkDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	err := client.GithubLinkDelete(app, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to delete github repo link: %v", err)
 	}
 
 	return nil
@@ -252,13 +253,13 @@ func resourceGithubLinkDelete(ctx context.Context, d *schema.ResourceData, meta 
 func resourceGithubLinkImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	err := d.Set("app", d.Id())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to store app id: %v", err)
 	}
 
 	diags := resourceGithubLinkRead(ctx, d, meta)
 	err = DiagnosticError(diags)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to read github repo link: %v", err)
 	}
 
 	return []*schema.ResourceData{d}, nil

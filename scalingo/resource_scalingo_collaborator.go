@@ -2,7 +2,7 @@ package scalingo
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -49,7 +49,7 @@ func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, met
 
 	collaborator, err := client.CollaboratorAdd(d.Get("app").(string), d.Get("email").(string))
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to add collaborator: %v", err)
 	}
 
 	d.SetId(collaborator.ID)
@@ -59,7 +59,7 @@ func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, met
 		"status":   collaborator.Status,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store collaborator informations: %v", err)
 	}
 
 	return nil
@@ -70,7 +70,7 @@ func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	collaborators, err := client.CollaboratorsList(d.Get("app").(string))
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to list collaborators: %v", err)
 	}
 
 	var collaborator scalingo.Collaborator
@@ -95,7 +95,7 @@ func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta 
 		"status":   collaborator.Status,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store collaborator informations: %v", err)
 	}
 
 	return nil
@@ -106,7 +106,7 @@ func resourceCollaboratorDelete(ctx context.Context, d *schema.ResourceData, met
 
 	err := client.CollaboratorRemove(d.Get("app").(string), d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to remove collaborator: %v", err)
 	}
 
 	return nil
@@ -117,14 +117,14 @@ func resourceCollaboratorImport(ctx context.Context, d *schema.ResourceData, met
 
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
-		return nil, errors.New("address should have the following format: <appid>:<collaborator ID>")
+		return nil, fmt.Errorf("address should have the following format: <appid>:<collaborator ID>")
 	}
 	appID := ids[0]
 	collaboratorID := ids[1] // can be either the email address or the ID
 
 	collaborators, err := client.CollaboratorsList(appID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to list collaborators: %v", err)
 	}
 
 	for _, collaborator := range collaborators {
@@ -132,11 +132,11 @@ func resourceCollaboratorImport(ctx context.Context, d *schema.ResourceData, met
 			d.SetId(collaborator.ID)
 			err = d.Set("app", appID)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("fail to store app id: %v", err)
 			}
 			return []*schema.ResourceData{d}, nil
 		}
 	}
 
-	return nil, errors.New("not found")
+	return nil, fmt.Errorf("not found")
 }

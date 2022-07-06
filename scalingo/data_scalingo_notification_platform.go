@@ -75,7 +75,7 @@ func dataSourceScNotificationPlatformRead(ctx context.Context, d *schema.Resourc
 		"available_event_ids": selected.AvailableEventIDs,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store notification platform attributes: %v", err)
 	}
 
 	return nil

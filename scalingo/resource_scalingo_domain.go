@@ -2,7 +2,7 @@ package scalingo
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -45,7 +45,7 @@ func resourceDomainCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		Name: domainName,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to add domain: %v", err)
 	}
 	d.SetId(domain.ID)
 
@@ -59,13 +59,13 @@ func resourceDomainRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	domain, err := client.DomainsShow(appID, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to get domain: %v", err)
 	}
 
 	d.SetId(domain.ID)
 	err = d.Set("common_name", domain.Name)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to store domain name: %v", err)
 	}
 
 	return nil
@@ -78,7 +78,7 @@ func resourceDomainDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	err := client.DomainsRemove(appID, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to remove domain: %v", err)
 	}
 
 	return nil
@@ -86,20 +86,20 @@ func resourceDomainDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourceDomainImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	if !strings.Contains(d.Id(), ":") {
-		return nil, errors.New("schema must be app_id:domain_id")
+		return nil, fmt.Errorf("schema must be app_id:domain_id")
 	}
 	split := strings.Split(d.Id(), ":")
 	d.SetId(split[1])
 
 	err := d.Set("app", split[0])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to set app name: %v", err)
 	}
 
 	diags := resourceDomainRead(ctx, d, meta)
 	err = DiagnosticError(diags)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to read domain: %v", err)
 	}
 
 	return []*schema.ResourceData{d}, nil

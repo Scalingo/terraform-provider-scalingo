@@ -68,7 +68,7 @@ func dataSourceScStackRead(ctx context.Context, d *schema.ResourceData, meta int
 		"default":     selected.Default,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("fail to save stack informations: %v", err)
 	}
 
 	return nil

@@ -2,7 +2,6 @@ package scalingo
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -139,7 +138,7 @@ func resourceScNotifierDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceScNotifierImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	if !strings.Contains(d.Id(), ":") {
-		return nil, errors.New("schema must be app_id:notifier_id")
+		return nil, fmt.Errorf("schema must be app_id:notifier_id")
 	}
 	split := strings.Split(d.Id(), ":")
 	d.SetId(split[1])
