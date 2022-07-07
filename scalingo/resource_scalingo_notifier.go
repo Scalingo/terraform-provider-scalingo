@@ -236,6 +236,12 @@ func setFromScNotifier(d *schema.ResourceData, c scalingo.API, notifier *scaling
 
 	typeData := notifier.Specialize().TypeDataMap()
 	for key, value := range typeData {
+		// GoScalingo calls the Webhook URL type data: "webhook url"
+		// However in this provider, we call it "webhook_url"
+		// This handles the translation
+		if key == "webhook url" {
+			key = "webhook_url"
+		}
 		values[key] = value
 	}
 
