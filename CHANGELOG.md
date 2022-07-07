@@ -2,6 +2,10 @@
 
 ## To be Released
 
+## v0.5.1
+
+* fix(notifiers) Rename webhook url field to webhook_url
+
 ## v0.5.0
 
 * feature(log-drains): Add support for log drains
