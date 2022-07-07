@@ -4,10 +4,11 @@
 
 ## v0.5.0
 
-* chore(errors) Switch error management to fmt.Errorf
-* feature(stacks) Add support for Scalingo stacks
-* chore(go-scalingo) Upgrade to go-scalingo v4
-* chore(terraform-plugin-sdk) Upgrade to SDK v2
+* feature(log-drains): Add support for log drains
+* chore(errors): Switch error management to fmt.Errorf
+* feature(stacks): Add support for Scalingo stacks
+* chore(go-scalingo): Upgrade to go-scalingo v4
+* chore(terraform-plugin-sdk): Upgrade to SDK v2
 
 ## v0.4.2
 
