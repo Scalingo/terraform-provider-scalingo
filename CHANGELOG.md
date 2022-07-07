@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v0.5.0
+
 * chore(errors) Switch error management to fmt.Errorf
 * feature(stacks) Add support for Scalingo stacks
 * chore(go-scalingo) Upgrade to go-scalingo v4
