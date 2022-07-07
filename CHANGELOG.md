@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(app) Do not try to remove the stack_id if it's not set in the app resource
+
 ## v0.5.1
 
 * fix(notifiers) Rename webhook url field to webhook_url
