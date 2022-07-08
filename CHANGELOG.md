@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v0.5.2
+
 * fix(app) Do not try to remove the stack_id if it's not set in the app resource
 
 ## v0.5.1
