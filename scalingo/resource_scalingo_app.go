@@ -46,6 +46,12 @@ func resourceScalingoApp() *schema.Resource {
 			"stack_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if newValue == "" {
+						return true
+					}
+					return true
+				},
 			},
 		},
 
