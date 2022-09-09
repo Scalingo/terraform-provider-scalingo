@@ -29,7 +29,7 @@ provider "scalingo" {
 ```
 
 ```bash
-export TF_VAR_scaling_api_token=tk-us-1234567890
+export TF_VAR_scalingo_api_token=tk-us-1234567890
 terraform plan
 ```
 
