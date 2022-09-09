@@ -107,6 +107,28 @@ $ make testacc
 Please read the README in the `scalingo-terraform` to get more information about
 that.
 
+### Testing the plugin against the development environment
+
+First you will need to create a terraform configuration file defining the plugin installation path
+
+```
+# local_dev.tfrc
+
+provider_installation {
+  dev_overrides {
+    "scalingo/scalingo" = "<your-gopath>/bin/"
+  }
+}
+```
+
+Then you can use the development plugin by precising the configuration path in the `TF_CLI_CONFIG_FILE` env variable
+
+```
+TF_CLI_CONFIG_FILE=./local_dev.tfrc terraform plan
+```
+
+Alternatively you can add the provider configuration to the `$HOME/.terraformrc` file
+
 ## Release a New Version
 
 Instructions on this [Notion page](https://www.notion.so/scalingooriginal/New-Terraform-Provider-Release-40cd0af66b1f48148fb641ea138a22e5).
