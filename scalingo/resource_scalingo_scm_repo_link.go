@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v4"
+	"github.com/Scalingo/go-scalingo/v5"
 )
 
 func resourceScalingoScmRepoLink() *schema.Resource {
@@ -125,13 +125,13 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	link, err := client.SCMRepoLinkCreate(app, params)
+	link, err := client.SCMRepoLinkCreate(ctx, app, params)
 	if err != nil {
 		return diag.Errorf("fail to add SCM repo link: %v", err)
 	}
 
 	if deployOnBranchChange {
-		err := client.SCMRepoLinkManualDeploy(app, branch)
+		err := client.SCMRepoLinkManualDeploy(ctx, app, branch)
 		if err != nil {
 			return diag.Errorf("fail to trigger manual deploy: %v", err)
 		}
@@ -192,7 +192,7 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if (d.HasChange("branch") || d.HasChange("deploy_on_branch_change")) && deployOnBranchChange {
-		err := client.SCMRepoLinkManualDeploy(app, branch)
+		err := client.SCMRepoLinkManualDeploy(ctx, app, branch)
 		if err != nil {
 			return diag.Errorf("fail to trigger manual deploy: %v", err)
 		}
@@ -203,7 +203,7 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if changed {
-		link, err := client.SCMRepoLinkUpdate(app, params)
+		link, err := client.SCMRepoLinkUpdate(ctx, app, params)
 		if err != nil {
 			return diag.Errorf("fail to update github repo link: %v", err)
 		}
@@ -226,7 +226,7 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 	client, _ := meta.(*scalingo.Client)
 	app, _ := d.Get("app").(string)
 
-	link, err := client.SCMRepoLinkShow(app)
+	link, err := client.SCMRepoLinkShow(ctx, app)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -252,7 +252,7 @@ func resourceScmRepoLinkDelete(ctx context.Context, d *schema.ResourceData, meta
 	client, _ := meta.(*scalingo.Client)
 	app, _ := d.Get("app").(string)
 
-	err := client.SCMRepoLinkDelete(app)
+	err := client.SCMRepoLinkDelete(ctx, app)
 	if err != nil {
 		return diag.Errorf("fail to delete scm repo link: %v", err)
 	}
