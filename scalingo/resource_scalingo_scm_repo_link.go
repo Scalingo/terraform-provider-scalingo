@@ -108,10 +108,7 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 		AutoDeployEnabled:       &autoDeployEnabled,
 		DeployReviewAppsEnabled: &deployReviewAppsEnabled,
 		AuthIntegrationUUID:     &authIntegrationUUID,
-	}
-
-	if autoDeployEnabled {
-		params.Branch = &branch
+		Branch:                  &branch,
 	}
 
 	if deployReviewAppsEnabled {
@@ -148,11 +145,11 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	changed := false
 	branch, _ := d.Get("branch").(string)
-	autoDeploy, _ := d.Get("auto_deploy").(bool)
+	autoDeploy, _ := d.Get("auto_deploy_enabled").(bool)
 	deployOnBranchChange, _ := d.Get("deploy_on_branch_change").(bool)
 
 	if branch == "" && (deployOnBranchChange || autoDeploy) {
-		return diag.Errorf("Branch must be set when deploy_on_branch_change or auto_deploy is enabled")
+		return diag.Errorf("Branch must be set when deploy_on_branch_change or auto_deploy_enabled is enabled")
 	}
 
 	params := scalingo.SCMRepoLinkUpdateParams{}
@@ -167,27 +164,27 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if d.HasChange("deploy_review_apps_enabled") {
-		params.DeployReviewAppsEnabled = boolAddr(d.Get("review_apps").(bool))
+		params.DeployReviewAppsEnabled = boolAddr(d.Get("deploy_review_apps_enabled").(bool))
 		changed = true
 	}
 
 	if d.HasChange("delete_on_close_enabled") {
-		params.DestroyOnCloseEnabled = boolAddr(d.Get("destroy_review_app_on_close").(bool))
+		params.DestroyOnCloseEnabled = boolAddr(d.Get("delete_on_close_enabled").(bool))
 		changed = true
 	}
 
 	if d.HasChange("delete_stale_enabled") {
-		params.DestroyStaleEnabled = boolAddr(d.Get("destroy_stale_review_app").(bool))
+		params.DestroyStaleEnabled = boolAddr(d.Get("delete_stale_enabled").(bool))
 		changed = true
 	}
 
 	if d.HasChange("hours_before_delete_on_close") {
-		params.HoursBeforeDeleteOnClose = uintAddr(uint(d.Get("destroy_closed_review_app_after").(int)))
+		params.HoursBeforeDeleteOnClose = uintAddr(uint(d.Get("hours_before_delete_on_close").(int)))
 		changed = true
 	}
 
 	if d.HasChange("hours_before_delete_stale") {
-		params.HoursBeforeDeleteStale = uintAddr(uint(d.Get("destroy_stale_review_app_after").(int)))
+		params.HoursBeforeDeleteStale = uintAddr(uint(d.Get("hours_before_delete_stale").(int)))
 		changed = true
 	}
 
