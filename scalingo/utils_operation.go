@@ -1,13 +1,14 @@
 package scalingo
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/Scalingo/go-scalingo/v4"
+	"github.com/Scalingo/go-scalingo/v5"
 )
 
-func waitOperation(client *scalingo.Client, location string) error {
+func waitOperation(ctx context.Context, client *scalingo.Client, location string) error {
 	var err error
 
 	op := &scalingo.Operation{}
@@ -16,7 +17,7 @@ func waitOperation(client *scalingo.Client, location string) error {
 	defer ticker.Stop()
 
 	for op.Status != scalingo.OperationStatusDone {
-		op, err = client.OperationsShowFromURL(location)
+		op, err = client.OperationsShowFromURL(ctx, location)
 		if err != nil {
 			return err
 		}

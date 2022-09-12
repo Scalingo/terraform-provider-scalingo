@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v4"
+	"github.com/Scalingo/go-scalingo/v5"
 )
 
 func resourceScalingoNotifier() *schema.Resource {
@@ -80,11 +80,11 @@ func resourceScalingoNotifier() *schema.Resource {
 func resourceScNotifierRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 	app, _ := d.Get("app").(string)
-	notifier, err := client.NotifierByID(app, d.Id())
+	notifier, err := client.NotifierByID(ctx, app, d.Id())
 	if err != nil {
 		return diag.Errorf("fail to find notifier %v of app %v: %v", app, d.Id(), err)
 	}
-	err = setFromScNotifier(d, client, notifier)
+	err = setFromScNotifier(ctx, d, client, notifier)
 	if err != nil {
 		return diag.Errorf("fail to set resource from API data: %v", err)
 	}
@@ -94,15 +94,15 @@ func resourceScNotifierRead(ctx context.Context, d *schema.ResourceData, meta in
 // resourceScNotifierCreate creates a notifier calling the Scalingo API
 func resourceScNotifierCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
-	params, err := readNotifierParamsFromResource(d, client)
+	params, err := readNotifierParamsFromResource(ctx, d, client)
 	if err != nil {
 		return diag.Errorf("fail to read notifier params from resource: %v", err)
 	}
-	notifier, err := client.NotifierProvision(d.Get("app").(string), params)
+	notifier, err := client.NotifierProvision(ctx, d.Get("app").(string), params)
 	if err != nil {
 		return diag.Errorf("fail to provision notifier: %v", err)
 	}
-	err = setFromScNotifier(d, client, notifier)
+	err = setFromScNotifier(ctx, d, client, notifier)
 	if err != nil {
 		return diag.Errorf("fail to set resource from API data: %v", err)
 	}
@@ -112,15 +112,15 @@ func resourceScNotifierCreate(ctx context.Context, d *schema.ResourceData, meta 
 // resourceScNotifierUpdate updates a notifier calling the Scalingo API
 func resourceScNotifierUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
-	params, err := readNotifierParamsFromResource(d, client)
+	params, err := readNotifierParamsFromResource(ctx, d, client)
 	if err != nil {
 		return diag.Errorf("fail to read notifier params from resource: %v", err)
 	}
-	notifier, err := client.NotifierUpdate(d.Get("app").(string), d.Id(), params)
+	notifier, err := client.NotifierUpdate(ctx, d.Get("app").(string), d.Id(), params)
 	if err != nil {
 		return diag.Errorf("fail to update notifier: %v", err)
 	}
-	err = setFromScNotifier(d, client, notifier)
+	err = setFromScNotifier(ctx, d, client, notifier)
 	if err != nil {
 		return diag.Errorf("fail to set resource from API data: %v", err)
 	}
@@ -129,7 +129,7 @@ func resourceScNotifierUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceScNotifierDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
-	err := client.NotifierDestroy(d.Get("app").(string), d.Id())
+	err := client.NotifierDestroy(ctx, d.Get("app").(string), d.Id())
 	if err != nil {
 		return diag.Errorf("fail to delete notifier: %v", err)
 	}
@@ -156,8 +156,8 @@ func resourceScNotifierImport(ctx context.Context, d *schema.ResourceData, meta 
 	return []*schema.ResourceData{d}, nil
 }
 
-func readNotifierParamsFromResource(d *schema.ResourceData, c scalingo.API) (scalingo.NotifierParams, error) {
-	types, err := c.EventTypesList()
+func readNotifierParamsFromResource(ctx context.Context, d *schema.ResourceData, c scalingo.API) (scalingo.NotifierParams, error) {
+	types, err := c.EventTypesList(ctx)
 	if err != nil {
 		return scalingo.NotifierParams{}, fmt.Errorf("fail to list event types: %v", err)
 	}
@@ -204,8 +204,8 @@ func readNotifierParamsFromResource(d *schema.ResourceData, c scalingo.API) (sca
 	}, nil
 }
 
-func setFromScNotifier(d *schema.ResourceData, c scalingo.API, notifier *scalingo.Notifier) error {
-	types, err := c.EventTypesList()
+func setFromScNotifier(ctx context.Context, d *schema.ResourceData, c scalingo.API, notifier *scalingo.Notifier) error {
+	types, err := c.EventTypesList(ctx)
 	if err != nil {
 		return fmt.Errorf("fail to list event types: %v", err)
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v4"
+	"github.com/Scalingo/go-scalingo/v5"
 )
 
 func dataSourceScNotificationPlatform() *schema.Resource {
@@ -44,7 +44,7 @@ func dataSourceScNotificationPlatform() *schema.Resource {
 func dataSourceScNotificationPlatformRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	platforms, err := client.NotificationPlatformsList()
+	platforms, err := client.NotificationPlatformsList(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}

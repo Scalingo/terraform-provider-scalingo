@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	scalingo "github.com/Scalingo/go-scalingo/v4"
+	scalingo "github.com/Scalingo/go-scalingo/v5"
 )
 
 func resourceScalingoRun() *schema.Resource {
@@ -55,7 +55,7 @@ func resourceRunCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	command := stringListToStringSlice(d.Get("command").([]interface{}))
 	detached, _ := d.Get("detached").(bool)
 
-	res, err := client.Run(scalingo.RunOpts{
+	res, err := client.Run(ctx, scalingo.RunOpts{
 		Command:  command,
 		App:      d.Get("app").(string),
 		Detached: detached,
@@ -74,7 +74,7 @@ func resourceRunCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	// If the container is attached, open a WS connection to get the command output
-	token, err := client.GetAccessToken()
+	token, err := client.GetAccessToken(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
