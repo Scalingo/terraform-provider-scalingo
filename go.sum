@@ -8,6 +8,8 @@ github.com/Scalingo/go-scalingo/v4 v4.16.0 h1:PVTSYk+YfQmCGn9KPFQ16SJyC5NAKom5Bm
 github.com/Scalingo/go-scalingo/v4 v4.16.0/go.mod h1:sniKbxDzZSSyXhcAkoX4Kp0EJrgcjNFWMvUTtWohP6I=
 github.com/Scalingo/go-scalingo/v5 v5.0.0 h1:LGrNW78lLNSANV4fT42Y55Ft/55+h2CTI6Att3DPhqg=
 github.com/Scalingo/go-scalingo/v5 v5.0.0/go.mod h1:b/SeZwa10u6/CpB6WmxeToZ5FES8N/o83YpHBGLDvQ8=
+github.com/Scalingo/go-scalingo/v5 v5.1.0 h1:NoPimHk7VGBChig67a8CpOBbMXwAsy206aqnO3IMoes=
+github.com/Scalingo/go-scalingo/v5 v5.1.0/go.mod h1:b/SeZwa10u6/CpB6WmxeToZ5FES8N/o83YpHBGLDvQ8=
 github.com/acomagu/bufpipe v1.0.3/go.mod h1:mxdxdup/WdsKVreO5GpW4+M/1CE2sMG4jeGJ2sYmHc4=
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.2 h1:0S/Yg6LYmFJ5stwQeRp6EeOcCbj7xiqQSdNelsXvaqE=
