@@ -113,13 +113,13 @@ func resourceGithubLinkCreate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	link, err := client.GithubLinkAdd(app, params)
+	link, err := client.GithubLinkAdd(ctx, app, params)
 	if err != nil {
 		return diag.Errorf("fail to add github link: %v", err)
 	}
 
 	if deployOnBranchChange {
-		err := client.GithubLinkManualDeploy(app, link.ID, branch)
+		err := client.GithubLinkManualDeploy(ctx, app, link.ID, branch)
 		if err != nil {
 			return diag.Errorf("fail to trigger manual deploy: %v", err)
 		}
@@ -180,7 +180,7 @@ func resourceGithubLinkUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if (d.HasChange("branch") || d.HasChange("deploy_on_branch_change")) && deployOnBranchChange {
-		err := client.GithubLinkManualDeploy(app, d.Id(), branch)
+		err := client.GithubLinkManualDeploy(ctx, app, d.Id(), branch)
 		if err != nil {
 			return diag.Errorf("fail to tigger manual deploy: %v", err)
 		}
@@ -191,7 +191,7 @@ func resourceGithubLinkUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if changed {
-		link, err := client.GithubLinkUpdate(app, d.Id(), params)
+		link, err := client.GithubLinkUpdate(ctx, app, d.Id(), params)
 		if err != nil {
 			return diag.Errorf("fail to update github repo link: %v", err)
 		}
@@ -216,7 +216,7 @@ func resourceGithubLinkRead(ctx context.Context, d *schema.ResourceData, meta in
 	client, _ := meta.(*scalingo.Client)
 	app, _ := d.Get("app").(string)
 
-	link, err := client.GithubLinkShow(app)
+	link, err := client.GithubLinkShow(ctx, app)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -242,7 +242,7 @@ func resourceGithubLinkDelete(ctx context.Context, d *schema.ResourceData, meta 
 	client, _ := meta.(*scalingo.Client)
 	app, _ := d.Get("app").(string)
 
-	err := client.GithubLinkDelete(app, d.Id())
+	err := client.GithubLinkDelete(ctx, app, d.Id())
 	if err != nil {
 		return diag.Errorf("fail to delete github repo link: %v", err)
 	}

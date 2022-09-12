@@ -1,9 +1,13 @@
 package scalingo
 
-import scalingo "github.com/Scalingo/go-scalingo/v5"
+import (
+	"context"
 
-func appEnvironment(client *scalingo.Client, appID string) (map[string]interface{}, error) {
-	variables, err := client.VariablesList(appID)
+	scalingo "github.com/Scalingo/go-scalingo/v5"
+)
+
+func appEnvironment(ctx context.Context, client *scalingo.Client, appID string) (map[string]interface{}, error) {
+	variables, err := client.VariablesList(ctx, appID)
 	if err != nil {
 		return nil, err
 	}
@@ -15,19 +19,19 @@ func appEnvironment(client *scalingo.Client, appID string) (map[string]interface
 	return result, nil
 }
 
-func deleteVariablesByName(client *scalingo.Client, appID string, names []string) error {
+func deleteVariablesByName(ctx context.Context, client *scalingo.Client, appID string, names []string) error {
 	if len(names) == 0 {
 		return nil
 	}
 
-	variables, err := client.VariablesList(appID)
+	variables, err := client.VariablesList(ctx, appID)
 	if err != nil {
 		return err
 	}
 
 	for _, variable := range variables {
 		if Contains(names, variable.Name) {
-			err := client.VariableUnset(appID, variable.ID)
+			err := client.VariableUnset(ctx, appID, variable.ID)
 			if err != nil {
 				return err
 			}

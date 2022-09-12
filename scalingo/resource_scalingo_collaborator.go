@@ -47,7 +47,7 @@ func resourceScalingoCollaborator() *schema.Resource {
 func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	collaborator, err := client.CollaboratorAdd(d.Get("app").(string), d.Get("email").(string))
+	collaborator, err := client.CollaboratorAdd(ctx, d.Get("app").(string), d.Get("email").(string))
 	if err != nil {
 		return diag.Errorf("fail to add collaborator: %v", err)
 	}
@@ -68,7 +68,7 @@ func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, met
 func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	collaborators, err := client.CollaboratorsList(d.Get("app").(string))
+	collaborators, err := client.CollaboratorsList(ctx, d.Get("app").(string))
 	if err != nil {
 		return diag.Errorf("fail to list collaborators: %v", err)
 	}
@@ -104,7 +104,7 @@ func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta 
 func resourceCollaboratorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	err := client.CollaboratorRemove(d.Get("app").(string), d.Id())
+	err := client.CollaboratorRemove(ctx, d.Get("app").(string), d.Id())
 	if err != nil {
 		return diag.Errorf("fail to remove collaborator: %v", err)
 	}
@@ -122,7 +122,7 @@ func resourceCollaboratorImport(ctx context.Context, d *schema.ResourceData, met
 	appID := ids[0]
 	collaboratorID := ids[1] // can be either the email address or the ID
 
-	collaborators, err := client.CollaboratorsList(appID)
+	collaborators, err := client.CollaboratorsList(ctx, appID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to list collaborators: %v", err)
 	}

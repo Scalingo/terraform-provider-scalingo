@@ -44,7 +44,7 @@ func dataSourceScNotificationPlatform() *schema.Resource {
 func dataSourceScNotificationPlatformRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	platforms, err := client.NotificationPlatformsList()
+	platforms, err := client.NotificationPlatformsList(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}

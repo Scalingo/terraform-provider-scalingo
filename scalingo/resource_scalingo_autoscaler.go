@@ -62,7 +62,7 @@ func resourceAutoscalerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	appID, _ := d.Get("app").(string)
 
-	autoscaler, err := client.AutoscalerAdd(appID, scalingo.AutoscalerAddParams{
+	autoscaler, err := client.AutoscalerAdd(ctx, appID, scalingo.AutoscalerAddParams{
 		ContainerType: d.Get("container_type").(string),
 		Metric:        d.Get("metric").(string),
 		Target:        d.Get("target").(float64),
@@ -84,7 +84,7 @@ func resourceAutoscalerRead(ctx context.Context, d *schema.ResourceData, meta in
 	id := d.Id()
 	appID, _ := d.Get("app").(string)
 
-	autoscaler, err := client.AutoscalerShow(appID, id)
+	autoscaler, err := client.AutoscalerShow(ctx, appID, id)
 	if err != nil {
 		return diag.Errorf("fail to get autoscaler: %v", err)
 	}
@@ -138,7 +138,7 @@ func resourceAutoscalerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if changed {
-		_, err := client.AutoscalerUpdate(appID, id, params)
+		_, err := client.AutoscalerUpdate(ctx, appID, id, params)
 		if err != nil {
 			return diag.Errorf("fail to update autoscaler: %v", err)
 		}
@@ -152,7 +152,7 @@ func resourceAutoscalerDelete(ctx context.Context, d *schema.ResourceData, meta 
 	appID, _ := d.Get("app").(string)
 
 	client, _ := meta.(*scalingo.Client)
-	err := client.AutoscalerRemove(appID, id)
+	err := client.AutoscalerRemove(ctx, appID, id)
 	if err != nil {
 		return diag.Errorf("fail to destroy autoscaler: %v", err)
 	}

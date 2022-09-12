@@ -42,7 +42,7 @@ func dataSourceScStackRead(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("name attribute is mendatory")
 	}
 
-	stacks, err := client.StacksList()
+	stacks, err := client.StacksList(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}

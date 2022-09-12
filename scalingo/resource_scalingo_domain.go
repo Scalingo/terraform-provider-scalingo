@@ -41,7 +41,7 @@ func resourceDomainCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	domainName, _ := d.Get("common_name").(string)
 	appID, _ := d.Get("app").(string)
 
-	domain, err := client.DomainsAdd(appID, scalingo.Domain{
+	domain, err := client.DomainsAdd(ctx, appID, scalingo.Domain{
 		Name: domainName,
 	})
 	if err != nil {
@@ -57,7 +57,7 @@ func resourceDomainRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	appID, _ := d.Get("app").(string)
 
-	domain, err := client.DomainsShow(appID, d.Id())
+	domain, err := client.DomainsShow(ctx, appID, d.Id())
 	if err != nil {
 		return diag.Errorf("fail to get domain: %v", err)
 	}
@@ -76,7 +76,7 @@ func resourceDomainDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	appID, _ := d.Get("app").(string)
 
-	err := client.DomainsRemove(appID, d.Id())
+	err := client.DomainsRemove(ctx, appID, d.Id())
 	if err != nil {
 		return diag.Errorf("fail to remove domain: %v", err)
 	}
