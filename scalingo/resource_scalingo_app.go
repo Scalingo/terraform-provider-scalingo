@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	scalingo "github.com/Scalingo/go-scalingo/v4"
+	scalingo "github.com/Scalingo/go-scalingo/v5"
 )
 
 func resourceScalingoApp() *schema.Resource {
@@ -75,7 +75,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		createOpts.StackID = stackID
 	}
 
-	app, err := client.AppsCreate(createOpts)
+	app, err := client.AppsCreate(ctx, createOpts)
 	if err != nil {
 		return diag.Errorf("fail to create app: %v", err)
 	}
@@ -100,12 +100,12 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 			})
 		}
 
-		_, _, err := client.VariableMultipleSet(d.Id(), variables)
+		_, _, err := client.VariableMultipleSet(ctx, d.Id(), variables)
 		if err != nil {
 			return diag.Errorf("fail to set environement variables: %v", err)
 		}
 
-		allEnvironment, err := appEnvironment(client, app.Id)
+		allEnvironment, err := appEnvironment(ctx, client, app.Id)
 		if err != nil {
 			return diag.Errorf("fail to fetch application environment: %v", err)
 		}
@@ -116,7 +116,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if forceHTTPS, _ := d.Get("force_https").(bool); forceHTTPS {
-		_, err := client.AppsForceHTTPS(app.Id, forceHTTPS)
+		_, err := client.AppsForceHTTPS(ctx, app.Id, forceHTTPS)
 		if err != nil {
 			return diag.Errorf("fail to force HTTPS: %v", err)
 		}
@@ -130,7 +130,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 	id := d.Id()
 
-	app, err := client.AppsShow(id)
+	app, err := client.AppsShow(ctx, id)
 	if err != nil {
 		return diag.Errorf("fail to fetch application: %v", err)
 	}
@@ -147,7 +147,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diag.Errorf("fail to store application informations: %v", err)
 	}
 
-	variables, err := client.VariablesList(d.Id())
+	variables, err := client.VariablesList(ctx, d.Id())
 	if err != nil {
 		return diag.Errorf("fail to list application variables: %v", err)
 	}
@@ -181,7 +181,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if d.HasChange("name") {
 		oldName, newName := d.GetChange("name")
 
-		app, err := client.AppsRename(oldName.(string), newName.(string))
+		app, err := client.AppsRename(ctx, oldName.(string), newName.(string))
 		if err != nil {
 			return diag.Errorf("fail to rename app: %v", err)
 		}
@@ -201,7 +201,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		diff := MapDiff(oldVariables.(map[string]interface{}), newVariables.(map[string]interface{}))
 		variables, _ := newVariables.(map[string]interface{})
 
-		err := deleteVariablesByName(client, d.Id(), diff.Deleted)
+		err := deleteVariablesByName(ctx, client, d.Id(), diff.Deleted)
 		if err != nil {
 			return diag.Errorf("fail to delete variables: %v", err)
 		}
@@ -222,12 +222,12 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 			})
 		}
 
-		_, _, err = client.VariableMultipleSet(d.Id(), variablesToSet)
+		_, _, err = client.VariableMultipleSet(ctx, d.Id(), variablesToSet)
 		if err != nil {
 			return diag.Errorf("fail to set variables: %v", err)
 		}
 
-		allEnvironment, err := appEnvironment(client, d.Id())
+		allEnvironment, err := appEnvironment(ctx, client, d.Id())
 		if err != nil {
 			return diag.Errorf("fail to get application environment: %v", err)
 		}
@@ -237,7 +237,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 			return diag.Errorf("fail to store application environment: %v", err)
 		}
 
-		err = restartApp(client, d.Id())
+		err = restartApp(ctx, client, d.Id())
 		if err != nil {
 			return diag.Errorf("fail to restart app: %v", err)
 		}
@@ -245,7 +245,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if d.HasChange("force_https") {
 		_, ForceHTTPS := d.GetChange("force_https")
-		_, err := client.AppsForceHTTPS(d.Id(), ForceHTTPS.(bool))
+		_, err := client.AppsForceHTTPS(ctx, d.Id(), ForceHTTPS.(bool))
 		if err != nil {
 			return diag.Errorf("fail to set force HTTPS: %v", err)
 		}
@@ -253,7 +253,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if d.HasChange("stack_id") {
 		_, stackID := d.GetChange("stack_id")
-		_, err := client.AppsSetStack(d.Id(), stackID.(string))
+		_, err := client.AppsSetStack(ctx, d.Id(), stackID.(string))
 		if err != nil {
 			return diag.Errorf("fail to set application stack: %v", err)
 		}
@@ -268,24 +268,24 @@ func resourceAppDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	id := d.Id()
 	name, _ := d.Get("name").(string)
 
-	err := client.AppsDestroy(id, name)
+	err := client.AppsDestroy(ctx, id, name)
 	if err != nil {
 		return diag.Errorf("fail to destroy app: %v", err)
 	}
 	return nil
 }
 
-func restartApp(client *scalingo.Client, id string) error {
+func restartApp(ctx context.Context, client *scalingo.Client, id string) error {
 	// Ignore the restart error, here the error is probably linked to the
 	// application status, which means that the environment will be applied
 	// later.
 	// If the restart occurred, wait synchronously until the end of the restart
 	// to validate that everything went fine
-	res, err := client.AppsRestart(id, nil)
+	res, err := client.AppsRestart(ctx, id, nil)
 	if err == nil && res.StatusCode == 202 {
 		defer res.Body.Close()
 		location := res.Header.Get("Location")
-		err = waitOperation(client, location)
+		err = waitOperation(ctx, client, location)
 		if err != nil {
 			return fmt.Errorf("fail to get wait for the operation to finish: %v", err)
 		}

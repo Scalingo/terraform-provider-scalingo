@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v4"
+	"github.com/Scalingo/go-scalingo/v5"
 )
 
 func resourceScalingoLogDrain() *schema.Resource {
@@ -99,9 +99,9 @@ func resourceLogDrainCreate(ctx context.Context, d *schema.ResourceData, meta in
 
 	addonID, ok := d.Get("addon").(string)
 	if ok && addonID != "" {
-		res, err = client.LogDrainAddonAdd(appID, addonID, params)
+		res, err = client.LogDrainAddonAdd(ctx, appID, addonID, params)
 	} else {
-		res, err = client.LogDrainAdd(appID, params)
+		res, err = client.LogDrainAdd(ctx, appID, params)
 	}
 	if err != nil {
 		return diag.Errorf("fail to create log drain: %v", err)
@@ -132,9 +132,9 @@ func resourceLogDrainRead(ctx context.Context, d *schema.ResourceData, meta inte
 	var res []scalingo.LogDrain
 	addonID, ok := d.Get("addon").(string)
 	if ok && addonID != "" {
-		res, err = client.LogDrainsAddonList(appID, addonID)
+		res, err = client.LogDrainsAddonList(ctx, appID, addonID)
 	} else {
-		res, err = client.LogDrainsList(appID)
+		res, err = client.LogDrainsList(ctx, appID)
 	}
 	if err != nil {
 		return diag.Errorf("fail to list log drains: %v", err)
@@ -169,9 +169,9 @@ func resourceLogDrainDelete(ctx context.Context, d *schema.ResourceData, meta in
 	var err error
 	addonID, ok := d.Get("addon").(string)
 	if ok && addonID != "" {
-		err = client.LogDrainAddonRemove(appID, addonID, drainURL)
+		err = client.LogDrainAddonRemove(ctx, appID, addonID, drainURL)
 	} else {
-		err = client.LogDrainRemove(appID, drainURL)
+		err = client.LogDrainRemove(ctx, appID, drainURL)
 	}
 	if err != nil {
 		return diag.Errorf("fail to destroy log drain: %v", err)

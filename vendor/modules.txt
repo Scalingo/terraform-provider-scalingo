@@ -1,11 +1,11 @@
-# github.com/Scalingo/go-scalingo/v4 v4.16.0
+# github.com/Scalingo/go-scalingo/v5 v5.1.0
 ## explicit; go 1.17
-github.com/Scalingo/go-scalingo/v4
-github.com/Scalingo/go-scalingo/v4/billing
-github.com/Scalingo/go-scalingo/v4/debug
-github.com/Scalingo/go-scalingo/v4/http
-github.com/Scalingo/go-scalingo/v4/http/httpmock
-github.com/Scalingo/go-scalingo/v4/io
+github.com/Scalingo/go-scalingo/v5
+github.com/Scalingo/go-scalingo/v5/billing
+github.com/Scalingo/go-scalingo/v5/debug
+github.com/Scalingo/go-scalingo/v5/http
+github.com/Scalingo/go-scalingo/v5/http/httpmock
+github.com/Scalingo/go-scalingo/v5/io
 # github.com/agext/levenshtein v1.2.2
 ## explicit
 github.com/agext/levenshtein
@@ -17,7 +17,7 @@ github.com/apparentlymart/go-textseg/v13/textseg
 github.com/fatih/color
 # github.com/go-test/deep v1.0.5
 ## explicit; go 1.13
-# github.com/golang-jwt/jwt/v4 v4.4.1
+# github.com/golang-jwt/jwt/v4 v4.4.2
 ## explicit; go 1.16
 github.com/golang-jwt/jwt/v4
 # github.com/golang/mock v1.6.0

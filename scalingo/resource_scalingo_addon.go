@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	scalingo "github.com/Scalingo/go-scalingo/v4"
+	scalingo "github.com/Scalingo/go-scalingo/v5"
 )
 
 func resourceScalingoAddon() *schema.Resource {
@@ -57,7 +57,7 @@ func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	planName, _ := d.Get("plan").(string)
 	appID, _ := d.Get("app").(string)
 
-	planID, err := addonPlanID(client, providerID, planName)
+	planID, err := addonPlanID(ctx, client, providerID, planName)
 	if err != nil {
 		return diag.Errorf("fail to get addon plan id: %v", err)
 	}
@@ -66,7 +66,7 @@ func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(err)
 	}
 
-	res, err := client.AddonProvision(appID, scalingo.AddonProvisionParams{
+	res, err := client.AddonProvision(ctx, appID, scalingo.AddonProvisionParams{
 		AddonProviderID: providerID,
 		PlanID:          planID,
 	})
@@ -74,7 +74,7 @@ func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.Errorf("fail to provision addon: %v", err)
 	}
 
-	err = waitUntilProvisionned(client, res.Addon)
+	err = waitUntilProvisionned(ctx, client, res.Addon)
 	if err != nil {
 		return diag.Errorf("fail to wait for the addon to be provisionned: %v", err)
 	}
@@ -92,7 +92,7 @@ func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	appID, _ := d.Get("app").(string)
 
-	addon, err := client.AddonShow(appID, d.Id())
+	addon, err := client.AddonShow(ctx, appID, d.Id())
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			d.MarkNewResource()
@@ -123,19 +123,19 @@ func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	providerID, _ := d.Get("provider_id").(string)
 
 	if d.HasChange("plan") {
-		planID, err := addonPlanID(client, providerID, d.Get("plan").(string))
+		planID, err := addonPlanID(ctx, client, providerID, d.Get("plan").(string))
 		if err != nil {
 			return diag.Errorf("fail to get addon plan id: %v", err)
 		}
 
-		res, err := client.AddonUpgrade(appID, d.Id(), scalingo.AddonUpgradeParams{
+		res, err := client.AddonUpgrade(ctx, appID, d.Id(), scalingo.AddonUpgradeParams{
 			PlanID: planID,
 		})
 		if err != nil {
 			return diag.Errorf("fail to upgrade addon: %v", err)
 		}
 
-		err = waitUntilProvisionned(client, res.Addon)
+		err = waitUntilProvisionned(ctx, client, res.Addon)
 		if err != nil {
 			return diag.Errorf("fail to wait for the addon to be provisionned: %v", err)
 		}
@@ -153,7 +153,7 @@ func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	appID, _ := d.Get("app").(string)
 
-	err := client.AddonDestroy(appID, d.Id())
+	err := client.AddonDestroy(ctx, appID, d.Id())
 	if err != nil {
 		return diag.Errorf("fail to destroy addon: %v", err)
 	}
@@ -161,8 +161,8 @@ func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func addonPlanID(client *scalingo.Client, providerID, name string) (string, error) {
-	plans, err := client.AddonProviderPlansList(providerID)
+func addonPlanID(ctx context.Context, client *scalingo.Client, providerID, name string) (string, error) {
+	plans, err := client.AddonProviderPlansList(ctx, providerID)
 	if err != nil {
 		return "", err
 	}
@@ -198,12 +198,12 @@ func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta inter
 	return []*schema.ResourceData{d}, nil
 }
 
-func waitUntilProvisionned(client *scalingo.Client, addon scalingo.Addon) error {
+func waitUntilProvisionned(ctx context.Context, client *scalingo.Client, addon scalingo.Addon) error {
 	var err error
 	timer := time.NewTimer(5 * time.Minute)
 	ticker := time.NewTicker(5 * time.Second)
 	for addon.Status != scalingo.AddonStatusRunning {
-		addon, err = client.AddonShow(addon.AppID, addon.ID)
+		addon, err = client.AddonShow(ctx, addon.AppID, addon.ID)
 		if err != nil {
 			return err
 		}
