@@ -1,6 +1,6 @@
 package scalingo
 
-import scalingo "github.com/Scalingo/go-scalingo/v4"
+import scalingo "github.com/Scalingo/go-scalingo/v5"
 
 func appEnvironment(client *scalingo.Client, appID string) (map[string]interface{}, error) {
 	variables, err := client.VariablesList(appID)

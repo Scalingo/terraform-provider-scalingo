@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Scalingo/go-scalingo/v4"
+	"github.com/Scalingo/go-scalingo/v5"
 )
 
 func waitOperation(client *scalingo.Client, location string) error {
