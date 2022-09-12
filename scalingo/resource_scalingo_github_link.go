@@ -10,6 +10,7 @@ import (
 	scalingo "github.com/Scalingo/go-scalingo/v4"
 )
 
+// deprecated
 func resourceScalingoGithubLink() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceGithubLinkCreate,
