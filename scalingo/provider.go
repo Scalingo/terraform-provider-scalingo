@@ -49,6 +49,7 @@ func Provider() *schema.Provider {
 			"scalingo_autoscaler":     resourceScalingoAutoscaler(),
 			"scalingo_domain":         resourceScalingoDomain(),
 			"scalingo_github_link":    resourceScalingoGithubLink(),
+			"scalingo_scm_repo_link":  resourceScalingoScmRepoLink(),
 			"scalingo_notifier":       resourceScalingoNotifier(),
 			"scalingo_run":            resourceScalingoRun(),
 			"scalingo_log_drain":      resourceScalingoLogDrain(),
