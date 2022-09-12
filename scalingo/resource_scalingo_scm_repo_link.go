@@ -85,11 +85,8 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 	branch, _ := d.Get("branch").(string)
 	autoDeployEnabled, _ := d.Get("auto_deploy_enabled").(bool)
 	deployOnBranchChange, _ := d.Get("deploy_on_branch_change").(bool)
-	authIntegrationUUID, isAuthIntegrationUUID := d.Get("auth_integration_uuid").(scalingo.SCMType)
+	authIntegrationUUID, _ := d.Get("auth_integration_uuid").(string)
 
-	if !isAuthIntegrationUUID {
-		return diag.Errorf("Invalid auth_integration_uuid")
-	}
 	if branch == "" && (deployOnBranchChange || autoDeployEnabled) {
 		return diag.Errorf("Branch must be set when deploy_on_branch_change or auto_deploy_enabled is enabled")
 	}
@@ -106,12 +103,11 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 	hoursBeforeDeleteOnCloseUint := uint(hoursBeforeDeleteOnClose)
 	hoursBeforeDeleteStaleUint := uint(hoursBeforeDeleteStale)
 
-	authIntegrationUUIDString := authIntegrationUUID.Str()
 	params := scalingo.SCMRepoLinkCreateParams{
 		Source:                  &source,
 		AutoDeployEnabled:       &autoDeployEnabled,
 		DeployReviewAppsEnabled: &deployReviewAppsEnabled,
-		AuthIntegrationUUID:     &authIntegrationUUIDString,
+		AuthIntegrationUUID:     &authIntegrationUUID,
 	}
 
 	if autoDeployEnabled {
