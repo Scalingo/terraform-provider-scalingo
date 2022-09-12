@@ -194,7 +194,7 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if (d.HasChange("branch") || d.HasChange("deploy_on_branch_change")) && deployOnBranchChange {
 		err := client.SCMRepoLinkManualDeploy(app, branch)
 		if err != nil {
-			return diag.Errorf("fail to tigger manual deploy: %v", err)
+			return diag.Errorf("fail to trigger manual deploy: %v", err)
 		}
 		err = d.Set("branch", branch)
 		if err != nil {
