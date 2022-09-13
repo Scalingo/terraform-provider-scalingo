@@ -101,6 +101,7 @@ func resourceScmIntegrationRead(ctx context.Context, d *schema.ResourceData, met
 
 	return nil
 }
+
 func resourceScmIntegrationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
