@@ -32,6 +32,26 @@ func resourceScalingoScmIntegration() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"uid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"username": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"avatar_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"email": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"profile_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
