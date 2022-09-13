@@ -14,11 +14,11 @@ func dataSourceScalingoScmIntegration() *schema.Resource {
 		ReadContext: dataSourceScmIntegrationRead,
 
 		Schema: map[string]*schema.Schema{
-			"scm_type": {
+			"url": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"url": {
+			"scm_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -59,8 +59,7 @@ func filterScmIntegrations(ss []scalingo.SCMIntegration, test func(scalingo.SCMI
 func dataSourceScmIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	scmTypeStr, _ := d.Get("scm_type").(string)
-	scmType := scalingo.SCMType(scmTypeStr)
+	url, _ := d.Get("url").(string)
 
 	integrations, err := client.SCMIntegrationsList(ctx)
 	if err != nil {
@@ -68,9 +67,10 @@ func dataSourceScmIntegrationRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	selectedIntegrations := filterScmIntegrations(integrations, func(element scalingo.SCMIntegration) bool {
-		return element.SCMType == scmType
+		return element.URL == url
 	})
-	if len(integrations) == 0 {
+
+	if len(selectedIntegrations) != 1 {
 		return diag.Errorf("fail to find the selected integration")
 	}
 
