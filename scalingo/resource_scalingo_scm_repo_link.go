@@ -88,7 +88,7 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 	authIntegrationUUID, _ := d.Get("auth_integration_uuid").(string)
 
 	if branch == "" && (deployOnBranchChange || autoDeployEnabled) {
-		return diag.Errorf("Branch must be set when deploy_on_branch_change or auto_deploy_enabled is enabled")
+		return diag.Errorf("branch must be set when deploy_on_branch_change or auto_deploy_enabled is enabled")
 	}
 
 	deployReviewAppsEnabled, _ := d.Get("deploy_review_apps_enabled").(bool)
@@ -138,6 +138,7 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	return nil
 }
+
 func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
@@ -149,7 +150,7 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 	deployOnBranchChange, _ := d.Get("deploy_on_branch_change").(bool)
 
 	if branch == "" && (deployOnBranchChange || autoDeploy) {
-		return diag.Errorf("Branch must be set when deploy_on_branch_change or auto_deploy_enabled is enabled")
+		return diag.Errorf("branch must be set when deploy_on_branch_change or auto_deploy_enabled is enabled")
 	}
 
 	params := scalingo.SCMRepoLinkUpdateParams{}
@@ -219,6 +220,7 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 	return nil
 }
+
 func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 	app, _ := d.Get("app").(string)
@@ -245,6 +247,7 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	return nil
 }
+
 func resourceScmRepoLinkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 	app, _ := d.Get("app").(string)
@@ -256,6 +259,7 @@ func resourceScmRepoLinkDelete(ctx context.Context, d *schema.ResourceData, meta
 
 	return nil
 }
+
 func resourceScmRepoLinkImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	err := d.Set("app", d.Id())
 	if err != nil {

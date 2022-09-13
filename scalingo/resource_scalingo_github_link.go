@@ -10,7 +10,7 @@ import (
 	scalingo "github.com/Scalingo/go-scalingo/v5"
 )
 
-// deprecated
+// Deprecated: the usage of 'github_link' resources are replaced by the 'scm_repo_link' resources allowing to support several git server integrations.
 func resourceScalingoGithubLink() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceGithubLinkCreate,
