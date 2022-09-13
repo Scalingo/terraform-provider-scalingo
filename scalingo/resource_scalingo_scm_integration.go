@@ -28,9 +28,10 @@ func resourceScalingoScmIntegration() *schema.Resource {
 				ForceNew: true,
 			},
 			"access_token": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Required:  true,
+				ForceNew:  true,
+				Sensitive: true,
 			},
 			"uid": {
 				Type:     schema.TypeString,
