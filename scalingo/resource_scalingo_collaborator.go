@@ -59,7 +59,7 @@ func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, met
 		"status":   collaborator.Status,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store collaborator informations: %v", err)
+		return diag.Errorf("fail to store collaborator information: %v", err)
 	}
 
 	return nil
@@ -95,7 +95,7 @@ func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta 
 		"status":   collaborator.Status,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store collaborator informations: %v", err)
+		return diag.Errorf("fail to store collaborator information: %v", err)
 	}
 
 	return nil

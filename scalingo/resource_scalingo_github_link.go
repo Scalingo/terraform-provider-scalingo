@@ -183,7 +183,7 @@ func resourceGithubLinkUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if (d.HasChange("branch") || d.HasChange("deploy_on_branch_change")) && deployOnBranchChange {
 		err := client.GithubLinkManualDeploy(ctx, app, d.Id(), branch)
 		if err != nil {
-			return diag.Errorf("fail to tigger manual deploy: %v", err)
+			return diag.Errorf("fail to trigger manual deploy: %v", err)
 		}
 		err = d.Set("branch", branch)
 		if err != nil {
@@ -207,7 +207,7 @@ func resourceGithubLinkUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			"destroy_stale_review_app_after":  int(link.HoursBeforeDeleteStale),
 		})
 		if err != nil {
-			return diag.Errorf("fail to store github repo link informations: %v", err)
+			return diag.Errorf("fail to store github repo link information: %v", err)
 		}
 	}
 
@@ -234,7 +234,7 @@ func resourceGithubLinkRead(ctx context.Context, d *schema.ResourceData, meta in
 		"source":                          link.GithubSource,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store github repo link informations: %v", err)
+		return diag.Errorf("fail to store github repo link information: %v", err)
 	}
 
 	return nil

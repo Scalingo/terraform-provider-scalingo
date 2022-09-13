@@ -70,7 +70,7 @@ func resourceAutoscalerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		MaxContainers: d.Get("max_containers").(int),
 	})
 	if err != nil {
-		return diag.Errorf("fail to get autoscaler informations: %v", err)
+		return diag.Errorf("fail to get autoscaler information: %v", err)
 	}
 
 	d.SetId(autoscaler.ID)

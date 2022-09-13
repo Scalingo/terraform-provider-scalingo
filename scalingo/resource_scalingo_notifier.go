@@ -247,7 +247,7 @@ func setFromScNotifier(ctx context.Context, d *schema.ResourceData, c scalingo.A
 
 	err = SetAll(d, values)
 	if err != nil {
-		return fmt.Errorf("fail to store values from notifer: %v", err)
+		return fmt.Errorf("fail to store values from notifier: %v", err)
 	}
 	return nil
 }
