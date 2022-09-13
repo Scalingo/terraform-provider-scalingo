@@ -98,7 +98,7 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 	hoursBeforeDeleteStale, _ := d.Get("hours_before_delete_stale").(int)
 
 	if hoursBeforeDeleteOnClose < 0 || hoursBeforeDeleteStale < 0 {
-		return diag.Errorf("Hours must be an unsigned int")
+		return diag.Errorf("hours must be an unsigned int")
 	}
 	hoursBeforeDeleteOnCloseUint := uint(hoursBeforeDeleteOnClose)
 	hoursBeforeDeleteStaleUint := uint(hoursBeforeDeleteStale)
