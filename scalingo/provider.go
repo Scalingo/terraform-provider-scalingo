@@ -43,12 +43,9 @@ func Provider() *schema.Provider {
 			"scalingo_notification_platform": dataSourceScNotificationPlatform(),
 			"scalingo_region":                dataSourceScRegion(),
 			"scalingo_stack":                 dataSourceScStack(),
-<<<<<<< HEAD
 			"scalingo_container_size":        dataSourceScContainerSize(),
 			"scalingo_addon_providers":       dataSourceScAddonProvider(),
-=======
-			"scalingo_scm_integration":       dataSourceScalingoScmIntegration(),
->>>>>>> 09c92b53 (feat(data-scm-integration): Add scm integration data source)
+			"scalingo_scm_integration":       dataSourceScScmIntegration(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"scalingo_addon":           resourceScalingoAddon(),

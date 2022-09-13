@@ -9,9 +9,9 @@ import (
 	scalingo "github.com/Scalingo/go-scalingo/v5"
 )
 
-func dataSourceScalingoScmIntegration() *schema.Resource {
+func dataSourceScScmIntegration() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceScmIntegrationRead,
+		ReadContext: dataSourceScScmIntegrationRead,
 
 		Schema: map[string]*schema.Schema{
 			"url": {
@@ -56,7 +56,7 @@ func filterScmIntegrations(ss []scalingo.SCMIntegration, test func(scalingo.SCMI
 	return ret
 }
 
-func dataSourceScmIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceScScmIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
 	url, _ := d.Get("url").(string)
