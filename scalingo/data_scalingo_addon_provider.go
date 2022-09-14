@@ -33,10 +33,7 @@ func dataSourceScAddonProvider() *schema.Resource {
 func dataSourceScAddonProviderRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	name, ok := d.Get("name").(string)
-	if !ok || name == "" {
-		return diag.Errorf("name attribute is mandatory")
-	}
+	name, _ := d.Get("name").(string)
 
 	addonProviders, err := client.AddonProvidersList(ctx)
 	if err != nil {
