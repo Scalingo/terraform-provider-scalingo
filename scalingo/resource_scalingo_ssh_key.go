@@ -104,13 +104,8 @@ func resourceSSHKeyDelete(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceSSHKeyImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	err := d.Set("id", d.Id())
-	if err != nil {
-		return nil, fmt.Errorf("fail to store ssh key id: %v", err)
-	}
-
 	diags := resourceSSHKeyRead(ctx, d, meta)
-	err = DiagnosticError(diags)
+	err := DiagnosticError(diags)
 	if err != nil {
 		return nil, fmt.Errorf("fail to read ssh key: %v", err)
 	}
