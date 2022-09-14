@@ -70,7 +70,7 @@ func resourceScmIntegrationCreate(ctx context.Context, d *schema.ResourceData, m
 
 	integration, err := client.SCMIntegrationsCreate(ctx, scalingo.SCMType(scmType), url, accessToken)
 	if err != nil {
-		return diag.Errorf("fail to add scm integration: %v", err)
+		return diag.Errorf("fail to create scm integration: %v", err)
 	}
 	d.SetId(integration.ID)
 
@@ -83,7 +83,7 @@ func resourceScmIntegrationRead(ctx context.Context, d *schema.ResourceData, met
 	id := d.Id()
 	integration, err := client.SCMIntegrationsShow(ctx, id)
 	if err != nil {
-		return diag.Errorf("fail to fetch integration: %v", err)
+		return diag.Errorf("fail to fetch scm integration: %v", err)
 	}
 	err = SetAll(d, map[string]interface{}{
 		"scm_type":    integration.SCMType,
