@@ -50,23 +50,18 @@ func dataSourceScRegionsRead(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 
-	name, ok := d.Get("name").(string)
-	if !ok || name == "" {
-		return diag.Errorf("name attribute is mandatory")
-	}
+	name, _ := d.Get("name").(string)
 
-	hasSelected := false
 	var selected scalingo.Region
 	for _, v := range regions {
 		if v.Name == name {
 			selected = v
-			hasSelected = true
 			break
 		}
 	}
 
-	if !hasSelected {
-		return diag.Errorf("notification platform '%v' not found", name)
+	if selected == (scalingo.Region{}) {
+		return diag.Errorf("region '%v' not found", name)
 	}
 
 	d.SetId(selected.Name)
@@ -79,7 +74,7 @@ func dataSourceScRegionsRead(ctx context.Context, d *schema.ResourceData, meta i
 		"ssh":          selected.SSH,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store notification platform attributes: %v", err)
+		return diag.FromErr(err)
 	}
 
 	return nil
