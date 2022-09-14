@@ -39,7 +39,6 @@ func dataSourceScAddonProviderRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	addonProviders, err := client.AddonProvidersList(ctx)
-
 	if err != nil {
 		return diag.Errorf("fail to fetch addon providers: %v", err)
 	}
