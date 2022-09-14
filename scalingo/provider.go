@@ -56,6 +56,7 @@ func Provider() *schema.Provider {
 			"scalingo_scm_repo_link":   resourceScalingoScmRepoLink(),
 			"scalingo_notifier":        resourceScalingoNotifier(),
 			"scalingo_log_drain":       resourceScalingoLogDrain(),
+			"scalingo_ssh_key":         resourceScalingoSSHKey(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
