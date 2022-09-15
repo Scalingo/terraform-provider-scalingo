@@ -56,10 +56,6 @@ func dataSourceScAddonProvider() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"price": {
-							Type:     schema.TypeFloat,
-							Computed: true,
-						},
 						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -123,20 +119,19 @@ func dataSourceScAddonProviderRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.Errorf("addon provider '%v' not found", name)
 	}
 	d.SetId(selected.ID)
-	categoryMap := map[string]interface{}{
+	category := map[string]interface{}{
 		"id":          selected.Category.ID,
 		"name":        selected.Category.Name,
 		"description": selected.Category.Description,
 		"position":    fmt.Sprintf("%d", selected.Category.Position),
 	}
 
-	planMap := make([]map[string]interface{}, 0)
+	plans := []map[string]interface{}{}
 	for _, v := range selected.Plans {
-		planMap = append(planMap, map[string]interface{}{
+		plans = append(plans, map[string]interface{}{
 			"id":                           v.ID,
 			"name":                         v.Name,
 			"display_name":                 v.DisplayName,
-			"price":                        v.Price,
 			"description":                  v.Description,
 			"position":                     v.Position,
 			"on_demand":                    v.OnDemand,
@@ -152,10 +147,10 @@ func dataSourceScAddonProviderRead(ctx context.Context, d *schema.ResourceData, 
 		"name":              selected.Name,
 		"short_description": selected.ShortDescription,
 		"description":       selected.Description,
-		"category":          categoryMap,
+		"category":          category,
 		"provider_name":     selected.ProviderName,
 		"provider_url":      selected.ProviderURL,
-		"plans":             planMap,
+		"plans":             plans,
 	})
 	if err != nil {
 		return diag.FromErr(err)
