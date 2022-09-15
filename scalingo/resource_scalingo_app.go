@@ -80,9 +80,9 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.Errorf("fail to create app: %v", err)
 	}
 
-	d.SetId(app.Id)
+	d.SetId(app.ID)
 	err = SetAll(d, map[string]interface{}{
-		"url":      app.Url,
+		"url":      app.URL,
 		"git_url":  app.GitUrl,
 		"stack_id": app.StackID,
 	})
@@ -105,7 +105,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 			return diag.Errorf("fail to set environement variables: %v", err)
 		}
 
-		allEnvironment, err := appEnvironment(ctx, client, app.Id)
+		allEnvironment, err := appEnvironment(ctx, client, app.ID)
 		if err != nil {
 			return diag.Errorf("fail to fetch application environment: %v", err)
 		}
@@ -116,7 +116,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if forceHTTPS, _ := d.Get("force_https").(bool); forceHTTPS {
-		_, err := client.AppsForceHTTPS(ctx, app.Id, forceHTTPS)
+		_, err := client.AppsForceHTTPS(ctx, app.ID, forceHTTPS)
 		if err != nil {
 			return diag.Errorf("fail to force HTTPS: %v", err)
 		}
@@ -135,10 +135,10 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diag.Errorf("fail to fetch application: %v", err)
 	}
 
-	d.SetId(app.Id)
+	d.SetId(app.ID)
 	err = SetAll(d, map[string]interface{}{
 		"name":        app.Name,
-		"url":         app.Url,
+		"url":         app.URL,
 		"git_url":     app.GitUrl,
 		"force_https": app.ForceHTTPS,
 		"stack_id":    app.StackID,
@@ -188,7 +188,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		err = SetAll(d, map[string]interface{}{
 			"name":    app.Name,
-			"url":     app.Url,
+			"url":     app.URL,
 			"git_url": app.GitUrl,
 		})
 		if err != nil {

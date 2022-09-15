@@ -88,7 +88,7 @@ func resourceScmIntegrationRead(ctx context.Context, d *schema.ResourceData, met
 	err = SetAll(d, map[string]interface{}{
 		"scm_type":    integration.SCMType,
 		"url":         integration.URL,
-		"uid":         integration.Uid,
+		"uid":         integration.UID,
 		"username":    integration.Username,
 		"avatar_url":  integration.AvatarURL,
 		"email":       integration.Email,
