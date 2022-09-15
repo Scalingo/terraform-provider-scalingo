@@ -42,6 +42,10 @@ func dataSourceScScmIntegration() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"owner_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -83,6 +87,7 @@ func dataSourceScScmIntegrationRead(ctx context.Context, d *schema.ResourceData,
 		"avatar_url":  integration.AvatarURL,
 		"email":       integration.Email,
 		"profile_url": integration.ProfileURL,
+		"owner_id":    integration.Owner.ID,
 	})
 	if err != nil {
 		return diag.Errorf("fail to store scm integration information: %v", err)
