@@ -32,10 +32,8 @@ func dataSourceScAddonProvider() *schema.Resource {
 				Computed: true,
 			},
 			"category": {
-				Type: schema.TypeMap,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				Type:     schema.TypeMap,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 			"provider_name": {
@@ -47,8 +45,55 @@ func dataSourceScAddonProvider() *schema.Resource {
 				Computed: true,
 			},
 			"plans": {
-				Type:     schema.TypeList,
-				Elem:     &schema.Schema{Type: schema.TypeMap},
+				Type: schema.TypeList,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"display_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"price": {
+							Type:     schema.TypeFloat,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"position": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"on_demand": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"disabled": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"disabled_alternative_plan_id": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"sku": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"hds_available": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+					},
+				},
 				Computed: true,
 			},
 		},
@@ -91,17 +136,14 @@ func dataSourceScAddonProviderRead(ctx context.Context, d *schema.ResourceData, 
 			"id":                           v.ID,
 			"name":                         v.Name,
 			"display_name":                 v.DisplayName,
-			"price":                        fmt.Sprintf("%f", v.Price),
+			"price":                        v.Price,
 			"description":                  v.Description,
-			"position":                     fmt.Sprintf("%d", v.Position),
-			"on_demand":                    fmt.Sprintf("%t", v.OnDemand),
-			"disabled":                     fmt.Sprintf("%t", v.Disabled),
-			"disabled_alternative_plan_id": fmt.Sprintf("%t", v.DisabledAlternativePlanID),
+			"position":                     v.Position,
+			"on_demand":                    v.OnDemand,
+			"disabled":                     v.Disabled,
+			"disabled_alternative_plan_id": v.DisabledAlternativePlanID,
 			"sku":                          v.SKU,
-			"hds_available":                fmt.Sprintf("%t", v.HDSAvailable),
-			"pricing_default_price":        v.Pricings.Default.Price,
-			"pricing_default_currency":     v.Pricings.Default.Currency,
-			"pricing_default_period":       v.Pricings.Default.Period,
+			"hds_available":                v.HDSAvailable,
 		})
 	}
 
