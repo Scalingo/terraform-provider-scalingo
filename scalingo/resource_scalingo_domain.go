@@ -65,8 +65,25 @@ func resourceDomainUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	appID, _ := d.Get("app").(string)
 	canonical, _ := d.Get("canonical").(bool)
 
-	// TODO add update when go scalingo is up to date
-
+	if d.HasChange("canonical") {
+		var domain scalingo.Domain
+		var err error
+		if canonical {
+			domain, err = client.DomainSetCanonical(ctx, appID, d.Id())
+		} else {
+			// This may cause an issue when the user is changing which domain is canonical
+			// This may add the new canonical flag first and remove the old one after
+			// In this case the newly set canonical flag will be removed instead of the old one
+			domain, err = client.DomainUnsetCanonical(ctx, appID)
+		}
+		if err != nil {
+			return diag.Errorf("fail to update domain: %v", err)
+		}
+		err = d.Set("canonical", domain.Canonical)
+		if err != nil {
+			return diag.Errorf("fail to store domain information: %v", err)
+		}
+	}
 	return nil
 }
 
