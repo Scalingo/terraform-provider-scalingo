@@ -86,7 +86,7 @@ func resourceContainerTypeRead(ctx context.Context, d *schema.ResourceData, meta
 				"size":   ct.Size,
 			})
 			if err != nil {
-				return diag.Errorf("fail to store container type informations: %v", err)
+				return diag.Errorf("fail to store container type information: %v", err)
 			}
 			break
 		}
@@ -153,7 +153,7 @@ func resourceContainerTypeImport(ctx context.Context, d *schema.ResourceData, me
 				"size":   ct.Size,
 			})
 			if err != nil {
-				return nil, fmt.Errorf("fail to store container informations: %v", err)
+				return nil, fmt.Errorf("fail to store container information: %v", err)
 			}
 
 			return []*schema.ResourceData{d}, nil
