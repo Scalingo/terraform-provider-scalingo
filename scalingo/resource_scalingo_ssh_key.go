@@ -35,16 +35,6 @@ func resourceScalingoSSHKey() *schema.Resource {
 	}
 }
 
-func filterSSHKeys(sshKeys []scalingo.Key, test func(scalingo.Key) bool) []scalingo.Key {
-	var filteredKeys []scalingo.Key
-	for _, s := range sshKeys {
-		if test(s) {
-			filteredKeys = append(filteredKeys, s)
-		}
-	}
-	return filteredKeys
-}
-
 func resourceSSHKeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
@@ -69,7 +59,7 @@ func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 	if err != nil {
 		return diag.Errorf("fail to get list of ssh keys: %v", err)
 	}
-	filteredKeys := filterSSHKeys(keysList, func(k scalingo.Key) bool {
+	filteredKeys := keepIf(keysList, func(k scalingo.Key) bool {
 		return k.ID == keyID
 	})
 
