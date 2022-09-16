@@ -50,16 +50,6 @@ func dataSourceScScmIntegration() *schema.Resource {
 	}
 }
 
-func filterScmIntegrations(ss []scalingo.SCMIntegration, test func(scalingo.SCMIntegration) bool) []scalingo.SCMIntegration {
-	var ret []scalingo.SCMIntegration
-	for _, s := range ss {
-		if test(s) {
-			ret = append(ret, s)
-		}
-	}
-	return ret
-}
-
 func dataSourceScScmIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
@@ -70,7 +60,7 @@ func dataSourceScScmIntegrationRead(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("fail to fetch integrations: %v", err)
 	}
 
-	selectedIntegrations := filterScmIntegrations(integrations, func(element scalingo.SCMIntegration) bool {
+	selectedIntegrations := keepIf(integrations, func(element scalingo.SCMIntegration) bool {
 		return element.URL == url
 	})
 
