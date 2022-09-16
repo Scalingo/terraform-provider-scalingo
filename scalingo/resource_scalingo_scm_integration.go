@@ -115,9 +115,7 @@ func resourceScmIntegrationDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceScmIntegrationImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	d.SetId(d.Id())
-
-	diags := resourceGithubLinkRead(ctx, d, meta)
+	diags := resourceScmIntegrationRead(ctx, d, meta)
 	if err := DiagnosticError(diags); err != nil {
 		return nil, fmt.Errorf("fail to read scm integration: %v", err)
 	}
