@@ -1,6 +1,6 @@
 module github.com/Scalingo/terraform-provider-scalingo
 
-go 1.18
+go 1.19
 
 require (
 	github.com/Scalingo/go-scalingo/v5 v5.2.0
