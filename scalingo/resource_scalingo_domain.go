@@ -14,6 +14,7 @@ import (
 func resourceScalingoDomain() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDomainCreate,
+		UpdateContext: resourceDomainUpdate,
 		ReadContext:   resourceDomainRead,
 		DeleteContext: resourceDomainDelete,
 		Importer: &schema.ResourceImporter{
@@ -31,6 +32,10 @@ func resourceScalingoDomain() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"canonical": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -38,11 +43,13 @@ func resourceScalingoDomain() *schema.Resource {
 func resourceDomainCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	domainName, _ := d.Get("common_name").(string)
 	appID, _ := d.Get("app").(string)
+	domainName, _ := d.Get("common_name").(string)
+	canonical, _ := d.Get("canonical").(bool)
 
 	domain, err := client.DomainsAdd(ctx, appID, scalingo.Domain{
-		Name: domainName,
+		Name:      domainName,
+		Canonical: canonical,
 	})
 	if err != nil {
 		return diag.Errorf("fail to add domain: %v", err)
@@ -52,21 +59,34 @@ func resourceDomainCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
+func resourceDomainUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+
+	appID, _ := d.Get("app").(string)
+	canonical, _ := d.Get("canonical").(bool)
+
+	// TODO add update when go scalingo is up to date
+
+	return nil
+}
+
 func resourceDomainRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
 	appID, _ := d.Get("app").(string)
-
 	domain, err := client.DomainsShow(ctx, appID, d.Id())
 	if err != nil {
 		return diag.Errorf("fail to get domain: %v", err)
 	}
 
-	d.SetId(domain.ID)
-	err = d.Set("common_name", domain.Name)
+	err = SetAll(d, map[string]interface{}{
+		"common_name": domain.Name,
+		"canonical":   domain.Canonical,
+	})
 	if err != nil {
-		return diag.Errorf("fail to store domain name: %v", err)
+		return diag.Errorf("fail to store domain information: %v", err)
 	}
+	d.SetId(domain.ID)
 
 	return nil
 }
