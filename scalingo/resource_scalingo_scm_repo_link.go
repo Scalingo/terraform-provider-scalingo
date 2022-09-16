@@ -221,7 +221,6 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 		"hours_before_delete_stale":    int(link.HoursBeforeDeleteStale),
 		"branch":                       link.Branch,
 		"auth_integration_uuid":        link.AuthIntegrationUUID,
-		"source":                       link.Source,
 	})
 	if err != nil {
 		return diag.Errorf("fail to store scm repo link information: %v", err)
