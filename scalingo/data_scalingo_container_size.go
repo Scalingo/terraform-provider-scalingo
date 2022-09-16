@@ -62,7 +62,6 @@ func dataSourceScContainerSize() *schema.Resource {
 	}
 }
 
-// dataSourceScNotificationPlatformRead performs the Scalingo API lookup
 func dataSourceScContainerSizeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
@@ -73,27 +72,30 @@ func dataSourceScContainerSizeRead(ctx context.Context, d *schema.ResourceData, 
 
 	name, _ := d.Get("name").(string)
 
-	i := 0
-	for i < len(containers) && containers[i].Name != name {
-		i++
+	var containerSize scalingo.ContainerSize
+	for _, v := range containers {
+		if v.Name == name {
+			containerSize = v
+			break
+		}
 	}
-	if i >= len(containers) {
-		return diag.Errorf("container '%v' not found", name)
+	if containerSize.ID == "" {
+		return diag.Errorf("container size '%v' not found", name)
 	}
 
-	d.SetId(containers[i].ID)
+	d.SetId(containerSize.ID)
 	err = SetAll(d, map[string]interface{}{
-		"name":             containers[i].Name,
-		"id":               containers[i].ID,
-		"sku":              containers[i].SKU,
-		"human_name":       containers[i].HumanName,
-		"human_cpu":        containers[i].HumanCPU,
-		"memory":           containers[i].Memory,
-		"pids_limit":       containers[i].PidsLimit,
-		"hourly_price":     containers[i].HourlyPrice,
-		"thirtydays_price": containers[i].ThirtydaysPrice,
-		"swap":             containers[i].Swap,
-		"ordinal":          containers[i].Ordinal,
+		"name":             containerSize.Name,
+		"id":               containerSize.ID,
+		"sku":              containerSize.SKU,
+		"human_name":       containerSize.HumanName,
+		"human_cpu":        containerSize.HumanCPU,
+		"memory":           containerSize.Memory,
+		"pids_limit":       containerSize.PidsLimit,
+		"hourly_price":     containerSize.HourlyPrice,
+		"thirtydays_price": containerSize.ThirtydaysPrice,
+		"swap":             containerSize.Swap,
+		"ordinal":          containerSize.Ordinal,
 	})
 	if err != nil {
 		return diag.FromErr(err)
