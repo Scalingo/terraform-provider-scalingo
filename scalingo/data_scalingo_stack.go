@@ -39,7 +39,7 @@ func dataSourceScStackRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	name, ok := d.Get("name").(string)
 	if !ok || name == "" {
-		return diag.Errorf("name attribute is mendatory")
+		return diag.Errorf("name attribute is mandatory")
 	}
 
 	stacks, err := client.StacksList(ctx)
@@ -68,7 +68,7 @@ func dataSourceScStackRead(ctx context.Context, d *schema.ResourceData, meta int
 		"default":     selected.Default,
 	})
 	if err != nil {
-		return diag.Errorf("fail to save stack informations: %v", err)
+		return diag.Errorf("fail to save stack information: %v", err)
 	}
 
 	return nil

@@ -84,11 +84,10 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 	source, _ := d.Get("source").(string)
 	branch, _ := d.Get("branch").(string)
 	autoDeployEnabled, _ := d.Get("auto_deploy_enabled").(bool)
-	deployOnBranchChange, _ := d.Get("deploy_on_branch_change").(bool)
 	authIntegrationUUID, _ := d.Get("auth_integration_uuid").(string)
 
-	if branch == "" && (deployOnBranchChange || autoDeployEnabled) {
-		return diag.Errorf("branch must be set when deploy_on_branch_change or auto_deploy_enabled is enabled")
+	if branch == "" && autoDeployEnabled {
+		return diag.Errorf("branch must be set when auto_deploy_enabled is enabled")
 	}
 
 	deployReviewAppsEnabled, _ := d.Get("deploy_review_apps_enabled").(bool)
@@ -127,13 +126,6 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("fail to add SCM repo link: %v", err)
 	}
 
-	if deployOnBranchChange {
-		err := client.SCMRepoLinkManualDeploy(ctx, app, branch)
-		if err != nil {
-			return diag.Errorf("fail to trigger manual deploy: %v", err)
-		}
-	}
-
 	d.SetId(link.ID)
 
 	return nil
@@ -146,11 +138,10 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	changed := false
 	branch, _ := d.Get("branch").(string)
-	autoDeploy, _ := d.Get("auto_deploy_enabled").(bool)
-	deployOnBranchChange, _ := d.Get("deploy_on_branch_change").(bool)
+	autoDeployEnabled, _ := d.Get("auto_deploy_enabled").(bool)
 
-	if branch == "" && (deployOnBranchChange || autoDeploy) {
-		return diag.Errorf("branch must be set when deploy_on_branch_change or auto_deploy_enabled is enabled")
+	if branch == "" && autoDeployEnabled {
+		return diag.Errorf("branch must be set when auto_deploy_enabled is enabled")
 	}
 
 	params := scalingo.SCMRepoLinkUpdateParams{}
@@ -160,7 +151,7 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if d.HasChange("auto_deploy_enabled") {
-		params.AutoDeployEnabled = &autoDeploy
+		params.AutoDeployEnabled = &autoDeployEnabled
 		changed = true
 	}
 
@@ -187,17 +178,6 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if d.HasChange("hours_before_delete_stale") {
 		params.HoursBeforeDeleteStale = uintAddr(uint(d.Get("hours_before_delete_stale").(int)))
 		changed = true
-	}
-
-	if (d.HasChange("branch") || d.HasChange("deploy_on_branch_change")) && deployOnBranchChange {
-		err := client.SCMRepoLinkManualDeploy(ctx, app, branch)
-		if err != nil {
-			return diag.Errorf("fail to trigger manual deploy: %v", err)
-		}
-		err = d.Set("branch", branch)
-		if err != nil {
-			return diag.Errorf("fail to store new branch name: %v", err)
-		}
 	}
 
 	if changed {

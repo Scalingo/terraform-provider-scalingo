@@ -102,7 +102,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		_, _, err := client.VariableMultipleSet(ctx, d.Id(), variables)
 		if err != nil {
-			return diag.Errorf("fail to set environement variables: %v", err)
+			return diag.Errorf("fail to set environment variables: %v", err)
 		}
 
 		allEnvironment, err := appEnvironment(ctx, client, app.ID)
@@ -144,7 +144,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		"stack_id":    app.StackID,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store application informations: %v", err)
+		return diag.Errorf("fail to store application information: %v", err)
 	}
 
 	variables, err := client.VariablesList(ctx, d.Id())

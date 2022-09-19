@@ -76,7 +76,7 @@ func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	err = waitUntilProvisionned(ctx, client, res.Addon)
 	if err != nil {
-		return diag.Errorf("fail to wait for the addon to be provisionned: %v", err)
+		return diag.Errorf("fail to wait for the addon to be provisioned: %v", err)
 	}
 
 	d.SetId(res.Addon.ID)
@@ -108,7 +108,7 @@ func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		"provider_id": addon.AddonProvider.ID,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store addon informations: %v", err)
+		return diag.Errorf("fail to store addon information: %v", err)
 	}
 
 	d.SetId(addon.ID)
@@ -137,7 +137,7 @@ func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 		err = waitUntilProvisionned(ctx, client, res.Addon)
 		if err != nil {
-			return diag.Errorf("fail to wait for the addon to be provisionned: %v", err)
+			return diag.Errorf("fail to wait for the addon to be provisioned: %v", err)
 		}
 
 		if err := d.Set("plan_id", res.Addon.Plan.ID); err != nil {
