@@ -3,6 +3,7 @@ package scalingo
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -151,12 +152,13 @@ func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	afterTimeStr, _ := d.Get("after").(string)
 	if afterTimeStr == "" {
-		afterTime = time.Now()
+		afterTime = time.Now().Add(time.Hour * 24)
 	} else {
 		afterTime, err = time.Parse(scalingo.BillingMonthDateFormat, afterTimeStr)
 		if err != nil {
 			return diag.Errorf("fail to parse after: %v", err)
 		}
+		afterTime = afterTime.Add(time.Hour * 24)
 	}
 
 	// fetch all invoices in a slice
@@ -200,7 +202,12 @@ func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.Errorf("fail to store invoices information: %v", err)
 	}
 
-	// TODO find id to set
-	d.SetId("my_id")
+	// use period as an ID
+	d.SetId(fmt.Sprintf(
+		"%s-%s",
+		beforeTime.Format(scalingo.BillingMonthDateFormat),
+		afterTime.Format(scalingo.BillingMonthDateFormat),
+	))
+
 	return nil
 }
