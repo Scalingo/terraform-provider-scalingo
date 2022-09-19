@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 			"scalingo_container_size":        dataSourceScContainerSize(),
 			"scalingo_addon_providers":       dataSourceScAddonProvider(),
 			"scalingo_scm_integration":       dataSourceScScmIntegration(),
+			"scalingo_invoices":              dataSourceScInvoice(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"scalingo_addon":           resourceScalingoAddon(),
