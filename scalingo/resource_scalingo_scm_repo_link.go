@@ -3,7 +3,6 @@ package scalingo
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -127,7 +126,7 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("fail to add SCM repo link: %v", err)
 	}
 
-	d.SetId(link.ID)
+	d.SetId(link.AppID)
 
 	return nil
 }
@@ -210,7 +209,7 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(link.ID)
+	d.SetId(link.AppID)
 
 	err = SetAll(d, map[string]interface{}{
 		"auto_deploy_enabled":          link.AutoDeployEnabled,
@@ -221,6 +220,7 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 		"hours_before_delete_stale":    int(link.HoursBeforeDeleteStale),
 		"branch":                       link.Branch,
 		"auth_integration_uuid":        link.AuthIntegrationUUID,
+		"source":                       fmt.Sprintf("%s/%s/%s", link.URL, link.Owner, link.Repo),
 	})
 	if err != nil {
 		return diag.Errorf("fail to store scm repo link information: %v", err)
@@ -242,13 +242,7 @@ func resourceScmRepoLinkDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceScmRepoLinkImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	ids := strings.Split(d.Id(), ":")
-	if len(ids) != 2 {
-		return nil, fmt.Errorf("address should have the following format: <appid>:<addonid>")
-	}
-
-	d.SetId(ids[1])
-	err := d.Set("app", ids[0])
+	err := d.Set("app", d.Id())
 	if err != nil {
 		return nil, fmt.Errorf("fail to store app id: %v", err)
 	}
