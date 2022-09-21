@@ -2,6 +2,11 @@
 
 ## To Be Released
 
+## 5.2.1
+
+* fix(notifiers): add missing fields in `Notifier` [#278](https://github.com/Scalingo/go-scalingo/pull/278)
+* fix(scm_repo_link): add missing field `URL` in the structure `SCMRepoLink` [#281](https://github.com/Scalingo/go-scalingo/pull/282)
+
 ## 5.2.0
 
 * feat(alerts): add missing fields for alerts endpoint [#276](https://github.com/Scalingo/go-scalingo/pull/276)
