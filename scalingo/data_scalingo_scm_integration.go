@@ -53,7 +53,7 @@ func dataSourceScScmIntegration() *schema.Resource {
 func dataSourceScScmIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	scmType := d.Get("scm_type").(string)
+	scmType, _ := d.Get("scm_type").(string)
 	url, _ := d.Get("url").(string)
 
 	integrations, err := client.SCMIntegrationsList(ctx)
