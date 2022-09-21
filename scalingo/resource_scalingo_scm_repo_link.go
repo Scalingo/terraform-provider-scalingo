@@ -41,11 +41,6 @@ func resourceScalingoScmRepoLink() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"deploy_on_branch_change": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"deploy_review_apps_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -54,7 +49,7 @@ func resourceScalingoScmRepoLink() *schema.Resource {
 			"delete_on_close_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 			},
 			"hours_before_delete_on_close": {
 				Type:     schema.TypeInt,
@@ -212,6 +207,7 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 	d.SetId(link.AppID)
 
 	err = SetAll(d, map[string]interface{}{
+		"app":                          link.AppID,
 		"auto_deploy_enabled":          link.AutoDeployEnabled,
 		"deploy_review_apps_enabled":   link.DeployReviewAppsEnabled,
 		"delete_on_close_enabled":      link.DeleteOnCloseEnabled,

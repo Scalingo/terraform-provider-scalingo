@@ -16,11 +16,11 @@ func dataSourceScScmIntegration() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"url": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"scm_type": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"uid": {
 				Type:     schema.TypeString,
@@ -53,6 +53,7 @@ func dataSourceScScmIntegration() *schema.Resource {
 func dataSourceScScmIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
+	scmType := d.Get("scm_type").(string)
 	url, _ := d.Get("url").(string)
 
 	integrations, err := client.SCMIntegrationsList(ctx)
@@ -60,8 +61,15 @@ func dataSourceScScmIntegrationRead(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("fail to fetch integrations: %v", err)
 	}
 
-	selectedIntegrations := keepIf(integrations, func(element scalingo.SCMIntegration) bool {
-		return element.URL == url
+	selectedIntegrations := keepIf(integrations, func(integration scalingo.SCMIntegration) bool {
+		selected := true
+		if scmType != "" {
+			selected = selected && (scalingo.SCMType(scmType) == integration.SCMType)
+		}
+		if url != "" {
+			selected = selected && (url == integration.URL)
+		}
+		return selected
 	})
 
 	if len(selectedIntegrations) != 1 {
