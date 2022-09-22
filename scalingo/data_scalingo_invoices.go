@@ -115,8 +115,17 @@ func dataSourceScInvoice() *schema.Resource {
 
 const PageSize = 50
 
-func isInTimeRange(before time.Time, after time.Time, value time.Time) bool {
-	return value.After(before) && value.Before(after)
+func isInTimeRange(min time.Time, max time.Time, value time.Time) bool {
+	// If no boundary is set, the time is considered always in the range
+	if min.IsZero() && max.IsZero() {
+		return true
+	} else if min.IsZero() {
+		return value.Before(max)
+	} else if max.IsZero() {
+		return value.After(min)
+	} else {
+		return value.After(min) && value.Before(max)
+	}
 }
 
 func structToMap(v interface{}) (map[string]interface{}, error) {
@@ -133,17 +142,19 @@ func structToMap(v interface{}) (map[string]interface{}, error) {
 }
 
 func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var beforeTime time.Time
-	var afterTime time.Time
-	var err error
+	var (
+		// All invoices which concern a month after a given date
+		afterTime time.Time
+		// All invoices which concern a month before a given date
+		beforeTime time.Time
+		err        error
+	)
 
 	client, _ := meta.(*scalingo.Client)
 
-	// handling config and setting default values if empty
+	// Handling date filters
 	beforeTimeStr, _ := d.Get("before").(string)
-	if beforeTimeStr == "" {
-		beforeTime = time.Unix(0, 0)
-	} else {
+	if beforeTimeStr != "" {
 		beforeTime, err = time.Parse(scalingo.BillingMonthDateFormat, beforeTimeStr)
 		if err != nil {
 			return diag.Errorf("fail to parse before: %v", err)
@@ -151,14 +162,11 @@ func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	afterTimeStr, _ := d.Get("after").(string)
-	if afterTimeStr == "" {
-		afterTime = time.Now().Add(time.Hour * 24)
-	} else {
+	if afterTimeStr != "" {
 		afterTime, err = time.Parse(scalingo.BillingMonthDateFormat, afterTimeStr)
 		if err != nil {
 			return diag.Errorf("fail to parse after: %v", err)
 		}
-		afterTime = afterTime.Add(time.Hour * 24)
 	}
 
 	// fetch all invoices in a slice
@@ -183,7 +191,7 @@ func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	// filtering invoices with the current config
 	filteredInvoices := keepIf(invoices, func(invoice *scalingo.Invoice) bool {
-		return isInTimeRange(beforeTime, afterTime, time.Time(invoice.BillingMonth))
+		return isInTimeRange(afterTime, beforeTime, time.Time(invoice.BillingMonth))
 	})
 
 	// mapping invoices list to raw json struct before saving in the state to keep json fields
@@ -192,6 +200,10 @@ func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta i
 		"after":    afterTimeStr,
 		"invoices": filteredInvoices,
 	})
+
+	for i, invoice := range invoicesState["invoices"].([]interface{}) {
+		invoice.(map[string]interface{})["billing_month"] = time.Time(filteredInvoices[i].BillingMonth).Format(time.RFC3339)
+	}
 	if err != nil {
 		return diag.Errorf("fail to map invoices: %v", err)
 	}
