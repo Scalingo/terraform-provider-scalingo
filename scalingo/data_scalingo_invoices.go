@@ -201,6 +201,8 @@ func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta i
 		"invoices": filteredInvoices,
 	})
 
+	// Since scalingo.Invoice.BillingMonth is a custom type, it is serialized as an empty object and not a string
+	// Fixing this manually for the time being
 	for i, invoice := range invoicesState["invoices"].([]interface{}) {
 		invoice.(map[string]interface{})["billing_month"] = time.Time(filteredInvoices[i].BillingMonth).Format(time.RFC3339)
 	}
