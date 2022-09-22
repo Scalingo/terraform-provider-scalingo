@@ -41,11 +41,6 @@ func resourceScalingoScmRepoLink() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"deploy_on_branch_change": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"deploy_review_apps_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -54,7 +49,7 @@ func resourceScalingoScmRepoLink() *schema.Resource {
 			"delete_on_close_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 			},
 			"hours_before_delete_on_close": {
 				Type:     schema.TypeInt,
@@ -126,7 +121,7 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.Errorf("fail to add SCM repo link: %v", err)
 	}
 
-	d.SetId(link.ID)
+	d.SetId(link.AppID)
 
 	return nil
 }
@@ -209,9 +204,10 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(link.ID)
+	d.SetId(link.AppID)
 
 	err = SetAll(d, map[string]interface{}{
+		"app":                          link.AppID,
 		"auto_deploy_enabled":          link.AutoDeployEnabled,
 		"deploy_review_apps_enabled":   link.DeployReviewAppsEnabled,
 		"delete_on_close_enabled":      link.DeleteOnCloseEnabled,
@@ -220,6 +216,7 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 		"hours_before_delete_stale":    int(link.HoursBeforeDeleteStale),
 		"branch":                       link.Branch,
 		"auth_integration_uuid":        link.AuthIntegrationUUID,
+		"source":                       fmt.Sprintf("%s/%s/%s", link.URL, link.Owner, link.Repo),
 	})
 	if err != nil {
 		return diag.Errorf("fail to store scm repo link information: %v", err)
