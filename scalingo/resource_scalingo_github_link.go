@@ -29,11 +29,6 @@ func resourceScalingoGithubLink() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"deploy_on_branch_change": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"auto_deploy": {
 				Type:     schema.TypeBool,
 				Optional: true,
