@@ -12,7 +12,7 @@ import (
 	scalingo "github.com/Scalingo/go-scalingo/v5"
 )
 
-func resourceScalingoAlerts() *schema.Resource {
+func resourceScalingoAlert() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAlertsCreate,
 		ReadContext:   resourceAlertsRead,
@@ -33,20 +33,23 @@ func resourceScalingoAlerts() *schema.Resource {
 				Required: true,
 			},
 			"limit": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Required: true,
 			},
 			"disabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 			},
 			"send_when_below": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 			},
 			"duration_before_trigger": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "0s",
 			},
 			"remind_every": {
 				Type:     schema.TypeString,
@@ -56,18 +59,6 @@ func resourceScalingoAlerts() *schema.Resource {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
-			},
-			"created_at": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"updated_at": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"metadata": {
-				Type:     schema.TypeMap,
-				Computed: true,
 			},
 		},
 
@@ -81,24 +72,48 @@ func resourceAlertsCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	client, _ := meta.(*scalingo.Client)
 	app, _ := d.Get("app").(string)
 
-	remindEvery, err := time.ParseDuration(d.Get("remind_every").(string))
-	if err != nil {
-		return diag.Errorf("fail to parse remind_every information: %v", err)
+	var (
+		remindEvery           time.Duration
+		durationBeforeTrigger time.Duration
+		err                   error
+	)
+
+	params := scalingo.AlertAddParams{
+		ContainerType: d.Get("container_type").(string),
+		Metric:        d.Get("metric").(string),
+		Limit:         d.Get("limit").(float64),
+		Disabled:      d.Get("disabled").(bool),
+		SendWhenBelow: d.Get("send_when_below").(bool),
 	}
-	durationBeforeTrigger, err := time.ParseDuration(d.Get("duration_before_trigger").(string))
-	if err != nil {
-		return diag.Errorf("fail to parse duration_before_trigger information: %v", err)
+
+	for _, notifierID := range d.Get("notifiers").([]interface{}) {
+		params.Notifiers = append(params.Notifiers, notifierID.(string))
 	}
-	alert, err := client.AlertAdd(ctx, app, scalingo.AlertAddParams{
-		ContainerType:         d.Get("container_type").(string),
-		Metric:                d.Get("metric").(string),
-		Limit:                 d.Get("limit").(float64),
-		Disabled:              d.Get("disabled").(bool),
-		RemindEvery:           &remindEvery,
-		DurationBeforeTrigger: &durationBeforeTrigger,
-		SendWhenBelow:         d.Get("send_when_below").(bool),
-		Notifiers:             d.Get("notifiers").([]string),
-	})
+
+	remindEveryStr := d.Get("remind_every").(string)
+	if remindEveryStr != "" {
+		remindEvery, err = time.ParseDuration(remindEveryStr)
+		if err != nil {
+			return diag.Errorf("fail to parse remind_every information: %v", err)
+		}
+	}
+
+	durationBeforeTriggerStr := d.Get("duration_before_trigger").(string)
+	if durationBeforeTriggerStr != "" {
+		durationBeforeTrigger, err = time.ParseDuration(durationBeforeTriggerStr)
+		if err != nil {
+			return diag.Errorf("fail to parse duration_before_trigger information: %v", err)
+		}
+	}
+
+	if remindEvery != 0 {
+		params.RemindEvery = &remindEvery
+	}
+	if durationBeforeTrigger != 0 {
+		params.DurationBeforeTrigger = &durationBeforeTrigger
+	}
+
+	alert, err := client.AlertAdd(ctx, app, params)
 	if err != nil {
 		return diag.Errorf("fail to create alert: %v", err)
 	}
@@ -128,9 +143,6 @@ func resourceAlertsRead(ctx context.Context, d *schema.ResourceData, meta interf
 		"duration_before_trigger": alert.DurationBeforeTrigger.String(),
 		"remind_every":            alert.RemindEvery,
 		"notifiers":               alert.Notifiers,
-		"created_at":              alert.CreatedAt,
-		"updated_at":              alert.UpdatedAt,
-		"metadata":                alert.Metadata,
 	})
 	if err != nil {
 		return diag.Errorf("fail to get alerts information: %v", err)
@@ -199,9 +211,6 @@ func resourceAlertsUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			"duration_before_trigger": alertUpdate.DurationBeforeTrigger.String(),
 			"remind_every":            alertUpdate.RemindEvery,
 			"notifiers":               alertUpdate.Notifiers,
-			"created_at":              alertUpdate.CreatedAt,
-			"updated_at":              alertUpdate.UpdatedAt,
-			"metadata":                alertUpdate.Metadata,
 		})
 		if err != nil {
 			return diag.Errorf("fail to get alerts information: %v", err)
