@@ -241,5 +241,4 @@ func resourceAlertsImport(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	return []*schema.ResourceData{d}, nil
-
 }
