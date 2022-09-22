@@ -90,7 +90,7 @@ func resourceAlertsCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		params.Notifiers = append(params.Notifiers, notifierID.(string))
 	}
 
-	remindEveryStr := d.Get("remind_every").(string)
+	remindEveryStr, _ := d.Get("remind_every").(string)
 	if remindEveryStr != "" {
 		remindEvery, err = time.ParseDuration(remindEveryStr)
 		if err != nil {
@@ -98,7 +98,7 @@ func resourceAlertsCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	durationBeforeTriggerStr := d.Get("duration_before_trigger").(string)
+	durationBeforeTriggerStr, _ := d.Get("duration_before_trigger").(string)
 	if durationBeforeTriggerStr != "" {
 		durationBeforeTrigger, err = time.ParseDuration(durationBeforeTriggerStr)
 		if err != nil {
