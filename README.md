@@ -46,6 +46,21 @@ export SCALINGO_API_TOKEN=tk-us-1234567890
 terraform plan
 ```
 
+### Use terraform import
+
+Some resources are using a specific syntax using a `:` to provide multiple information.
+
+The terraform import command is formatted like the following:
+
+```bash
+terraform import <ADDR> <ID>
+```
+
+For example, to import alerts the ID is composed like: `<application ID>:<alert ID>`
+
+```bash
+terraform import scalingo_alert.cpu_alert my-app:al-18f30d13-3c19-422d-a0d6-6cdb254baeb7
+```
 
 
 Building The Provider
