@@ -127,11 +127,17 @@ func resourceAlertsRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	app, _ := d.Get("app").(string)
 
-	alert, err := client.AlertShow(ctx, app, d.Id())
+	alerts, err := client.AlertsList(ctx, app)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
+	filteredAlerts := keepIf(alerts, func(a *scalingo.Alert) bool {
+		return a.ID == d.Id()
+	})
+	if len(filteredAlerts) != 1 {
+		return diag.Errorf("fail to get alerts information: %v", err)
+	}
+	alert := filteredAlerts[0]
 	d.SetId(alert.ID)
 	err = SetAll(d, map[string]interface{}{
 		"app":                     alert.AppID,
@@ -189,9 +195,11 @@ func resourceAlertsUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		alertUpdateParams.SendWhenBelow = boolAddr(d.Get("send_when_below").(bool))
 		changed = true
 	}
-	notifiers, _ := d.Get("send_when_below").([]string)
 	if d.HasChange("notifiers") {
-		alertUpdateParams.Notifiers = &notifiers
+		alertUpdateParams.Notifiers = new([]string)
+		for _, notifierID := range d.Get("notifiers").([]interface{}) {
+			*alertUpdateParams.Notifiers = append(*alertUpdateParams.Notifiers, notifierID.(string))
+		}
 		changed = true
 	}
 
@@ -210,7 +218,7 @@ func resourceAlertsUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			"send_when_below":         alertUpdate.SendWhenBelow,
 			"duration_before_trigger": alertUpdate.DurationBeforeTrigger.String(),
 			"remind_every":            alertUpdate.RemindEvery,
-			"notifiers":               alertUpdate.Notifiers,
+			"notifiers":               alertUpdateParams.Notifiers,
 		})
 		if err != nil {
 			return diag.Errorf("fail to get alerts information: %v", err)
