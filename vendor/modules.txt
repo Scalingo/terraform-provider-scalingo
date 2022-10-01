@@ -1,11 +1,11 @@
-# github.com/Scalingo/go-scalingo/v5 v5.2.1
+# github.com/Scalingo/go-scalingo/v6 v6.0.0
 ## explicit; go 1.17
-github.com/Scalingo/go-scalingo/v5
-github.com/Scalingo/go-scalingo/v5/billing
-github.com/Scalingo/go-scalingo/v5/debug
-github.com/Scalingo/go-scalingo/v5/http
-github.com/Scalingo/go-scalingo/v5/http/httpmock
-github.com/Scalingo/go-scalingo/v5/io
+github.com/Scalingo/go-scalingo/v6
+github.com/Scalingo/go-scalingo/v6/billing
+github.com/Scalingo/go-scalingo/v6/debug
+github.com/Scalingo/go-scalingo/v6/http
+github.com/Scalingo/go-scalingo/v6/http/httpmock
+github.com/Scalingo/go-scalingo/v6/io
 # github.com/agext/levenshtein v1.2.2
 ## explicit
 github.com/agext/levenshtein
@@ -174,7 +174,7 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
 github.com/zclconf/go-cty/cty/set
-# golang.org/x/net v0.0.0-20220920203100-d0c6ba3f52d9
+# golang.org/x/net v0.0.0-20220927171203-f486391704dc
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
