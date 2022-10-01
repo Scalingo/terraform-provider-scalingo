@@ -1,4 +1,4 @@
-# github.com/Scalingo/go-scalingo/v5 v5.2.1
+# github.com/Scalingo/go-scalingo/v5 v5.2.2
 ## explicit; go 1.17
 github.com/Scalingo/go-scalingo/v5
 github.com/Scalingo/go-scalingo/v5/billing

@@ -2,6 +2,10 @@
 
 ## To Be Released
 
+## 5.2.2
+
+*  feat(logs): add timestamp to the logs URL [#283](https://github.com/Scalingo/go-scalingo/pull/283)
+
 ## 5.2.1
 
 * fix(notifiers): add missing fields in `Notifier` [#278](https://github.com/Scalingo/go-scalingo/pull/278)
