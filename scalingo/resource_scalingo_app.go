@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	scalingo "github.com/Scalingo/go-scalingo/v5"
+	scalingo "github.com/Scalingo/go-scalingo/v6"
 )
 
 func resourceScalingoApp() *schema.Resource {
@@ -44,8 +44,11 @@ func resourceScalingoApp() *schema.Resource {
 				Default:  false,
 			},
 			"stack_id": {
-				Type:     schema.TypeString,
+				Type: schema.TypeString,
+				// Either set by the user, either set automatically by server if
+				// no value is provided
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					if newValue == "" {
 						return true
@@ -83,7 +86,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	d.SetId(app.ID)
 	err = SetAll(d, map[string]interface{}{
 		"url":      app.URL,
-		"git_url":  app.GitUrl,
+		"git_url":  app.GitURL,
 		"stack_id": app.StackID,
 	})
 	if err != nil {
@@ -139,7 +142,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 	err = SetAll(d, map[string]interface{}{
 		"name":        app.Name,
 		"url":         app.URL,
-		"git_url":     app.GitUrl,
+		"git_url":     app.GitURL,
 		"force_https": app.ForceHTTPS,
 		"stack_id":    app.StackID,
 	})
@@ -189,7 +192,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		err = SetAll(d, map[string]interface{}{
 			"name":    app.Name,
 			"url":     app.URL,
-			"git_url": app.GitUrl,
+			"git_url": app.GitURL,
 		})
 		if err != nil {
 			return diag.Errorf("fail to store application metadata: %v", err)

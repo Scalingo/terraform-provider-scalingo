@@ -21,7 +21,7 @@ resource "scalingo_domain" "wwwtestappcom" {
 
 resource "scalingo_addon" "test_redis" {
   provider_id = "scalingo-redis"
-  plan        = "free"
+  plan        = "redis-sandbox"
   app         = scalingo_app.test_app.id
 }
 

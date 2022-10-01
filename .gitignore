@@ -32,3 +32,6 @@ website/vendor
 # Test exclusions
 !command/test-fixtures/**/*.tfstate
 !command/test-fixtures/**/.terraform/
+
+# Local configuration excludsion
+*.tfrc
