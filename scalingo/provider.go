@@ -1,3 +1,5 @@
+// Package scalingo is the main package of the Terraform Provider for Scalingo.
+// It aims at defining all resources and data providers from the plugin.
 package scalingo
 
 import (
@@ -7,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	scalingo "github.com/Scalingo/go-scalingo/v5"
+	scalingo "github.com/Scalingo/go-scalingo/v6"
 )
 
 func Provider() *schema.Provider {

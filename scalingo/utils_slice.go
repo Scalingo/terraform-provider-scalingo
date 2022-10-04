@@ -13,7 +13,7 @@ func keepIf[S any](slice []S, test func(S) bool) []S {
 	return filteredSlice
 }
 
-func Contains(s []string, v string) bool {
+func Contains[T comparable](s []T, v T) bool {
 	for _, c := range s {
 		if c == v {
 			return true
