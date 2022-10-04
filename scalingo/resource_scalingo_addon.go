@@ -135,11 +135,8 @@ func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		return diag.Errorf("fail to list addon providers: %v", err)
 	}
-	addonProvider := keepIf(providers, func(p *scalingo.AddonProvider) bool {
-		return p.ID == addon.AddonProvider.ID
-	})[0]
 	features := []string{}
-	if addonProvider.Category.Name == "Database" {
+	if addonIsDatabase(providers, addon) {
 		db, err := client.DatabaseShow(ctx, addon.AppID, addon.ID)
 		if err != nil {
 			return diag.Errorf("fail to get database metadata for addon %v: %v", addon.ID, err)
@@ -156,6 +153,17 @@ func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	d.SetId(addon.ID)
 
 	return nil
+}
+
+func addonIsDatabase(providers []*scalingo.AddonProvider, addon scalingo.Addon) bool {
+	addonProviders := keepIf(providers, func(p *scalingo.AddonProvider) bool {
+		return p.ID == addon.AddonProvider.ID
+	})
+	if len(addonProviders) == 0 {
+		return false
+	}
+
+	return strings.HasPrefix(strings.ToLower(addonProviders[0].Category.Name), "database")
 }
 
 func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -343,7 +351,7 @@ func waitUntilDatabaseFeatureActivated(ctx context.Context, client *scalingo.Cli
 				case scalingo.DatabaseFeatureStatusActivated:
 					return nil
 				case scalingo.DatabaseFeatureStatusFailed:
-					return nil
+					return fmt.Errorf("fail to enable feature %v, please contact support: %w", feature, err)
 				}
 			}
 		}
