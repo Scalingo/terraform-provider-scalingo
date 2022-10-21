@@ -13,10 +13,11 @@ import (
 // Deprecated: the usage of 'github_link' resources are replaced by the 'scm_repo_link' resources allowing to support several git server integrations.
 func resourceScalingoGithubLink() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceGithubLinkCreate,
-		ReadContext:   resourceGithubLinkRead,
-		UpdateContext: resourceGithubLinkUpdate,
-		DeleteContext: resourceGithubLinkDelete,
+		DeprecationMessage: "Use 'scm_repo_link' resource instead of 'github_link', will be deleted in the future",
+		CreateContext:      resourceGithubLinkCreate,
+		ReadContext:        resourceGithubLinkRead,
+		UpdateContext:      resourceGithubLinkUpdate,
+		DeleteContext:      resourceGithubLinkDelete,
 
 		Schema: map[string]*schema.Schema{
 			"app": {
