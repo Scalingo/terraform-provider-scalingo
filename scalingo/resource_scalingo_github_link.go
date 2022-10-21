@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	scalingo "github.com/Scalingo/go-scalingo/v5"
+	scalingo "github.com/Scalingo/go-scalingo/v6"
 )
 
 // Deprecated: the usage of 'github_link' resources are replaced by the 'scm_repo_link' resources allowing to support several git server integrations.

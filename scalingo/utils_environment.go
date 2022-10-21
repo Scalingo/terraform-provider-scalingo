@@ -3,7 +3,7 @@ package scalingo
 import (
 	"context"
 
-	scalingo "github.com/Scalingo/go-scalingo/v5"
+	scalingo "github.com/Scalingo/go-scalingo/v6"
 )
 
 func appEnvironment(ctx context.Context, client *scalingo.Client, appID string) (map[string]interface{}, error) {
