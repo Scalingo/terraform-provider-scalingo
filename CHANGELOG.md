@@ -2,6 +2,37 @@
 
 ## To be Released
 
+## v1.0.0
+
+### Breaking Changes
+
+* Resource `github_link`: `deploy_on_branch_change` has been removed
+* Resource `run`: complete resource has been removed
+
+### Deprecation
+
+* Resource `github_link` has been deprecated in favor of `scm_repo_link`
+
+### Changes
+
+* resource(addon): Add `database_features` property to enable automatically database addon features #95
+* resource(domain): Add `canonical` property to configure a Domain as canonical #80
+* resource(alert): Add `alert` resource to configure application alerts on metrics #86 #93
+* resource(scm_repo_link): Add `scm_repo_link` resource to create SCM links with application and configure it #85 #65
+* resource(scm_integration): Add `scm_integration` to create GitHub Enterprise and Gitlab self-hosted SCM Integration #46
+* resource(ssh_key): Add `ssh_key` resource to handle use public SSH keys #72
+* resource(run): Drop `run` resource: not pertinent in terraform provider #70
+* resource(github_link): Deprecate `github_link` resource entirely
+* resource(github_link): Remove `deploy_on_branch_change` property to prevent resource creation side effect #77
+* data_provider(addon_provider): Add `addon_provider` data provider to list accessible addon provider #68
+* data_provider(container_size): Add `container_size` data provider to get metadata about every container size #76
+* data_provider(region): Add data `region` provider to get metadata for every accessible region #69
+* data_provider(scm_integration): Add `scm_integrations` data provider to get information from GitHub and Gitlab #85 #66
+* data_provider(invoices): Add `invoices` data provider to get invoices from an account #87
+* deps(go-scalingo): Bump v6.0.0 #95
+* deps(terraform-plugin-sdk): Bump v2.23 #96
+* chore(refactoring) Use generics for filters #78
+
 ## v0.5.2
 
 * fix(app) Do not try to remove the stack_id if it's not set in the app resource
