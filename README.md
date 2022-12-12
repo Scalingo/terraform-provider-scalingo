@@ -146,9 +146,17 @@ Alternatively you can add the provider configuration to the `$HOME/.terraformrc`
 
 ### Generate automatic documentation
 
+Documentation of the provider is based on official Terraform documentation
+plugin: https://github.com/hashicorp/terraform-plugin-docs
+
 ```
 go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+tfplugindocs
 ```
+
+By running the process, it will scan all resources metadata plus the examples
+directory to generate a complete documentation structure in the `docs/`
+directory.
 
 ## Release a New Version
 
