@@ -19,26 +19,31 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_API_TOKEN", nil),
+				Description: "API Token to authenticate requests with",
 			},
 			"api_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_API_URL", nil),
+				Description: "URL of the Scalingo Application API to use (Override region default)",
 			},
 			"db_api_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_DB_API_URL", nil),
+				Description: "URL of the Scalingo Database API to use (Override region default)",
 			},
 			"auth_api_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_AUTH_URL", nil),
+				Description: "URL of the Scalingo Authentication API to use (Override region default)",
 			},
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SCALINGO_REGION", "osc-fr1"),
+				Description: "Region to use with the provider",
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{

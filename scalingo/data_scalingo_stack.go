@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/Scalingo/go-scalingo/v6"
 )
@@ -12,23 +13,39 @@ import (
 func dataSourceScStack() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceScStackRead,
+		Description: "List of available stacks to base applications on",
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Slug name of the stack (scalingo-18, scalingo-20, …)",
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Textual description of the stack",
 			},
 			"base_image": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Base docker image on which is based the stack",
 			},
 			"default": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Is it the current default stack?",
+			},
+			"id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the stack",
+			},
+			"deprecated_at": {
+				Type:         schema.TypeString,
+				Computed:     true,
+				ValidateFunc: validation.IsRFC3339Time,
+				Description:  "When has been/will be deprecated the stack",
 			},
 		},
 	}

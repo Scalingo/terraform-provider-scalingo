@@ -16,25 +16,30 @@ func resourceScalingoCollaborator() *schema.Resource {
 		CreateContext: resourceCollaboratorCreate,
 		ReadContext:   resourceCollaboratorRead,
 		DeleteContext: resourceCollaboratorDelete,
+		Description:   "Resource representing a collaboration between a user and an application",
 
 		Schema: map[string]*schema.Schema{
 			"app": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "ID or slug name of the targeted application",
 			},
 			"email": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Email of the collaborator to invite",
 			},
 			"username": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Username of the attached account once the collaboration has been accepted",
 			},
 			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Status of the collaboration (pending/accepted)",
 			},
 		},
 

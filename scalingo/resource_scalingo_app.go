@@ -16,32 +16,39 @@ func resourceScalingoApp() *schema.Resource {
 		ReadContext:   resourceAppRead,
 		UpdateContext: resourceAppUpdate,
 		DeleteContext: resourceAppDelete,
+		Description:   "Resource representing an application",
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the application",
 			},
 			"environment": {
-				Type:     schema.TypeMap,
-				Optional: true,
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Key-value map of environment variables attached to the application",
 			},
 			"all_environment": {
-				Type:     schema.TypeMap,
-				Computed: true,
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: "Computed key-value map containing environment in read-only",
 			},
 			"url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Base URL (https://*) to access the application",
 			},
 			"git_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Hostname to use to deploy code with Git + SSH",
 			},
 			"force_https": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Redirect HTTP traffic to HTTPS + HSTS header if enabled",
 			},
 			"stack_id": {
 				Type: schema.TypeString,
@@ -55,6 +62,7 @@ func resourceScalingoApp() *schema.Resource {
 					}
 					return true
 				},
+				Description: "ID of the base stack to use (scalingo-18/scalingo-20)",
 			},
 		},
 

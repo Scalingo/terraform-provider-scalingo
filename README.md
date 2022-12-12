@@ -144,6 +144,12 @@ TF_CLI_CONFIG_FILE=./local_dev.tfrc terraform plan
 
 Alternatively you can add the provider configuration to the `$HOME/.terraformrc` file
 
+### Generate automatic documentation
+
+```
+go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+```
+
 ## Release a New Version
 
 Instructions on this [Notion page](https://www.notion.so/scalingooriginal/New-Terraform-Provider-Release-40cd0af66b1f48148fb641ea138a22e5).

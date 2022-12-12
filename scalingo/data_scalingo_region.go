@@ -12,31 +12,38 @@ import (
 func dataSourceScRegion() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceScRegionsRead,
+		Description: "Scalingo Region metadata",
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Slug name of the region (osc-fr1, osc-secnum-fr1, ...)",
 			},
 			"display_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Human-enriched name of the region",
 			},
 			"api": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "URL of the application-management API",
 			},
 			"dashboard": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "URL of the web dashboard",
 			},
 			"database_api": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "URL of the database-management API",
 			},
 			"ssh": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Hostname to the domain for SSH 'git push' input",
 			},
 		},
 	}
