@@ -144,7 +144,7 @@ TF_CLI_CONFIG_FILE=./local_dev.tfrc terraform plan
 
 Alternatively you can add the provider configuration to the `$HOME/.terraformrc` file
 
-### Generate automatic documentation
+### Generate Documentation
 
 Documentation of the provider is based on official Terraform documentation
 plugin: https://github.com/hashicorp/terraform-plugin-docs
