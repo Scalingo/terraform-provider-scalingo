@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/Scalingo/go-scalingo/v6"
 )
@@ -42,10 +41,9 @@ func dataSourceScStack() *schema.Resource {
 				Description: "ID of the stack",
 			},
 			"deprecated_at": {
-				Type:         schema.TypeString,
-				Computed:     true,
-				ValidateFunc: validation.IsRFC3339Time,
-				Description:  "When has been/will be deprecated the stack",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "When has been/will be deprecated the stack",
 			},
 		},
 	}
