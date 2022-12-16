@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.0.1
+
 * Add `Description` for all Resources and Data Sources
 * Create various examples in `examples` directory to generate appropriate documentation on Terraform registry website:
   https://registry.terraform.io/providers/Scalingo/scalingo/latest/docs
