@@ -18,18 +18,21 @@ func resourceScalingoSSHKey() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceSSHKeyImporter,
 		},
+		Description: "Resource representing a SSH Key used for git operations authentication",
 
 		Schema: map[string]*schema.Schema{
 			"key_name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Name of the SSH Key",
 			},
 			"public_key": {
-				Type:      schema.TypeString,
-				Required:  true,
-				ForceNew:  true,
-				Sensitive: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Sensitive:   true,
+				Description: "Content of the public SSH Key",
 			},
 		},
 	}

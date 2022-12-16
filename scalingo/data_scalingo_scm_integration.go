@@ -12,39 +12,48 @@ import (
 func dataSourceScScmIntegration() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceScScmIntegrationRead,
+		Description: "SCM Integrations which are attached to an account, required to use github/gitlab integrations with SCM Repo Links",
 
 		Schema: map[string]*schema.Schema{
 			"url": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "URL to the SCM integration provider",
 			},
 			"scm_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Type of SCM integration (github/gitlab)",
 			},
 			"uid": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Unique identifier of the SCM integration",
 			},
 			"username": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Username of the integration platform account",
 			},
 			"avatar_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Avatar URL from the integration platform account",
 			},
 			"email": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "email from the integration platform account",
 			},
 			"profile_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Profile URL from the integration platform account",
 			},
 			"owner_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the user owning the integration (self when doing the request)",
 			},
 		},
 	}

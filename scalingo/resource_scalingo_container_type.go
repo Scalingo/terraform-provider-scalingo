@@ -17,24 +17,29 @@ func resourceScalingoContainerType() *schema.Resource {
 		ReadContext:   resourceContainerTypeRead,
 		UpdateContext: resourceContainerTypeUpdate,
 		DeleteContext: resourceContainerTypeDelete,
+		Description:   "Resource representing a container type, allowing to scale an application containers",
 
 		Schema: map[string]*schema.Schema{
 			"app": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "ID or slug name of the targeted application",
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the container type",
 			},
 			"amount": {
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Number of containers to boot for this type",
 			},
 			"size": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Size of the container (S/M/L/etc.)",
 			},
 		},
 

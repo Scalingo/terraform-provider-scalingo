@@ -18,29 +18,35 @@ func resourceScalingoAddon() *schema.Resource {
 		ReadContext:   resourceAddonRead,
 		UpdateContext: resourceAddonUpdate,
 		DeleteContext: resourceAddonDelete,
+		Description:   "Resource representing an Addon attached to an Application based on an AddonProvider",
 
 		Schema: map[string]*schema.Schema{
 			"provider_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "ID of slug name of the addon provider",
 			},
 			"plan": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the plan of the addon to provision",
 			},
 			"app": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "ID or slug name of the application which will receive the addon",
 			},
 			"plan_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the plan which was provisioned",
 			},
 			"resource_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Human readable ID of the addon which is provisioned",
 			},
 			"database_features": {
 				Type:     schema.TypeList,
@@ -48,6 +54,7 @@ func resourceScalingoAddon() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "List of enabled features for the addon (Database addons only)",
 			},
 		},
 

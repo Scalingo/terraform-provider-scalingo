@@ -20,21 +20,25 @@ func resourceScalingoDomain() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDomainImporter,
 		},
+		Description: "Resource representing a custom domain targeting an application",
 
 		Schema: map[string]*schema.Schema{
 			"common_name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Common Name (hostname) of the DNS entry which will target the application",
 			},
 			"app": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "ID or slug name of the targeted application",
 			},
 			"canonical": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "If true, all requests will be redirected to this domain (one per application)",
 			},
 		},
 	}
