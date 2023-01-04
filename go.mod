@@ -3,7 +3,7 @@ module github.com/Scalingo/terraform-provider-scalingo
 go 1.19
 
 require (
-	github.com/Scalingo/go-scalingo/v6 v6.0.1
+	github.com/Scalingo/go-scalingo/v6 v6.1.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
 )
 
@@ -12,7 +12,7 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-test/deep v1.0.5 // indirect
-	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
+	github.com/golang-jwt/jwt/v4 v4.4.3 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
