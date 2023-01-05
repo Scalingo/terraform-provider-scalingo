@@ -6,6 +6,9 @@ github.com/Scalingo/go-scalingo/v6/debug
 github.com/Scalingo/go-scalingo/v6/http
 github.com/Scalingo/go-scalingo/v6/http/httpmock
 github.com/Scalingo/go-scalingo/v6/io
+# github.com/Scalingo/go-utils/errors/v2 v2.2.0
+## explicit; go 1.17
+github.com/Scalingo/go-utils/errors/v2
 # github.com/agext/levenshtein v1.2.3
 ## explicit
 github.com/agext/levenshtein
@@ -155,6 +158,9 @@ github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.0.0
 ## explicit
 github.com/oklog/run
+# github.com/pkg/errors v0.9.1
+## explicit
+github.com/pkg/errors
 # github.com/vmihailenco/msgpack v4.0.4+incompatible
 ## explicit
 github.com/vmihailenco/msgpack

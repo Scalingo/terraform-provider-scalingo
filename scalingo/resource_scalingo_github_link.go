@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	scalingo "github.com/Scalingo/go-scalingo/v6"
+	"github.com/Scalingo/go-scalingo/v6/http"
+	scalingoerrors "github.com/Scalingo/go-utils/errors/v2"
 )
 
 // Deprecated: the usage of 'github_link' resources are replaced by the 'scm_repo_link' resources allowing to support several git server integrations.
@@ -225,7 +227,13 @@ func resourceGithubLinkRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	link, err := client.GithubLinkShow(ctx, app)
 	if err != nil {
-		return diag.FromErr(err)
+		rootCause := scalingoerrors.RootCause(err)
+		requestFailedErr, ok := rootCause.(*http.RequestFailedError)
+		if !ok {
+			return diag.FromErr(err)
+		}
+		fmt.Println("BINIOU")
+		fmt.Println(requestFailedErr)
 	}
 	d.SetId(link.ID)
 

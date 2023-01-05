@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/Scalingo/go-scalingo/v6"
+	"github.com/Scalingo/go-scalingo/v6/http"
+	scalingoerrors "github.com/Scalingo/go-utils/errors/v2"
 )
 
 func resourceScalingoScmRepoLink() *schema.Resource {
@@ -213,7 +215,13 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	link, err := client.SCMRepoLinkShow(ctx, app)
 	if err != nil {
-		return diag.FromErr(err)
+		rootCause := scalingoerrors.RootCause(err)
+		requestFailedErr, ok := rootCause.(*http.RequestFailedError)
+		if !ok {
+			return diag.FromErr(err)
+		}
+		fmt.Println("BINIOU")
+		fmt.Println(requestFailedErr)
 	}
 	d.SetId(link.AppID)
 
