@@ -2,6 +2,10 @@
 
 ## To be Released
 
+## v1.0.2
+
+* resource(app): Fix change of `stack_id` which was not applied correctly #117
+
 ## v1.0.1
 
 * Add `Description` for all Resources and Data Sources
