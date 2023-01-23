@@ -2,7 +2,9 @@ package scalingo
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -34,11 +36,6 @@ func dataSourceScStack() *schema.Resource {
 				Type:        schema.TypeBool,
 				Computed:    true,
 				Description: "Is it the current default stack?",
-			},
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "ID of the stack",
 			},
 			"deprecated_at": {
 				Type:        schema.TypeString,
@@ -75,13 +72,16 @@ func dataSourceScStackRead(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("fail to find stack with name '%s'", name)
 	}
 
-	d.SetId(selected.ID)
-	err = SetAll(d, map[string]interface{}{
+	stackFields := map[string]interface{}{
 		"name":        selected.Name,
 		"description": selected.Description,
 		"base_image":  selected.BaseImage,
 		"default":     selected.Default,
-	})
+	}
+	tflog.Info(ctx, fmt.Sprintf("Fetched stack '%v' with ID %v", name, selected.ID), stackFields)
+
+	d.SetId(selected.ID)
+	err = SetAll(d, stackFields)
 	if err != nil {
 		return diag.Errorf("fail to save stack information: %v", err)
 	}

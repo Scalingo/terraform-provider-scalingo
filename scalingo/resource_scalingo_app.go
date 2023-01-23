@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -54,15 +55,9 @@ func resourceScalingoApp() *schema.Resource {
 				Type: schema.TypeString,
 				// Either set by the user, either set automatically by server if
 				// no value is provided
-				Optional: true,
-				Computed: true,
-				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-					if newValue == "" {
-						return true
-					}
-					return true
-				},
-				Description: "ID of the base stack to use (scalingo-18/scalingo-20)",
+				Optional:    true,
+				Computed:    true,
+				Description: "ID of the base stack to use (scalingo-18/scalingo-20/scalingo-22)",
 			},
 		},
 
@@ -86,6 +81,10 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		createOpts.StackID = stackID
 	}
 
+	tflog.Info(ctx, "Creating Scalingo application", map[string]interface{}{
+		"name":     createOpts.Name,
+		"stack_id": createOpts.StackID,
+	})
 	app, err := client.AppsCreate(ctx, createOpts)
 	if err != nil {
 		return diag.Errorf("fail to create app: %v", err)
@@ -97,6 +96,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		"git_url":  app.GitURL,
 		"stack_id": app.StackID,
 	})
+
 	if err != nil {
 		return diag.Errorf("fail to store application attributes: %v", err)
 	}
