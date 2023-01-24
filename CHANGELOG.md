@@ -2,6 +2,12 @@
 
 ## To be Released
 
+## v1.0.3
+
+* resource(addon): Property `database_features` is now considered as computed
+  since backend is injecting default features, users should not have to list
+  all of them. #119
+
 ## v1.0.2
 
 * resource(app): Fix change of `stack_id` which was not applied correctly #117
