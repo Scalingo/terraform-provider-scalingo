@@ -206,10 +206,10 @@ google.golang.org/appengine/internal/datastore
 google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
-# google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d
-## explicit; go 1.11
+# google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6
+## explicit; go 1.19
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.51.0
+# google.golang.org/grpc v1.52.3
 ## explicit; go 1.17
 google.golang.org/grpc
 google.golang.org/grpc/attributes
