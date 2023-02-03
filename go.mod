@@ -25,7 +25,7 @@ require (
 	github.com/hashicorp/go-plugin v1.4.6 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.15.0 // indirect
+	github.com/hashicorp/hcl/v2 v2.16.0 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.14.2 // indirect
 	github.com/hashicorp/terraform-registry-address v0.1.0 // indirect
