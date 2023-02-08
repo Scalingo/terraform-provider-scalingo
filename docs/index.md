@@ -24,7 +24,7 @@ resource "scalingo_app" "my-app" {
 }
 
 # Provision a highly available PostgreSQL cluster and attach it to the application
-resource "scalingo_app" "my-db" {
+resource "scalingo_addon" "my-db" {
   provider_id = "postgresql"
   plan = "postgresql-business-1024"
   app = "${scalingo_app.my-app.id}"
@@ -32,7 +32,7 @@ resource "scalingo_app" "my-db" {
 
 # Configure domain 'example.com' to be targeting your application
 resource "scalingo_domain" "my-domain" {
-  name = "example.com"
+  common_name = "example.com"
   app = "${scalingo_app.my-app.id}"
 }
 ```
