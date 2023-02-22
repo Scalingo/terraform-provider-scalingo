@@ -2,7 +2,22 @@
 
 ## To be Released
 
+## v2.0.0
+
 * Remove deprecated `github_link` resource. Use `scm_repo_link` instead
+* Update dependencies:
+  - github.com/Scalingo/go-scalingo/v6 v6.3.0
+  - github.com/hashicorp/terraform-plugin-log v0.7.0
+  - github.com/fatih/color v1.14.1
+  - github.com/hashicorp/go-plugin v1.4.8
+  - github.com/hashicorp/hcl/v2 v2.16.0
+  - github.com/hashicorp/terraform-plugin-go v0.14.3
+  - github.com/oklog/run v1.1.0
+  - golang.org/x/net v0.7.0
+  - golang.org/x/sys v0.5.0
+  - golang.org/x/text v0.7.0
+  - google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6
+  - google.golang.org/grpc v1.52.3
 
 ## v1.0.3
 
