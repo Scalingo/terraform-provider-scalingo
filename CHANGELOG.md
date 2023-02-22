@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* Remove deprecated `github_link` resource. Use `scm_repo_link` instead
+
 ## v1.0.3
 
 * resource(addon): Property `database_features` is now considered as computed

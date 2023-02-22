@@ -31,6 +31,6 @@ data_source "scalingo_stack" "scalingo_20" {
 - `default` (Boolean) Is it the current default stack?
 - `deprecated_at` (String) When has been/will be deprecated the stack
 - `description` (String) Textual description of the stack
-- `id` (String) ID of the stack
+- `id` (String) The ID of this resource.
 
 

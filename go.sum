@@ -1,6 +1,6 @@
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
-github.com/Scalingo/go-scalingo/v6 v6.1.0 h1:e7LwOy3ePVRsMDu1V4rDqWgCXaE55hm9dRLj8i4qwf4=
-github.com/Scalingo/go-scalingo/v6 v6.1.0/go.mod h1:Y3QByF4s5i3lpJh87c5FEkSN07CWomN5FPt0X/Qzg0I=
+github.com/Scalingo/go-scalingo/v6 v6.3.0 h1:ADtzCCEqx1pdI6VaiOh3u9l8L2tScPp6cIKzvo/lcgE=
+github.com/Scalingo/go-scalingo/v6 v6.3.0/go.mod h1:Y3QByF4s5i3lpJh87c5FEkSN07CWomN5FPt0X/Qzg0I=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/apparentlymart/go-dump v0.0.0-20190214190832-042adf3cf4a0 h1:MzVXffFUye+ZcSR6opIgz9Co7WcDx6ZcY+RjfFHoA0I=
