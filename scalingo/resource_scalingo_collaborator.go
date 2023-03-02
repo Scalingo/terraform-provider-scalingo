@@ -90,7 +90,8 @@ func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if !found {
-		d.MarkNewResource()
+		// Flag that it doesn't exist anymore
+		d.SetId("")
 		return nil
 	}
 

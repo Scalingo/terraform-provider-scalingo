@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* resource(collaborator): Re-create collaborator if it has been deleted outside Terraform #137
+
 ## v2.0.0
 
 * Remove deprecated `github_link` resource. Use `scm_repo_link` instead
