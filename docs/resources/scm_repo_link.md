@@ -40,6 +40,7 @@ resource "scalingo_scm_repo_link" "github-link" {
 ### Optional
 
 - `auto_deploy_enabled` (Boolean) Is auto-deploy enabled?
+- `automatic_creation_from_forks_allowed` (Boolean) Should review apps be created automatically if a Pull/Merge Request is based on the branch of a fork
 - `branch` (String) Branch to use for autodeploy
 - `delete_on_close_enabled` (Boolean) Should review apps be deleted when Pull/Merge Requests are closed?
 - `delete_stale_enabled` (Boolean) Should a review app be deleted if attached Pull/Merge Request is considered as stale?
