@@ -75,6 +75,11 @@ func resourceScalingoScmRepoLink() *schema.Resource {
 				Optional:    true,
 				Description: "After how many hours should a Pull/Merge Request be considered as stale",
 			},
+			"automatic_creation_from_forks_allowed": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Should review apps be created automatically if a Pull/Merge Request is based on the branch of a fork",
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
@@ -101,6 +106,7 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 	hoursBeforeDeleteOnClose, _ := d.Get("hours_before_delete_on_close").(int)
 	deleteStaleEnabled, _ := d.Get("delete_stale_enabled").(bool)
 	hoursBeforeDeleteStale, _ := d.Get("hours_before_delete_stale").(int)
+	automaticCreationFromForksAllowed, _ := d.Get("automatic_creation_from_forks_allowed").(bool)
 
 	if hoursBeforeDeleteOnClose < 0 || hoursBeforeDeleteStale < 0 {
 		return diag.Errorf("hours must be an unsigned int")
@@ -117,6 +123,7 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if deployReviewAppsEnabled {
+		params.AutomaticCreationFromForksAllowed = &automaticCreationFromForksAllowed
 		if deleteOnCloseEnabled {
 			params.DestroyOnCloseEnabled = &deleteOnCloseEnabled
 			params.HoursBeforeDeleteOnClose = &hoursBeforeDeleteOnCloseUint
@@ -186,19 +193,25 @@ func resourceScmRepoLinkUpdate(ctx context.Context, d *schema.ResourceData, meta
 		changed = true
 	}
 
+	if d.HasChange("automatic_creation_from_forks_allowed") {
+		params.AutomaticCreationFromForksAllowed = boolAddr(d.Get("automatic_creation_from_forks_allowed").(bool))
+		changed = true
+	}
+
 	if changed {
 		link, err := client.SCMRepoLinkUpdate(ctx, app, params)
 		if err != nil {
 			return diag.Errorf("fail to update github repo link: %v", err)
 		}
 		err = SetAll(d, map[string]interface{}{
-			"branch":                       link.Branch,
-			"auto_deploy_enabled":          link.AutoDeployEnabled,
-			"deploy_review_apps_enabled":   link.DeployReviewAppsEnabled,
-			"delete_on_close_enabled":      link.DeleteOnCloseEnabled,
-			"delete_stale_enabled":         link.DeleteStaleEnabled,
-			"hours_before_delete_on_close": int(link.HoursBeforeDeleteOnClose),
-			"hours_before_delete_stale":    int(link.HoursBeforeDeleteStale),
+			"branch":                                link.Branch,
+			"auto_deploy_enabled":                   link.AutoDeployEnabled,
+			"deploy_review_apps_enabled":            link.DeployReviewAppsEnabled,
+			"delete_on_close_enabled":               link.DeleteOnCloseEnabled,
+			"delete_stale_enabled":                  link.DeleteStaleEnabled,
+			"automatic_creation_from_forks_allowed": link.AutomaticCreationFromForksAllowed,
+			"hours_before_delete_on_close":          int(link.HoursBeforeDeleteOnClose),
+			"hours_before_delete_stale":             int(link.HoursBeforeDeleteStale),
 		})
 		if err != nil {
 			return diag.Errorf("fail to store github repo link information: %v", err)
@@ -218,16 +231,17 @@ func resourceScmRepoLinkRead(ctx context.Context, d *schema.ResourceData, meta i
 	d.SetId(link.AppID)
 
 	err = SetAll(d, map[string]interface{}{
-		"app":                          link.AppID,
-		"auto_deploy_enabled":          link.AutoDeployEnabled,
-		"deploy_review_apps_enabled":   link.DeployReviewAppsEnabled,
-		"delete_on_close_enabled":      link.DeleteOnCloseEnabled,
-		"delete_stale_enabled":         link.DeleteStaleEnabled,
-		"hours_before_delete_on_close": int(link.HoursBeforeDeleteOnClose),
-		"hours_before_delete_stale":    int(link.HoursBeforeDeleteStale),
-		"branch":                       link.Branch,
-		"auth_integration_uuid":        link.AuthIntegrationUUID,
-		"source":                       fmt.Sprintf("%s/%s/%s", link.URL, link.Owner, link.Repo),
+		"app":                                   link.AppID,
+		"auto_deploy_enabled":                   link.AutoDeployEnabled,
+		"deploy_review_apps_enabled":            link.DeployReviewAppsEnabled,
+		"delete_on_close_enabled":               link.DeleteOnCloseEnabled,
+		"delete_stale_enabled":                  link.DeleteStaleEnabled,
+		"automatic_creation_from_forks_allowed": link.AutomaticCreationFromForksAllowed,
+		"hours_before_delete_on_close":          int(link.HoursBeforeDeleteOnClose),
+		"hours_before_delete_stale":             int(link.HoursBeforeDeleteStale),
+		"branch":                                link.Branch,
+		"auth_integration_uuid":                 link.AuthIntegrationUUID,
+		"source":                                fmt.Sprintf("%s/%s/%s", link.URL, link.Owner, link.Repo),
 	})
 	if err != nil {
 		return diag.Errorf("fail to store scm repo link information: %v", err)
