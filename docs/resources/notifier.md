@@ -74,11 +74,11 @@ resource "scalingo_notifier" "all_events" {
 - `send_all_alerts` (Boolean) Send notifications, all types alerts attached to the application if true
 - `send_all_events` (Boolean) Send notifications for all types of events of the application if true
 - `user_ids` (List of String) List of collaborators who should receive notifications (for notifier platform 'email')
-- `webhook_url` (String) Destination URL which should receive notifications (for notifier platform 'webhook')
+- `webhook_url` (String) Destination URL which should receive notifications (for notifier platforms 'slack', 'rocket_chat' and 'webhook')
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `type` (String) Human readable notifier type (slack/webhook/email/etc.)
+- `type` (String) Human readable notifier type (slack/webhook/email/rocket_chat/etc.)
 
 
