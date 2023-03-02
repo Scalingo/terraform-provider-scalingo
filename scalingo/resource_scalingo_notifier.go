@@ -54,11 +54,13 @@ func resourceScalingoNotifier() *schema.Resource {
 			"send_all_events": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default:     false,
 				Description: "Send notifications for all types of events of the application if true",
 			},
 			"selected_events": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Default:     false,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Allowlist of event types to filter which should trigger notifications",
 			},
@@ -77,12 +79,12 @@ func resourceScalingoNotifier() *schema.Resource {
 			"webhook_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Destination URL which should receive notifications (for notifier platform 'webhook')",
+				Description: "Destination URL which should receive notifications (for notifier platforms 'slack', 'rocket_chat' and 'webhook')",
 			},
 			"type": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Human readable notifier type (slack/webhook/email/etc.)",
+				Description: "Human readable notifier type (slack/webhook/email/rocket_chat/etc.)",
 			},
 		},
 	}
