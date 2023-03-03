@@ -60,7 +60,6 @@ func resourceScalingoNotifier() *schema.Resource {
 			"selected_events": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Default:     false,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Allowlist of event types to filter which should trigger notifications",
 			},
