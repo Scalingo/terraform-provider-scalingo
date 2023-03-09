@@ -1,0 +1,51 @@
+---
+page_title: "Provider: {{ .ProviderShortName | title }}"
+description: |-
+  Terraform provider to provision Scalingo applications and databases.
+---
+
+# {{ .ProviderShortName | title }} Provider
+
+The Scalingo provider is used to interact with the resources supported by Scalingo. The provider needs to be configured with the proper credentials before it can be used.
+
+Use the navigation to the left to read about the available resources.
+
+## Example Usage
+
+{{ tffile "examples/provider/provider.tf" }}
+
+## Provider Configuration
+
+!> **Warning:** Hard-coded credentials are not recommended in any Terraform
+configuration and risks secret leakage should this file ever be committed to a
+public version control system.
+
+Credentials can be provided by adding an `api_token` and `region`, to the `scalingo` provider block.
+
+Usage:
+
+```terraform
+provider "scalingo" {
+  api_token = "tk-us-1234567890"
+  region    = "osc-fr1"
+}
+```
+
+## Authentication with Environment Variables
+
+Credentials can be provided by using the `SCALINGO_API_TOKEN` environment variable.
+The region can be set using the `SCALINGO_REGION` environment variable.
+
+For example:
+
+```terraform
+provider "scalingo" {}
+```
+
+```sh
+$ export SCALINGO_API_TOKEN="tk-us-123456789"
+$ export SCALINGO_REGION="osc-fr1"
+$ terraform plan
+```
+
+{{ .SchemaMarkdown | trimspace }}
