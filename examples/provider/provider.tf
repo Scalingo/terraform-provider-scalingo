@@ -1,6 +1,7 @@
 # Initialize the scalingo provider with a token generated for your user
 provider "scalingo" {
-  api_token = "us-tk-1234567890"
+  api_token = "tk-us-1234567890"
+  region    = "osc-fr1"
 }
 
 # Create a new Scalingo app
