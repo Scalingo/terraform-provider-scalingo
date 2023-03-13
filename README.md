@@ -1,21 +1,17 @@
-Terraform Provider
-==================
+# Terraform Provider
 
 [Documentation](https://registry.terraform.io/providers/Scalingo/scalingo/latest/docs)
 
-Maintainers
------------
+## Maintainers
 
 This provider plugin is maintained by the [Scalingo](https://scalingo.com) team.
 
-Requirements
-------------
+## Requirements
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
--	[Go](https://golang.org/doc/install) 1.9 (to build the provider plugin)
+-	[Terraform](https://developer.hashicorp.com/terraform/downloads)
+-	[Go](https://go.dev/doc/install) to build the provider plugin
 
-Usage
----------------------
+## Usage
 
 ### Configuring with variables
 
@@ -63,8 +59,7 @@ terraform import scalingo_alert.cpu_alert my-app:al-18f30d13-3c19-422d-a0d6-6cdb
 ```
 
 
-Building The Provider
----------------------
+## Building The Provider
 
 Clone repository to: `$GOPATH/src/github.com/Scalingo/terraform-provider-scalingo`
 
@@ -80,12 +75,11 @@ $ cd $GOPATH/src/github.com/Scalingo/terraform-provider-scalingo
 $ make build
 ```
 
-Using the provider
-----------------------
+## Using the provider
+
 See [documentation](https://registry.terraform.io/providers/Scalingo/scalingo/latest/docs)
 
-Developing the Provider
----------------------------
+## Developing the Provider
 
 If you wish to work on the provider, you'll first need
 [Go](http://www.golang.org) installed on your machine (version 1.9+ is
