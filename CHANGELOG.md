@@ -2,7 +2,17 @@
 
 ## To be Released
 
+## v2.1.0
+
 * resource(collaborator): Re-create collaborator if it has been deleted outside Terraform #137
+* resource(notifier): Set default to false for 'send_all_alerts' #139
+* resource(scm_repo_link): Add option automatic_creation_from_forks_allowed to enable explicitely creation of review apps from fork #130
+* doc(notifier/region): Improve documentation examples #140
+* chore(deps): bump github.com/hashicorp/terraform-svchost from 0.0.0-20200729002733-f050f53b9734 to 0.1.0 #135
+* chore(deps): bump github.com/golang-jwt/jwt/v4 from 4.4.3 to 4.5.0 #132
+* chore(deps): bump google.golang.org/grpc from 1.52.3 to 1.53.0 #136
+* chore(deps): bump github.com/hashicorp/yamux #134
+* chore(deps): bump github.com/zclconf/go-cty from 1.12.1 to 1.13.0 #133
 
 ## v2.0.0
 
