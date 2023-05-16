@@ -116,23 +116,16 @@ func resourceScmRepoLinkCreate(ctx context.Context, d *schema.ResourceData, meta
 	hoursBeforeDeleteStaleUint := uint(hoursBeforeDeleteStale)
 
 	params := scalingo.SCMRepoLinkCreateParams{
-		Source:                  &source,
-		AutoDeployEnabled:       &autoDeployEnabled,
-		DeployReviewAppsEnabled: &deployReviewAppsEnabled,
-		AuthIntegrationUUID:     &authIntegrationUUID,
-		Branch:                  &branch,
-	}
-
-	if deployReviewAppsEnabled {
-		params.AutomaticCreationFromForksAllowed = &automaticCreationFromForksAllowed
-		if deleteOnCloseEnabled {
-			params.DestroyOnCloseEnabled = &deleteOnCloseEnabled
-			params.HoursBeforeDeleteOnClose = &hoursBeforeDeleteOnCloseUint
-		}
-		if deleteStaleEnabled {
-			params.DestroyStaleEnabled = &deleteStaleEnabled
-			params.HoursBeforeDeleteStale = &hoursBeforeDeleteStaleUint
-		}
+		Source:                            &source,
+		AutoDeployEnabled:                 &autoDeployEnabled,
+		DeployReviewAppsEnabled:           &deployReviewAppsEnabled,
+		AuthIntegrationUUID:               &authIntegrationUUID,
+		Branch:                            &branch,
+		AutomaticCreationFromForksAllowed: &automaticCreationFromForksAllowed,
+		DestroyOnCloseEnabled:             &deleteOnCloseEnabled,
+		HoursBeforeDeleteOnClose:          &hoursBeforeDeleteOnCloseUint,
+		DestroyStaleEnabled:               &deleteStaleEnabled,
+		HoursBeforeDeleteStale:            &hoursBeforeDeleteStaleUint,
 	}
 
 	link, err := client.SCMRepoLinkCreate(ctx, app, params)
