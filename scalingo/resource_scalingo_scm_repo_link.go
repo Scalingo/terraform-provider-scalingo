@@ -28,6 +28,7 @@ func resourceScalingoScmRepoLink() *schema.Resource {
 			"auth_integration_uuid": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "SCM Integration UUID to base the link on",
 			},
 			"source": {
