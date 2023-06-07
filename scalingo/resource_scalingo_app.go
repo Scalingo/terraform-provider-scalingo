@@ -55,13 +55,13 @@ func resourceScalingoApp() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: "Enable Router Logs into your application logs for a deeper understanding of your application",
+				Description: "Enable Router Logs to log all the connections made to your application",
 			},
 			"sticky_session": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: "Enable the Sticky Session feature, which associate alls HTTP requests from an end-user to a single `web` application container.",
+				Description: "Enable the Sticky Session feature, which associate all HTTP requests from an end-user to a single `web` application container.",
 			},
 			"stack_id": {
 				Type: schema.TypeString,
@@ -155,7 +155,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if stickySession, _ := d.Get("sticky_session").(bool); stickySession {
 		_, err := client.AppsStickySession(ctx, app.ID, stickySession)
 		if err != nil {
-			return diag.Errorf("fail to enable StickySession: %v", err)
+			return diag.Errorf("fail to enable Sticky Session: %v", err)
 		}
 	}
 
