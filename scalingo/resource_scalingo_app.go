@@ -51,6 +51,18 @@ func resourceScalingoApp() *schema.Resource {
 				Default:     false,
 				Description: "Redirect HTTP traffic to HTTPS + HSTS header if enabled",
 			},
+			"router_logs": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable Router Logs to log all the connections made to your application",
+			},
+			"sticky_session": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable the Sticky Session feature, which associate all HTTP requests from an end-user to a single `web` application container.",
+			},
 			"stack_id": {
 				Type: schema.TypeString,
 				// Either set by the user, either set automatically by server if
@@ -133,6 +145,20 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	}
 
+	if routerLogs, _ := d.Get("router_logs").(bool); routerLogs {
+		_, err := client.AppsRouterLogs(ctx, app.ID, routerLogs)
+		if err != nil {
+			return diag.Errorf("fail to enable Router Logs: %v", err)
+		}
+	}
+
+	if stickySession, _ := d.Get("sticky_session").(bool); stickySession {
+		_, err := client.AppsStickySession(ctx, app.ID, stickySession)
+		if err != nil {
+			return diag.Errorf("fail to enable Sticky Session: %v", err)
+		}
+	}
+
 	return nil
 }
 
@@ -148,11 +174,13 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 	d.SetId(app.ID)
 	err = SetAll(d, map[string]interface{}{
-		"name":        app.Name,
-		"url":         app.URL,
-		"git_url":     app.GitURL,
-		"force_https": app.ForceHTTPS,
-		"stack_id":    app.StackID,
+		"name":           app.Name,
+		"url":            app.URL,
+		"git_url":        app.GitURL,
+		"force_https":    app.ForceHTTPS,
+		"router_logs":    app.RouterLogs,
+		"sticky_session": app.StickySession,
+		"stack_id":       app.StackID,
 	})
 	if err != nil {
 		return diag.Errorf("fail to store application information: %v", err)
@@ -259,6 +287,22 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, err := client.AppsForceHTTPS(ctx, d.Id(), ForceHTTPS.(bool))
 		if err != nil {
 			return diag.Errorf("fail to set force HTTPS: %v", err)
+		}
+	}
+
+	if d.HasChange("router_logs") {
+		_, RouterLogs := d.GetChange("router_logs")
+		_, err := client.AppsRouterLogs(ctx, d.Id(), RouterLogs.(bool))
+		if err != nil {
+			return diag.Errorf("fail to set Router Logs: %v", err)
+		}
+	}
+
+	if d.HasChange("sticky_session") {
+		_, StickySession := d.GetChange("sticky_session")
+		_, err := client.AppsStickySession(ctx, d.Id(), StickySession.(bool))
+		if err != nil {
+			return diag.Errorf("fail to set Sticky Session: %v", err)
 		}
 	}
 
