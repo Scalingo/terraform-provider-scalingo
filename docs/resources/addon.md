@@ -30,7 +30,7 @@ resource "scalingo_addon" "test_redis" {
 
 ### Required
 
-- `app` (String) ID or slug name of the application which will receive the addon
+- `app` (String) ID of the application which will receive the addon
 - `plan` (String) Name of the plan of the addon to provision
 - `provider_id` (String) ID of slug name of the addon provider
 

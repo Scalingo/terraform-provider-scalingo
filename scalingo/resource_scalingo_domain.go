@@ -33,7 +33,7 @@ func resourceScalingoDomain() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "ID or slug name of the targeted application",
+				Description: "ID of the targeted application",
 			},
 			"canonical": {
 				Type:        schema.TypeBool,

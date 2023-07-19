@@ -17,7 +17,7 @@ Resource representing a log drain attached to an application or a database
 
 ### Required
 
-- `app` (String) ID or slug name of the targeted application
+- `app` (String) ID of the targeted application
 
 ### Optional
 

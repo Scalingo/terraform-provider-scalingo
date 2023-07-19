@@ -30,7 +30,7 @@ resource "scalingo_container_type" "web" {
 
 ### Required
 
-- `app` (String) ID or slug name of the targeted application
+- `app` (String) ID of the targeted application
 - `name` (String) Name of the container type
 
 ### Optional

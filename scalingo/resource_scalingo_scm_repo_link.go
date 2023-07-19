@@ -23,7 +23,7 @@ func resourceScalingoScmRepoLink() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "ID or slug name of the targeted application",
+				Description: "ID of the targeted application",
 			},
 			"auth_integration_uuid": {
 				Type:        schema.TypeString,

@@ -34,7 +34,7 @@ resource "scalingo_collaborator" "collaborators" {
 
 ### Required
 
-- `app` (String) ID or slug name of the targeted application
+- `app` (String) ID of the targeted application
 - `email` (String) Email of the collaborator to invite
 
 ### Read-Only

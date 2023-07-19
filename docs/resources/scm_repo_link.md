@@ -33,7 +33,7 @@ resource "scalingo_scm_repo_link" "github-link" {
 
 ### Required
 
-- `app` (String) ID or slug name of the targeted application
+- `app` (String) ID of the targeted application
 - `auth_integration_uuid` (String) SCM Integration UUID to base the link on
 - `source` (String) URL to the SCM repository, example: https://github.com/user/repository
 
