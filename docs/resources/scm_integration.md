@@ -29,5 +29,3 @@ Resource representing an SCM Integration are the link between an account and a s
 - `profile_url` (String) Profile URL in the SCM account
 - `uid` (String) Unique ID of the SCM account
 - `username` (String) Username in the SCM account
-
-

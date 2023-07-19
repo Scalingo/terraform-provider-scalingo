@@ -43,5 +43,3 @@ resource "scalingo_addon" "test_redis" {
 - `id` (String) The ID of this resource.
 - `plan_id` (String) ID of the plan which was provisioned
 - `resource_id` (String) Human readable ID of the addon which is provisioned
-
-

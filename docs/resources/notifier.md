@@ -80,5 +80,3 @@ resource "scalingo_notifier" "all_events" {
 
 - `id` (String) The ID of this resource.
 - `type` (String) Human readable notifier type (slack/webhook/email/rocket_chat/etc.)
-
-
