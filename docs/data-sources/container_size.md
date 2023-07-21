@@ -29,5 +29,3 @@ Container Sizes represents the definitions of the size of container types as wel
 - `pids_limit` (Number) Maximum number of processes (Process IDentifiers)
 - `sku` (String) Catalogue reference of the container size
 - `swap` (Number) Container swap memory limit (in bytes)
-
-

@@ -33,5 +33,3 @@ Resource representing a log drain attached to an application or a database
 
 - `drain_url` (String, Sensitive) URL representation of the log drain
 - `id` (String) The ID of this resource.
-
-

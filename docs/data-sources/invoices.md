@@ -62,5 +62,3 @@ Read-Only:
 - `id` (String)
 - `label` (String)
 - `price` (Number)
-
-

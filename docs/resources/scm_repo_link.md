@@ -51,5 +51,3 @@ resource "scalingo_scm_repo_link" "github-link" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

@@ -44,5 +44,3 @@ Read-Only:
 - `on_demand` (Boolean)
 - `position` (Number)
 - `sku` (String)
-
-

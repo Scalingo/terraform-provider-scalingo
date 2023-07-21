@@ -47,5 +47,3 @@ resource "scalingo_domain" "testappcom" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

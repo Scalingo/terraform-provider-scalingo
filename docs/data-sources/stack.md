@@ -38,5 +38,3 @@ resource "scalingo_app" "my_test_app" {
 - `deprecated_at` (String) When has been/will be deprecated the stack
 - `description` (String) Textual description of the stack
 - `id` (String) The ID of this resource.
-
-

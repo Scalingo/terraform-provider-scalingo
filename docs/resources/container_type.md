@@ -41,5 +41,3 @@ resource "scalingo_container_type" "web" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
