@@ -37,7 +37,7 @@ resource "scalingo_domain" "testappcom" {
 
 ### Required
 
-- `app` (String) ID or slug name of the targeted application
+- `app` (String) ID of the targeted application
 - `common_name` (String) Common Name (hostname) of the DNS entry which will target the application
 
 ### Optional
@@ -47,5 +47,3 @@ resource "scalingo_domain" "testappcom" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

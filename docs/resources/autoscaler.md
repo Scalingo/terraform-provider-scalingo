@@ -47,5 +47,3 @@ resource "scalingo_autoscaler" "test_autoscaler" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

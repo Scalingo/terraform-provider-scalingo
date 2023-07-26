@@ -34,7 +34,7 @@ resource "scalingo_collaborator" "collaborators" {
 
 ### Required
 
-- `app` (String) ID or slug name of the targeted application
+- `app` (String) ID of the targeted application
 - `email` (String) Email of the collaborator to invite
 
 ### Read-Only
@@ -42,5 +42,3 @@ resource "scalingo_collaborator" "collaborators" {
 - `id` (String) The ID of this resource.
 - `status` (String) Status of the collaboration (pending/accepted)
 - `username` (String) Username of the attached account once the collaboration has been accepted
-
-

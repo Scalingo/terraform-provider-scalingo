@@ -38,7 +38,7 @@ resource "scalingo_domain" "my-domain" {
 }
 ```
 
-### Provider Configuration
+## Provider Configuration
 
 !> **Warning:** Hard-coded credentials are not recommended in any Terraform
 configuration and risks secret leakage should this file ever be committed to a
@@ -55,7 +55,7 @@ provider "scalingo" {
 }
 ```
 
-### Environment Variables
+## Authentication with Environment Variables
 
 Credentials can be provided by using the `SCALINGO_API_TOKEN` environment variable.
 The region can be set using the `SCALINGO_REGION` environment variable.
@@ -77,8 +77,8 @@ $ terraform plan
 
 ### Optional
 
-- `api_token` (String) API Token to authenticate requests with. Can also be sourced from SCALINGO_API_TOKEN.
-- `api_url` (String) URL of the Scalingo Application API to use (Override region default). Can also be sourced from SCALINGO_API_URL.
-- `auth_api_url` (String) URL of the Scalingo Authentication API to use (Override region default). Can also be sourced from SCALINGO_AUTH_URL.
-- `db_api_url` (String) URL of the Scalingo Database API to use (Override region default). Can also be sourced from SCALINGO_DB_API_URL.
-- `region` (String) Region to use with the provider. Can also be sourced from SCALINGO_REGION.
+- `api_token` (String) API Token to authenticate requests with. Can also be sourced from `SCALINGO_API_TOKEN`.
+- `api_url` (String) URL of the Scalingo Application API to use (Override region default). Can also be sourced from `SCALINGO_API_URL`.
+- `auth_api_url` (String) URL of the Scalingo Authentication API to use (Override region default). Can also be sourced from `SCALINGO_AUTH_URL`.
+- `db_api_url` (String) URL of the Scalingo Database API to use (Override region default). Can also be sourced from `SCALINGO_DB_API_URL`.
+- `region` (String) Region to use with the provider. Can also be sourced from `SCALINGO_REGION`. (default: `osc-fr1`)

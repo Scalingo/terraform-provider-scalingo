@@ -36,5 +36,3 @@ data_source "scalingo_notification_platform" "email" {
 - `display_name` (String) Human-enriched name of the notification platform
 - `id` (String) The ID of this resource.
 - `logo_url` (String) Logo image URL representing the notification platform
-
-

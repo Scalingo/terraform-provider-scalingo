@@ -23,5 +23,3 @@ Resource representing a SSH Key used for git operations authentication
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

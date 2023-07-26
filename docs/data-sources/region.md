@@ -37,5 +37,3 @@ output "scalingo_dashboard" {
 - `display_name` (String) Human-enriched name of the region
 - `id` (String) The ID of this resource.
 - `ssh` (String) Hostname to the domain for SSH 'git push' input
-
-

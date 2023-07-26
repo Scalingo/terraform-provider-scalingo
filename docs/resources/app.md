@@ -36,9 +36,9 @@ resource "scalingo_app" "test_app" {
 
 - `environment` (Map of String) Key-value map of environment variables attached to the application
 - `force_https` (Boolean) Redirect HTTP traffic to HTTPS + HSTS header if enabled
-- `router_logs` (Boolean) Enable Router Logs into your application logs for a deeper understanding of your application
+- `router_logs` (Boolean) Enable Router Logs to log all the connections made to your application
 - `stack_id` (String) ID of the base stack to use (scalingo-18/scalingo-20/scalingo-22)
-- `sticky_session` (Boolean) Enable the Sticky Session feature, which associate alls HTTP requests from an end-user to a single `web` application container.
+- `sticky_session` (Boolean) Enable the Sticky Session feature, which associate all HTTP requests from an end-user to a single `web` application container.
 
 ### Read-Only
 
@@ -46,5 +46,3 @@ resource "scalingo_app" "test_app" {
 - `git_url` (String) Hostname to use to deploy code with Git + SSH
 - `id` (String) The ID of this resource.
 - `url` (String) Base URL (https://*) to access the application
-
-

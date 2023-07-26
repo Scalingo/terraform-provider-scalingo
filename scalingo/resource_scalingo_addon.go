@@ -36,7 +36,7 @@ func resourceScalingoAddon() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "ID or slug name of the application which will receive the addon",
+				Description: "ID of the application which will receive the addon",
 			},
 			"plan_id": {
 				Type:        schema.TypeString,

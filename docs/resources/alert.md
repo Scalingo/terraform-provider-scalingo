@@ -60,5 +60,3 @@ resource "scalingo_alert" "test_alert" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

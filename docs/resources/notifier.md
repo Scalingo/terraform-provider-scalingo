@@ -62,7 +62,7 @@ resource "scalingo_notifier" "all_events" {
 
 ### Required
 
-- `app` (String) ID or slug name of the targeted application
+- `app` (String) ID of the targeted application
 - `name` (String) Name given to the notifier
 - `platform_id` (String) ID of the Notifier Platform used to send notifications to
 
@@ -80,5 +80,3 @@ resource "scalingo_notifier" "all_events" {
 
 - `id` (String) The ID of this resource.
 - `type` (String) Human readable notifier type (slack/webhook/email/rocket_chat/etc.)
-
-

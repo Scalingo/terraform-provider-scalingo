@@ -45,5 +45,3 @@ resource "scalingo_scm_repo_link" "github-link" {
 - `profile_url` (String) Profile URL from the integration platform account
 - `uid` (String) Unique identifier of the SCM integration
 - `username` (String) Username of the integration platform account
-
-
