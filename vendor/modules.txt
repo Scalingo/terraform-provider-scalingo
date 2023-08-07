@@ -69,7 +69,7 @@ github.com/hashicorp/go-uuid
 # github.com/hashicorp/go-version v1.6.0
 ## explicit
 github.com/hashicorp/go-version
-# github.com/hashicorp/hcl/v2 v2.16.0
+# github.com/hashicorp/hcl/v2 v2.17.0
 ## explicit; go 1.18
 github.com/hashicorp/hcl/v2
 github.com/hashicorp/hcl/v2/ext/customdecode
