@@ -2,6 +2,20 @@
 
 ## To be Released
 
+## v2.2.0
+
+* feat(scalingo_app): add support for router logs and sticky sessions #167
+* fix(resource/scalingo_scm_repo_link): the auth_integration_uuid cannot be updated #161
+* chore(deps): bump github.com/go-test/deep from v1.0.5 to v1.1.0
+* chore(deps): bump github.com/golang/protobuf from 1.5.2 to v1.5.3
+* chore(deps): bump github.com/zclconf/go-cty from 1.13.0 to v1.13.1
+* chore(deps): bump golang.org/x/net from v0.8.0 to v0.9.0
+* chore(deps): bump golang.org/x/sys from v0.6.0 to v0.7.0
+* chore(deps): bump golang.org/x/text from v0.8.0 to v0.9.0
+* chore(deps): bump google.golang.org/genproto from
+  v0.0.0-20230110181048-76db0878b65f to v0.0.0-20230410155749-daa745c078e1
+* chore(deps): bump google.golang.org/grpc from 1.53.0 to v1.56.1
+
 ## v2.1.0
 
 * resource(collaborator): Re-create collaborator if it has been deleted outside Terraform #137
