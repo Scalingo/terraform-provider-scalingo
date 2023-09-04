@@ -109,6 +109,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId(app.ID)
 	err = SetAll(d, map[string]interface{}{
+		"base_url": app.BaseURL,
 		"url":      app.URL,
 		"git_url":  app.GitURL,
 		"stack_id": app.StackID,
