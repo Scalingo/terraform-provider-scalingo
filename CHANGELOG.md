@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(scalingo_app): expose application's base_url #175
+
 ## v2.2.0
 
 * feat(scalingo_app): add support for router logs and sticky sessions #167
