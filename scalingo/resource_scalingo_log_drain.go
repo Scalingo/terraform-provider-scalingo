@@ -26,8 +26,8 @@ func resourceScalingoLogDrain() *schema.Resource {
 			"type": {
 				Type:        schema.TypeString,
 				ForceNew:    true,
-				Optional:    true,
-				Description: "Type of log drain (syslog/http/elk/etc.)",
+				Required:    true,
+				Description: "type of log drain (syslog/http/elk/etc.)",
 			},
 			"host": {
 				Type:        schema.TypeString,
