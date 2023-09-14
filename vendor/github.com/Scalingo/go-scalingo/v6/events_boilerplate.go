@@ -54,6 +54,10 @@ func (e *EventLinkSCMType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
 
+func (e *EventUpdateSCMType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+
 func (e *EventUnlinkSCMType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
@@ -291,6 +295,14 @@ func (e *EventPasswordResetSuccessType) TypeDataPtr() interface{} {
 }
 
 func (e *EventStackChangedType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+
+func (e *EventCreateReviewAppType) TypeDataPtr() interface{} {
+	return &e.TypeData
+}
+
+func (e *EventDestroyReviewAppType) TypeDataPtr() interface{} {
 	return &e.TypeData
 }
 

@@ -2,6 +2,34 @@
 
 ## To Be Released
 
+## 6.7.2
+
+* fix(maintenance): change listing pagination meta to standard pagination meta
+
+## 6.7.1
+
+* style(readme): update api version
+
+## 6.7.0
+
+* feat(maintenance): add maintenance windows
+* feat(maintenance): add maintenance listing
+* feat(maintenance): add maintenance show
+
+## 6.6.0
+
+* feat(scm-repo-link): fetch a Pull Request data
+
+## 6.5.0
+
+* feat(scm-repo-link): add ManualDeployResponse
+
+## 6.4.0
+
+* feat(one-off): allow attached one-off to be run asynchronously
+* feat(stacks): add support for Deployment `stack_base_image`
+* feat(backup): add `StartedAt` and `Method` fields
+
 ## 6.3.0
 
 * feat(apps): add support for `hds_resource`
