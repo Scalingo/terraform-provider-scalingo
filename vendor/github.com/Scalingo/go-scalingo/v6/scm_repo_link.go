@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"gopkg.in/errgo.v1"
@@ -15,8 +16,9 @@ type SCMRepoLinkService interface {
 	SCMRepoLinkCreate(ctx context.Context, app string, params SCMRepoLinkCreateParams) (*SCMRepoLink, error)
 	SCMRepoLinkUpdate(ctx context.Context, app string, params SCMRepoLinkUpdateParams) (*SCMRepoLink, error)
 	SCMRepoLinkDelete(ctx context.Context, app string) error
+	SCMRepoLinkPullRequest(ctx context.Context, app string, number int) (*RepoLinkPullRequest, error)
 
-	SCMRepoLinkManualDeploy(ctx context.Context, app, branch string) error
+	SCMRepoLinkManualDeploy(ctx context.Context, app, branch string) (*Deployment, error)
 	SCMRepoLinkManualReviewApp(ctx context.Context, app, pullRequestID string) error
 	SCMRepoLinkDeployments(ctx context.Context, app string) ([]*Deployment, error)
 	SCMRepoLinkReviewApps(ctx context.Context, app string) ([]*ReviewApp, error)
@@ -89,8 +91,26 @@ type SCMRepoLinkDeploymentsResponse struct {
 	Deployments []*Deployment `json:"deployments"`
 }
 
+type SCMRepoLinkManualDeployResponse struct {
+	Deployment *Deployment `json:"deployment"`
+}
+
 type SCMRepoLinkReviewAppsResponse struct {
 	ReviewApps []*ReviewApp `json:"review_apps"`
+}
+
+type SCMRepoLinkPullRequestResponse struct {
+	Pull RepoLinkPullRequest `json:"pull"`
+}
+
+type RepoLinkPullRequest struct {
+	ID                    int    `json:"id"`
+	Number                int    `json:"number"`
+	Title                 string `json:"title"`
+	HTMLURL               string `json:"html_url"`
+	SourceRepoName        string `json:"source_repo_name"`
+	SourceRepoHTMLURL     string `json:"source_repo_html_url"`
+	OpenedFromAForkedRepo bool   `json:"opened_from_a_forked_repo"`
 }
 
 var _ SCMRepoLinkService = (*Client)(nil)
@@ -161,19 +181,32 @@ func (c *Client) SCMRepoLinkDelete(ctx context.Context, app string) error {
 	return nil
 }
 
-func (c *Client) SCMRepoLinkManualDeploy(ctx context.Context, app, branch string) error {
-	res, err := c.ScalingoAPI().Do(ctx, &http.APIRequest{
+func (c *Client) SCMRepoLinkPullRequest(ctx context.Context, app string, number int) (*RepoLinkPullRequest, error) {
+	var res SCMRepoLinkPullRequestResponse
+	err := c.ScalingoAPI().DoRequest(ctx, &http.APIRequest{
+		Method:   "GET",
+		Endpoint: fmt.Sprintf("/apps/%s/scm_repo_link/pulls/%d", app, number),
+		Expected: http.Statuses{200},
+	}, &res)
+	if err != nil {
+		return nil, errgo.Notef(err, "fail to get this SCM repo link")
+	}
+	return &res.Pull, nil
+}
+
+func (c *Client) SCMRepoLinkManualDeploy(ctx context.Context, app, branch string) (*Deployment, error) {
+	var res SCMRepoLinkManualDeployResponse
+	err := c.ScalingoAPI().DoRequest(ctx, &http.APIRequest{
 		Method:   "POST",
 		Endpoint: "/apps/" + app + "/scm_repo_link/manual_deploy",
 		Expected: http.Statuses{200},
 		Params:   map[string]string{"branch": branch},
-	})
+	}, &res)
 	if err != nil {
-		return errgo.Notef(err, "fail to trigger manual app deployment")
+		return nil, errgo.Notef(err, "fail to trigger manual app deployment")
 	}
-	defer res.Body.Close()
 
-	return nil
+	return res.Deployment, nil
 }
 
 func (c *Client) SCMRepoLinkManualReviewApp(ctx context.Context, app, pullRequestID string) error {

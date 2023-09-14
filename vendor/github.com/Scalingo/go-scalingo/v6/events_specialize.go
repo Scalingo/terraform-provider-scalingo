@@ -38,6 +38,8 @@ func (pev *Event) Specialize() DetailedEvent {
 		e = &EventDeploymentType{Event: ev}
 	case EventLinkSCM:
 		e = &EventLinkSCMType{Event: ev}
+	case EventUpdateSCM:
+		e = &EventUpdateSCMType{Event: ev}
 	case EventUnlinkSCM:
 		e = &EventUnlinkSCMType{Event: ev}
 	case EventNewIntegration:
@@ -158,6 +160,10 @@ func (pev *Event) Specialize() DetailedEvent {
 		e = &EventPasswordResetSuccessType{Event: ev}
 	case EventStackChanged:
 		e = &EventStackChangedType{Event: ev}
+	case EventCreateReviewApp:
+		e = &EventCreateReviewAppType{Event: ev}
+	case EventDestroyReviewApp:
+		e = &EventDestroyReviewAppType{Event: ev}
 	case EventLinkGithub:
 		e = &EventLinkGithubType{Event: ev}
 	case EventUnlinkGithub:
