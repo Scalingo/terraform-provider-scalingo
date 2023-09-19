@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -59,6 +60,17 @@ func dataSourceScRegionsRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	name, _ := d.Get("name").(string)
 
+	if name == "" {
+		// When name is not set, we try to load the region name from the
+		// environment variable `SCALINGO_REGION`.
+		// If not set, returns an empty string.
+		name = os.Getenv("SCALINGO_REGION")
+
+		if name == "" {
+			return diag.Errorf("Region is not specified. Please set it or use the 'SCALINGO_REGION' environment variable.")
+		}
+	}
+
 	var selected scalingo.Region
 	for _, v := range regions {
 		if v.Name == name {
@@ -68,7 +80,7 @@ func dataSourceScRegionsRead(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if selected == (scalingo.Region{}) {
-		return diag.Errorf("region '%v' not found", name)
+		return diag.Errorf("The specified Region ('%v') does not exist.", name)
 	}
 
 	d.SetId(selected.Name)
