@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	scalingo "github.com/Scalingo/go-scalingo/v6"
+	scalingo "github.com/Scalingo/go-scalingo/v7"
 )
 
 func resourceScalingoScmIntegration() *schema.Resource {
