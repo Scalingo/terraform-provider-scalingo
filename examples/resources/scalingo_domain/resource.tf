@@ -15,3 +15,10 @@ resource "scalingo_domain" "testappcom" {
   app         = scalingo_app.test_app.id
   canonical   = false
 }
+
+# Create a domain for an app without Let's Encrypt certificate generation
+resource "scalingo_domain" "testappcom" {
+  common_name         = "testapp.com"
+  app                 = scalingo_app.test_app.id
+  letsencrypt_enabled = false
+}

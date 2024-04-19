@@ -38,7 +38,14 @@ func resourceScalingoDomain() *schema.Resource {
 			"canonical": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Computed:    true,
 				Description: "If true, all requests will be redirected to this domain (one per application)",
+			},
+			"letsencrypt_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "If true (default), the domain will be secured with a Let's Encrypt certificate",
 			},
 		},
 	}
@@ -50,11 +57,14 @@ func resourceDomainCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	appID, _ := d.Get("app").(string)
 	domainName, _ := d.Get("common_name").(string)
 	canonical, _ := d.Get("canonical").(bool)
+	letsEncryptEnabled, _ := d.Get("letsencrypt_enabled").(bool)
 
-	domain, err := client.DomainsAdd(ctx, appID, scalingo.Domain{
-		Name:      domainName,
-		Canonical: canonical,
-	})
+	params := scalingo.DomainsAddParams{
+		Name:               domainName,
+		Canonical:          &canonical,
+		LetsEncryptEnabled: &letsEncryptEnabled,
+	}
+	domain, err := client.DomainsAdd(ctx, appID, params)
 	if err != nil {
 		return diag.Errorf("fail to add domain: %v", err)
 	}
