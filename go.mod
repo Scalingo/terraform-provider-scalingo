@@ -1,6 +1,8 @@
 module github.com/Scalingo/terraform-provider-scalingo
 
-go 1.20
+go 1.21
+
+toolchain go1.21.5
 
 require (
 	github.com/Scalingo/go-scalingo/v6 v6.7.7
@@ -9,6 +11,7 @@ require (
 )
 
 require (
+	github.com/Scalingo/go-scalingo/v7 v7.0.0 // indirect
 	github.com/Scalingo/go-utils/errors/v2 v2.4.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect

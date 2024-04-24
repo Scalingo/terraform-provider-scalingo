@@ -18,6 +18,7 @@ Resource representing a log drain attached to an application or a database
 ### Required
 
 - `app` (String) ID of the targeted application
+- `type` (String) type of log drain (syslog/http/elk/etc.)
 
 ### Optional
 
@@ -26,7 +27,6 @@ Resource representing a log drain attached to an application or a database
 - `host` (String) hostname to which logs are transferred
 - `port` (String) port to which logs are transferred
 - `token` (String, Sensitive) token used to authenticate log drain requests (see compatible destination in documentation)
-- `type` (String) Type of log drain (syslog/http/elk/etc.)
 - `url` (String, Sensitive) helper to generate all the host/port/token fields
 
 ### Read-Only
