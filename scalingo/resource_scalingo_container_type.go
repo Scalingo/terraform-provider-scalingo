@@ -33,7 +33,7 @@ func resourceScalingoContainerType() *schema.Resource {
 			},
 			"amount": {
 				Type:        schema.TypeInt,
-				Optional:    true,
+				Required:    true,
 				Description: "Number of containers to boot for this type",
 			},
 			"size": {
