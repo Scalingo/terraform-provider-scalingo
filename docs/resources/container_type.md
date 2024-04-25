@@ -30,12 +30,12 @@ resource "scalingo_container_type" "web" {
 
 ### Required
 
+- `amount` (Number) Number of containers to boot for this type
 - `app` (String) ID of the targeted application
 - `name` (String) Name of the container type
 
 ### Optional
 
-- `amount` (Number) Number of containers to boot for this type
 - `size` (String) Size of the container (S/M/L/etc.)
 
 ### Read-Only
