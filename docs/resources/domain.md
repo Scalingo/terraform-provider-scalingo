@@ -35,7 +35,7 @@ resource "scalingo_domain" "testappcom" {
 resource "scalingo_domain" "testappcom" {
   common_name         = "testapp.com"
   app                 = scalingo_app.test_app.id
-  letsencrypt_enabled = falsangeloe
+  letsencrypt_enabled = false
 }
 ```
 
