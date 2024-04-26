@@ -2,7 +2,14 @@
 
 ## To be Released
 
-* feat(scalingo_app): expose application's base_url #175
+## v2.3.0
+
+* resource(scalingo_app): expose application's base_url #175
+* resource(scalingo_container_type): make amount mandatory #191
+* resource(scalingo_domain): Add `letsencrypt_enabled` parameter #205
+* resource(scalingo_log_drain): Add `type` parameter mandatory #178
+* config: use `SCALINGO_REGION` if environment is set correctly
+* chore(deps) Various dependency updates
 
 ## v2.2.0
 
