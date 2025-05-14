@@ -301,7 +301,7 @@ func addonPlanID(ctx context.Context, client *scalingo.Client, providerID, name 
 		planList += ", " + plan.Name
 	}
 
-	return "", fmt.Errorf("Invalid plan name, possible values are: " + planList)
+	return "", fmt.Errorf("Invalid plan name, possible values are: %s", planList)
 }
 
 func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
