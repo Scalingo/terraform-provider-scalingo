@@ -1,0 +1,2 @@
+  go.sum @john-scalingo
+  github/workflows/* @john-scalingo
