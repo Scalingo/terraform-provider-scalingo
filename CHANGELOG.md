@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* chore(go): use go 1.24
+
 ## v2.3.0
 
 * resource(scalingo_app): expose application's base_url #175

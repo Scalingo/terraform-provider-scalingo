@@ -1,2 +1,3 @@
+github/workflows/* @john-scalingo
 go.mod @john-scalingo
 go.sum @john-scalingo
