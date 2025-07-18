@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	scalingo "github.com/Scalingo/go-scalingo/v7"
+	"github.com/Scalingo/go-scalingo/v8"
 )
 
 func resourceScalingoCollaborator() *schema.Resource {
@@ -16,6 +16,7 @@ func resourceScalingoCollaborator() *schema.Resource {
 		CreateContext: resourceCollaboratorCreate,
 		ReadContext:   resourceCollaboratorRead,
 		DeleteContext: resourceCollaboratorDelete,
+		UpdateContext: resourceCollaboratorUpdate,
 		Description:   "Resource representing a collaboration between a user and an application",
 
 		Schema: map[string]*schema.Schema{
@@ -41,6 +42,10 @@ func resourceScalingoCollaborator() *schema.Resource {
 				Computed:    true,
 				Description: "Status of the collaboration (pending/accepted)",
 			},
+			"limited": {
+				Type:        schema.TypeBool,
+				Description: "Whether the collaborator is a limited collaborator for the application",
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
@@ -52,7 +57,7 @@ func resourceScalingoCollaborator() *schema.Resource {
 func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	collaborator, err := client.CollaboratorAdd(ctx, d.Get("app").(string), d.Get("email").(string))
+	collaborator, err := client.CollaboratorAdd(ctx, d.Get("app").(string), scalingo.CollaboratorAddParams{d.Get("email").(string), false})
 	if err != nil {
 		return diag.Errorf("fail to add collaborator: %v", err)
 	}
@@ -62,6 +67,7 @@ func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, met
 	err = SetAll(d, map[string]interface{}{
 		"username": collaborator.Username,
 		"status":   collaborator.Status,
+		"limited":  collaborator.IsLimited,
 	})
 	if err != nil {
 		return diag.Errorf("fail to store collaborator information: %v", err)
@@ -99,6 +105,7 @@ func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta 
 		"username": collaborator.Username,
 		"email":    collaborator.Email,
 		"status":   collaborator.Status,
+		"limited":  collaborator.IsLimited,
 	})
 	if err != nil {
 		return diag.Errorf("fail to store collaborator information: %v", err)
@@ -113,6 +120,28 @@ func resourceCollaboratorDelete(ctx context.Context, d *schema.ResourceData, met
 	err := client.CollaboratorRemove(ctx, d.Get("app").(string), d.Id())
 	if err != nil {
 		return diag.Errorf("fail to remove collaborator: %v", err)
+	}
+
+	return nil
+}
+
+func resourceCollaboratorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+
+	collaborator, err := client.CollaboratorUpdate(ctx, d.Get("app").(string), d.Id(), scalingo.CollaboratorUpdateParams{d.Get("limited").(bool)})
+	if err != nil {
+		return diag.Errorf("fail to remove collaborator: %v", err)
+	}
+
+	d.SetId(collaborator.ID)
+
+	err = SetAll(d, map[string]interface{}{
+		"username": collaborator.Username,
+		"status":   collaborator.Status,
+		"limited":  collaborator.IsLimited,
+	})
+	if err != nil {
+		return diag.Errorf("fail to store collaborator information: %v", err)
 	}
 
 	return nil
