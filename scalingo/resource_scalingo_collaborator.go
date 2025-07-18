@@ -44,6 +44,7 @@ func resourceScalingoCollaborator() *schema.Resource {
 			},
 			"limited": {
 				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: "Whether the collaborator is a limited collaborator for the application",
 			},
 		},
@@ -130,7 +131,7 @@ func resourceCollaboratorUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	collaborator, err := client.CollaboratorUpdate(ctx, d.Get("app").(string), d.Id(), scalingo.CollaboratorUpdateParams{d.Get("limited").(bool)})
 	if err != nil {
-		return diag.Errorf("fail to remove collaborator: %v", err)
+		return diag.Errorf("fail to update collaborator: %v", err)
 	}
 
 	d.SetId(collaborator.ID)
