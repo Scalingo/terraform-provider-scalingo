@@ -58,7 +58,10 @@ func resourceScalingoCollaborator() *schema.Resource {
 func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	collaborator, err := client.CollaboratorAdd(ctx, d.Get("app").(string), scalingo.CollaboratorAddParams{d.Get("email").(string), false})
+	collaborator, err := client.CollaboratorAdd(ctx, d.Get("app").(string), scalingo.CollaboratorAddParams{
+		Email:     d.Get("email").(string),
+		IsLimited: false,
+	})
 	if err != nil {
 		return diag.Errorf("fail to add collaborator: %v", err)
 	}
@@ -129,7 +132,7 @@ func resourceCollaboratorDelete(ctx context.Context, d *schema.ResourceData, met
 func resourceCollaboratorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	collaborator, err := client.CollaboratorUpdate(ctx, d.Get("app").(string), d.Id(), scalingo.CollaboratorUpdateParams{d.Get("limited").(bool)})
+	collaborator, err := client.CollaboratorUpdate(ctx, d.Get("app").(string), d.Id(), scalingo.CollaboratorUpdateParams{IsLimited: d.Get("limited").(bool)})
 	if err != nil {
 		return diag.Errorf("fail to update collaborator: %v", err)
 	}
