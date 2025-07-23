@@ -173,6 +173,10 @@ func resourceCollaboratorImport(ctx context.Context, d *schema.ResourceData, met
 			if err != nil {
 				return nil, fmt.Errorf("store app id: %v", err)
 			}
+			err = d.Set("limited", collaborator.IsLimited)
+			if err != nil {
+				return nil, fmt.Errorf("store limited: %v", err)
+			}
 			return []*schema.ResourceData{d}, nil
 		}
 	}
