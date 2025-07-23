@@ -60,10 +60,10 @@ func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, met
 
 	collaborator, err := client.CollaboratorAdd(ctx, d.Get("app").(string), scalingo.CollaboratorAddParams{
 		Email:     d.Get("email").(string),
-		IsLimited: false,
+		IsLimited: d.Get("limited").(bool),
 	})
 	if err != nil {
-		return diag.Errorf("fail to add collaborator: %v", err)
+		return diag.Errorf("add collaborator: %v", err)
 	}
 
 	d.SetId(collaborator.ID)
@@ -74,7 +74,7 @@ func resourceCollaboratorCreate(ctx context.Context, d *schema.ResourceData, met
 		"limited":  collaborator.IsLimited,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store collaborator information: %v", err)
+		return diag.Errorf("store collaborator information: %v", err)
 	}
 
 	return nil
@@ -85,7 +85,7 @@ func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	collaborators, err := client.CollaboratorsList(ctx, d.Get("app").(string))
 	if err != nil {
-		return diag.Errorf("fail to list collaborators: %v", err)
+		return diag.Errorf("list collaborators: %v", err)
 	}
 
 	var collaborator scalingo.Collaborator
@@ -112,7 +112,7 @@ func resourceCollaboratorRead(ctx context.Context, d *schema.ResourceData, meta 
 		"limited":  collaborator.IsLimited,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store collaborator information: %v", err)
+		return diag.Errorf("store collaborator information: %v", err)
 	}
 
 	return nil
@@ -123,7 +123,7 @@ func resourceCollaboratorDelete(ctx context.Context, d *schema.ResourceData, met
 
 	err := client.CollaboratorRemove(ctx, d.Get("app").(string), d.Id())
 	if err != nil {
-		return diag.Errorf("fail to remove collaborator: %v", err)
+		return diag.Errorf("remove collaborator: %v", err)
 	}
 
 	return nil
@@ -134,7 +134,7 @@ func resourceCollaboratorUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	collaborator, err := client.CollaboratorUpdate(ctx, d.Get("app").(string), d.Id(), scalingo.CollaboratorUpdateParams{IsLimited: d.Get("limited").(bool)})
 	if err != nil {
-		return diag.Errorf("fail to update collaborator: %v", err)
+		return diag.Errorf("update collaborator: %v", err)
 	}
 
 	d.SetId(collaborator.ID)
@@ -145,7 +145,7 @@ func resourceCollaboratorUpdate(ctx context.Context, d *schema.ResourceData, met
 		"limited":  collaborator.IsLimited,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store collaborator information: %v", err)
+		return diag.Errorf("store collaborator information: %v", err)
 	}
 
 	return nil
@@ -163,7 +163,7 @@ func resourceCollaboratorImport(ctx context.Context, d *schema.ResourceData, met
 
 	collaborators, err := client.CollaboratorsList(ctx, appID)
 	if err != nil {
-		return nil, fmt.Errorf("fail to list collaborators: %v", err)
+		return nil, fmt.Errorf("list collaborators: %v", err)
 	}
 
 	for _, collaborator := range collaborators {
@@ -171,7 +171,7 @@ func resourceCollaboratorImport(ctx context.Context, d *schema.ResourceData, met
 			d.SetId(collaborator.ID)
 			err = d.Set("app", appID)
 			if err != nil {
-				return nil, fmt.Errorf("fail to store app id: %v", err)
+				return nil, fmt.Errorf("store app id: %v", err)
 			}
 			return []*schema.ResourceData{d}, nil
 		}
