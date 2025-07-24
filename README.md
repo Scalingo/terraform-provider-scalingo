@@ -87,6 +87,8 @@ If you wish to work on the provider, you'll first need
 [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding
 `$GOPATH/bin` to your `$PATH`.
 
+### Building
+
 To compile the provider, run `make build`. This will build the provider and put
 the provider binary in the `$GOPATH/bin` directory.
 
@@ -97,7 +99,9 @@ $ $GOPATH/bin/terraform-provider-scalingo
 ...
 ```
 
-In order to test the provider, you can simply run `make test`.
+### Testing
+
+In order to run the tests of the provider, you can simply run `make test`.
 
 ```sh
 $ make test
@@ -110,11 +114,6 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 ```sh
 $ make testacc
 ```
-
-### Testing the plugin against the staging environment
-
-Please read the README in the `scalingo-terraform` to get more information about
-that.
 
 ### Testing the plugin against the development environment
 
@@ -130,13 +129,62 @@ provider_installation {
 }
 ```
 
-Then you can use the development plugin by precising the configuration path in the `TF_CLI_CONFIG_FILE` env variable
+Then you can export the configuration path in the `TF_CLI_CONFIG_FILE` environment variable.
+
+```sh
+export TF_CLI_CONFIG_FILE=./local_dev.tfrc
+```
+
+Alternatively you can add the provider configuration to the `$HOME/.terraformrc` file.
+
+Now you need to ensure to have run `make build` to have the local changes built and ready for testing.
+When this is done, you can start writing your own Terraform file. For example:
 
 ```
-TF_CLI_CONFIG_FILE=./local_dev.tfrc terraform plan
+terraform{
+    required_providers{
+        scalingo={
+            source="scalingo/scalingo"
+            version="2.3.0"
+        }
+    }
+}
+
+provider "scalingo"{
+    region = ""
+    auth_api_url = <INSERT LOCAL AUTH URL>
+    api_url = <INSERT LOCAL API URL>
+    db_api_url = <INSERT LOCAL DB API URL>
+    api_token = <INSERT TOKEN>
+}
+
+resource "scalingo_app" "test-app" {
+    name = "test-application-terraform"
+}
 ```
 
-Alternatively you can add the provider configuration to the `$HOME/.terraformrc` file
+Then you just need to run the terraform commands:
+```sh
+terraform plan
+terraform apply
+...
+```
+
+### Testing the plugin against the staging environment
+
+In order to target staging, there is only one change to perform. The scalingo provider
+from your terraform file should look like:
+
+```
+provider "scalingo"{
+    region = ""
+    auth_api_url = "https://auth.st-sc.fr"
+    api_url = "https://api.osc-st-fr1.st-sc.fr"
+    db_api_url = "https://db-api.osc-st-fr1.st-sc.fr"
+    api_token = "<INSERT TOKEN>"
+}
+
+```
 
 ### Generate Documentation
 
