@@ -2,6 +2,8 @@
 
 ## To be Released
 
+# 2.4.0
+
 * chore(go): use go 1.24
 * resource(scalingo_collaborator): add capacity to update a collaborator to limited #231
 
