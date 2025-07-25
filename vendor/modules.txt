@@ -1,13 +1,13 @@
-# github.com/Scalingo/go-scalingo/v7 v7.0.2
-## explicit; go 1.20
-github.com/Scalingo/go-scalingo/v7
-github.com/Scalingo/go-scalingo/v7/billing
-github.com/Scalingo/go-scalingo/v7/debug
-github.com/Scalingo/go-scalingo/v7/http
-github.com/Scalingo/go-scalingo/v7/http/httpmock
-github.com/Scalingo/go-scalingo/v7/io
-# github.com/Scalingo/go-utils/errors/v2 v2.4.0
-## explicit; go 1.20
+# github.com/Scalingo/go-scalingo/v8 v8.3.0
+## explicit; go 1.24
+github.com/Scalingo/go-scalingo/v8
+github.com/Scalingo/go-scalingo/v8/billing
+github.com/Scalingo/go-scalingo/v8/debug
+github.com/Scalingo/go-scalingo/v8/http
+github.com/Scalingo/go-scalingo/v8/http/httpmock
+github.com/Scalingo/go-scalingo/v8/io
+# github.com/Scalingo/go-utils/errors/v2 v2.5.1
+## explicit; go 1.24
 github.com/Scalingo/go-utils/errors/v2
 # github.com/agext/levenshtein v1.2.3
 ## explicit
@@ -176,10 +176,10 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
 github.com/zclconf/go-cty/cty/set
-# golang.org/x/mod v0.24.0
+# golang.org/x/mod v0.25.0
 ## explicit; go 1.23.0
 golang.org/x/mod/semver
-# golang.org/x/net v0.40.0
+# golang.org/x/net v0.41.0
 ## explicit; go 1.23.0
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
@@ -188,14 +188,14 @@ golang.org/x/net/idna
 golang.org/x/net/internal/httpcommon
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sync v0.14.0
+# golang.org/x/sync v0.16.0
 ## explicit; go 1.23.0
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.33.0
 ## explicit; go 1.23.0
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.25.0
+# golang.org/x/text v0.27.0
 ## explicit; go 1.23.0
 golang.org/x/text/cases
 golang.org/x/text/internal
@@ -207,7 +207,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.33.0
+# golang.org/x/tools v0.34.0
 ## explicit; go 1.23.0
 golang.org/x/tools/cmd/stringer
 golang.org/x/tools/go/gcexportdata
