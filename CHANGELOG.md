@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(ci): migrate goreleaser to v2
+
 # 2.4.1
 
 * fix(ci): fix goreleaser CI deprecated option
