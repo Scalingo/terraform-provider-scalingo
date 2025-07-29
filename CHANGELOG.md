@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(ci): fix goreleaser CI deprecated option
+
 # 2.4.0
 
 * chore(go): use go 1.24
