@@ -2,6 +2,8 @@
 
 ## To be Released
 
+# 2.4.1
+
 * fix(ci): fix goreleaser CI deprecated option
 
 # 2.4.0
