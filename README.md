@@ -145,7 +145,7 @@ terraform{
     required_providers{
         scalingo={
             source="scalingo/scalingo"
-            version="2.4.1"
+            version="2.4.2"
         }
     }
 }
