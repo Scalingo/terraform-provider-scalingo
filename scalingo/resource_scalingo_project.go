@@ -14,6 +14,7 @@ func resourceScalingoProject() *schema.Resource {
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
 		DeleteContext: resourceProjectDelete,
+		UpdateContext: resourceProjectUpdate,
 
 		Description: "Resource representing a project",
 
@@ -43,8 +44,8 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, meta int
 	client, _ := meta.(*scalingo.Client)
 
 	project, err := client.ProjectAdd(ctx, scalingo.ProjectAddParams{
-		Name:    "",
-		Default: false,
+		Name:    d.Get("name").(string),
+		Default: d.Get("default").(bool),
 	})
 	if err != nil {
 		return diag.Errorf("create project: %v", err)
@@ -87,6 +88,42 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, meta int
 	err := client.ProjectDelete(ctx, d.Id())
 	if err != nil {
 		return diag.Errorf("remove project: %v", err)
+	}
+
+	return nil
+}
+
+func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+
+	var newProjectNamePtr *string
+	// Only set a new project name if a new name was provided
+	if newProjectName := d.Get("name").(string); newProjectName != "" {
+		newProjectNamePtr = &newProjectName
+	}
+
+	var defaultPtr *bool
+	// Only allow "default" to be true, otherwise do nothing
+	def := d.Get("default").(bool)
+	if def {
+		defaultPtr = &def
+	}
+
+	project, err := client.ProjectUpdate(ctx, d.Id(), scalingo.ProjectUpdateParams{
+		Name:    newProjectNamePtr,
+		Default: defaultPtr,
+	})
+	if err != nil {
+		return diag.Errorf("update project: %v", err)
+	}
+
+	d.SetId(project.ID)
+	err = SetAll(d, map[string]interface{}{
+		"name":    project.Name,
+		"default": project.Default,
+	})
+	if err != nil {
+		return diag.Errorf("store project information: %v", err)
 	}
 
 	return nil
