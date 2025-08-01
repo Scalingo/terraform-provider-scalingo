@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* resource(scalingo_project): create the schema with all methods
+
 # 2.4.2
 
 * fix(ci): migrate goreleaser to v2
