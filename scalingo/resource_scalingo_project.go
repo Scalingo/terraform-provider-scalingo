@@ -126,5 +126,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("store project information: %v", err)
 	}
 
+	// Get all projects to update the non-default one
+
 	return nil
 }
