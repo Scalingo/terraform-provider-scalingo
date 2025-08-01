@@ -12,6 +12,7 @@ import (
 func resourceScalingoProject() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectCreate,
+		ReadContext:   resourceProjectRead,
 
 		Description: "Resource representing a project",
 
@@ -49,6 +50,25 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	d.SetId(project.ID)
+	err = SetAll(d, map[string]interface{}{
+		"name":    project.Name,
+		"default": project.Default,
+	})
+	if err != nil {
+		return diag.Errorf("store project information: %v", err)
+	}
+
+	return nil
+}
+
+func resourceProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+
+	project, err := client.ProjectGet(ctx, d.Id())
+	if err != nil {
+		return diag.Errorf("get project: %v", err)
+	}
+
 	err = SetAll(d, map[string]interface{}{
 		"name":    project.Name,
 		"default": project.Default,
