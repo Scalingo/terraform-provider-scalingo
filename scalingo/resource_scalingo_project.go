@@ -27,7 +27,7 @@ func resourceScalingoProject() *schema.Resource {
 			},
 			"default": {
 				Type:        schema.TypeBool,
-				Required:    false,
+				Optional:    true,
 				Default:     false,
 				Description: "Whether or not the project is a default project",
 			},
