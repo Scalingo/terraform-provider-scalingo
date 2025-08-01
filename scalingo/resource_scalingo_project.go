@@ -13,6 +13,7 @@ func resourceScalingoProject() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
+		DeleteContext: resourceProjectDelete,
 
 		Description: "Resource representing a project",
 
@@ -75,6 +76,17 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, meta inter
 	})
 	if err != nil {
 		return diag.Errorf("store project information: %v", err)
+	}
+
+	return nil
+}
+
+func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(*scalingo.Client)
+
+	err := client.ProjectDelete(ctx, d.Id())
+	if err != nil {
+		return diag.Errorf("remove project: %v", err)
 	}
 
 	return nil
