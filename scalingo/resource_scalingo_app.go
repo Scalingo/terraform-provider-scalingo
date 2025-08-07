@@ -76,6 +76,12 @@ func resourceScalingoApp() *schema.Resource {
 				Computed:    true,
 				Description: "ID of the base stack to use (scalingo-18/scalingo-20/scalingo-22)",
 			},
+			"project_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "ID of the project to which the application belongs to",
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
@@ -93,14 +99,13 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		Name: appName,
 	}
 
-	stackID, _ := d.Get("stack_id").(string)
-	if stackID != "" {
-		createOpts.StackID = stackID
-	}
+	createOpts.StackID, _ = d.Get("stack_id").(string)
+	createOpts.ProjectID, _ = d.Get("project_id").(string)
 
 	tflog.Info(ctx, "Creating Scalingo application", map[string]interface{}{
-		"name":     createOpts.Name,
-		"stack_id": createOpts.StackID,
+		"name":       createOpts.Name,
+		"stack_id":   createOpts.StackID,
+		"project_id": createOpts.ProjectID,
 	})
 	app, err := client.AppsCreate(ctx, createOpts)
 	if err != nil {
@@ -109,10 +114,11 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId(app.ID)
 	err = SetAll(d, map[string]interface{}{
-		"base_url": app.BaseURL,
-		"url":      app.URL,
-		"git_url":  app.GitURL,
-		"stack_id": app.StackID,
+		"base_url":   app.BaseURL,
+		"url":        app.URL,
+		"git_url":    app.GitURL,
+		"stack_id":   app.StackID,
+		"project_id": app.Project.ID,
 	})
 
 	if err != nil {
@@ -188,6 +194,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		"router_logs":    app.RouterLogs,
 		"sticky_session": app.StickySession,
 		"stack_id":       app.StackID,
+		"project_id":     app.Project.ID,
 	})
 	if err != nil {
 		return diag.Errorf("fail to store application information: %v", err)

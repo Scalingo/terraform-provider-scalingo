@@ -3,7 +3,7 @@ module github.com/Scalingo/terraform-provider-scalingo
 go 1.24
 
 require (
-	github.com/Scalingo/go-scalingo/v8 v8.3.1-0.20250731105036-5cc557861063
+	github.com/Scalingo/go-scalingo/v8 v8.3.1-0.20250806122655-60d12659a68f
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
 )
