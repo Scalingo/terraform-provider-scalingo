@@ -2,8 +2,6 @@ package scalingo
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -40,7 +38,7 @@ func resourceScalingoProject() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceProjectImport,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }
@@ -132,28 +130,4 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	return nil
-}
-
-func resourceProjectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client, _ := meta.(*scalingo.Client)
-
-	if d.Id() == "" {
-		return nil, fmt.Errorf("project ID is empty")
-	}
-
-	project, err := client.ProjectGet(ctx, d.Id())
-	if err != nil {
-		return nil, fmt.Errorf("get project: %v", err)
-	}
-
-	d.SetId(project.ID)
-	err = SetAll(d, map[string]interface{}{
-		"name":    project.Name,
-		"default": project.Default,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("store project information: %v", err)
-	}
-
-	return []*schema.ResourceData{d}, nil
 }

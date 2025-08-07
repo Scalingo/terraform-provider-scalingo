@@ -18,14 +18,12 @@ func dataSourceScProject() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    false,
+				Computed:    true,
 				Description: "Name of the project",
 			},
 			"default": {
 				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "Whether or not the project is a default project",
 			},
 			"id": {
