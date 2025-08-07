@@ -2,7 +2,8 @@
 
 ## To be Released
 
-* resource(scalingo_project): create the schema with all methods
+* resource(scalingo_project): create the `project` schema with all methods
+* data_provider(scalingo_project): add the `project` source
 
 # 2.4.2
 
