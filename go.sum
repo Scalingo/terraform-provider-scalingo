@@ -1,7 +1,9 @@
-github.com/Scalingo/go-scalingo/v8 v8.5.1-0.20250922115948-c0b49f215765 h1:B43kagPVxDWftYcLfM5VUsJDuISjjL1QLMyLiBD9HC0=
-github.com/Scalingo/go-scalingo/v8 v8.5.1-0.20250922115948-c0b49f215765/go.mod h1:MGu1rilYgt4NEcjnNEqQ2DXYSXGzywR3z7YAQ0NWiMo=
+github.com/Scalingo/go-scalingo/v8 v8.7.0 h1:fXREF6SPHE7Ea/ajbmzrxA26A1Y0YekFheqQ71eJnCE=
+github.com/Scalingo/go-scalingo/v8 v8.7.0/go.mod h1:xsF6qfWLEkBDr4RoPkcECzGxTrzBuEa95flelQwZhPs=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1/go.mod h1:SbR1JuMtfAl+gpM7ahUW/c3Jm5MMzMAwJBk1pEHkVd8=
+github.com/Scalingo/go-utils/pagination v1.1.1 h1:/2C9hvh+l8FAUnHqb6boAtdz9sOMK5zMOVDPYENMovM=
+github.com/Scalingo/go-utils/pagination v1.1.1/go.mod h1:jR1Z7qXYHs1UqcbHfKZVoHoq548w+dlFCCX0BfbfuTs=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/apparentlymart/go-textseg/v12 v12.0.0/go.mod h1:S/4uRK2UtaQttw1GenVJEynmyUenKwP++x/+DdGV/Ec=

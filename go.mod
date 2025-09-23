@@ -3,13 +3,14 @@ module github.com/Scalingo/terraform-provider-scalingo
 go 1.24
 
 require (
-	github.com/Scalingo/go-scalingo/v8 v8.5.1-0.20250922115948-c0b49f215765
+	github.com/Scalingo/go-scalingo/v8 v8.7.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
 )
 
 require (
 	github.com/Scalingo/go-utils/errors/v2 v2.5.1 // indirect
+	github.com/Scalingo/go-utils/pagination v1.1.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
