@@ -1,5 +1,5 @@
-github.com/Scalingo/go-scalingo/v8 v8.4.0 h1:w4MFnIa0HwVdBTpPQOLl0oQt9Hhd9AsuGutigOFrhGs=
-github.com/Scalingo/go-scalingo/v8 v8.4.0/go.mod h1:MGu1rilYgt4NEcjnNEqQ2DXYSXGzywR3z7YAQ0NWiMo=
+github.com/Scalingo/go-scalingo/v8 v8.5.1-0.20250922115948-c0b49f215765 h1:B43kagPVxDWftYcLfM5VUsJDuISjjL1QLMyLiBD9HC0=
+github.com/Scalingo/go-scalingo/v8 v8.5.1-0.20250922115948-c0b49f215765/go.mod h1:MGu1rilYgt4NEcjnNEqQ2DXYSXGzywR3z7YAQ0NWiMo=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1/go.mod h1:SbR1JuMtfAl+gpM7ahUW/c3Jm5MMzMAwJBk1pEHkVd8=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=

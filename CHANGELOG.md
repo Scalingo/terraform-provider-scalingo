@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* resource(scaling_app): handle project ID update
+
 # 2.5.0
 
 * resource(scalingo_project): create the `project` schema with all methods
