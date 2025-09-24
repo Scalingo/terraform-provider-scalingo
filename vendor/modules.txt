@@ -1,4 +1,4 @@
-# github.com/Scalingo/go-scalingo/v8 v8.4.0
+# github.com/Scalingo/go-scalingo/v8 v8.7.0
 ## explicit; go 1.24
 github.com/Scalingo/go-scalingo/v8
 github.com/Scalingo/go-scalingo/v8/billing
@@ -9,6 +9,9 @@ github.com/Scalingo/go-scalingo/v8/io
 # github.com/Scalingo/go-utils/errors/v2 v2.5.1
 ## explicit; go 1.24
 github.com/Scalingo/go-utils/errors/v2
+# github.com/Scalingo/go-utils/pagination v1.1.1
+## explicit; go 1.24
+github.com/Scalingo/go-utils/pagination
 # github.com/agext/levenshtein v1.2.3
 ## explicit
 github.com/agext/levenshtein

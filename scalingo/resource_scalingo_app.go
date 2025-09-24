@@ -109,7 +109,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	})
 	app, err := client.AppsCreate(ctx, createOpts)
 	if err != nil {
-		return diag.Errorf("fail to create app: %v", err)
+		return diag.Errorf("create app: %v", err)
 	}
 
 	d.SetId(app.ID)
@@ -122,7 +122,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	})
 
 	if err != nil {
-		return diag.Errorf("fail to store application attributes: %v", err)
+		return diag.Errorf("store application attributes: %v", err)
 	}
 
 	if d.Get("environment") != nil {
@@ -137,37 +137,37 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		_, _, err := client.VariableMultipleSet(ctx, d.Id(), variables)
 		if err != nil {
-			return diag.Errorf("fail to set environment variables: %v", err)
+			return diag.Errorf("set environment variables: %v", err)
 		}
 
 		allEnvironment, err := appEnvironment(ctx, client, app.ID)
 		if err != nil {
-			return diag.Errorf("fail to fetch application environment: %v", err)
+			return diag.Errorf("fetch application environment: %v", err)
 		}
 		err = d.Set("all_environment", allEnvironment)
 		if err != nil {
-			return diag.Errorf("fail to store application environment: %v", err)
+			return diag.Errorf("store application environment: %v", err)
 		}
 	}
 
 	if forceHTTPS, _ := d.Get("force_https").(bool); forceHTTPS {
 		_, err := client.AppsForceHTTPS(ctx, app.ID, forceHTTPS)
 		if err != nil {
-			return diag.Errorf("fail to force HTTPS: %v", err)
+			return diag.Errorf("force HTTPS: %v", err)
 		}
 	}
 
 	if routerLogs, _ := d.Get("router_logs").(bool); routerLogs {
 		_, err := client.AppsRouterLogs(ctx, app.ID, routerLogs)
 		if err != nil {
-			return diag.Errorf("fail to enable Router Logs: %v", err)
+			return diag.Errorf("enable Router Logs: %v", err)
 		}
 	}
 
 	if stickySession, _ := d.Get("sticky_session").(bool); stickySession {
 		_, err := client.AppsStickySession(ctx, app.ID, stickySession)
 		if err != nil {
-			return diag.Errorf("fail to enable Sticky Session: %v", err)
+			return diag.Errorf("enable Sticky Session: %v", err)
 		}
 	}
 
@@ -181,7 +181,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 	app, err := client.AppsShow(ctx, id)
 	if err != nil {
-		return diag.Errorf("fail to fetch application: %v", err)
+		return diag.Errorf("fetch application: %v", err)
 	}
 
 	d.SetId(app.ID)
@@ -197,12 +197,12 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		"project_id":     app.Project.ID,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store application information: %v", err)
+		return diag.Errorf("store application information: %v", err)
 	}
 
 	variables, err := client.VariablesList(ctx, d.Id())
 	if err != nil {
-		return diag.Errorf("fail to list application variables: %v", err)
+		return diag.Errorf("list application variables: %v", err)
 	}
 
 	currentEnvironment, _ := d.Get("environment").(map[string]interface{})
@@ -222,7 +222,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		"environment":     environment,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store application environment: %v", err)
+		return diag.Errorf("store application environment: %v", err)
 	}
 
 	return nil
@@ -236,7 +236,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		app, err := client.AppsRename(ctx, oldName.(string), newName.(string))
 		if err != nil {
-			return diag.Errorf("fail to rename app: %v", err)
+			return diag.Errorf("rename app: %v", err)
 		}
 
 		err = SetAll(d, map[string]interface{}{
@@ -246,7 +246,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 			"git_url":  app.GitURL,
 		})
 		if err != nil {
-			return diag.Errorf("fail to store application metadata: %v", err)
+			return diag.Errorf("store application metadata: %v", err)
 		}
 	}
 
@@ -257,7 +257,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		err := deleteVariablesByName(ctx, client, d.Id(), diff.Deleted)
 		if err != nil {
-			return diag.Errorf("fail to delete variables: %v", err)
+			return diag.Errorf("delete variables: %v", err)
 		}
 
 		var variablesToSet scalingo.Variables
@@ -278,22 +278,22 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		_, _, err = client.VariableMultipleSet(ctx, d.Id(), variablesToSet)
 		if err != nil {
-			return diag.Errorf("fail to set variables: %v", err)
+			return diag.Errorf("set variables: %v", err)
 		}
 
 		allEnvironment, err := appEnvironment(ctx, client, d.Id())
 		if err != nil {
-			return diag.Errorf("fail to get application environment: %v", err)
+			return diag.Errorf("get application environment: %v", err)
 		}
 
 		err = d.Set("all_environment", allEnvironment)
 		if err != nil {
-			return diag.Errorf("fail to store application environment: %v", err)
+			return diag.Errorf("store application environment: %v", err)
 		}
 
 		err = restartApp(ctx, client, d.Id())
 		if err != nil {
-			return diag.Errorf("fail to restart app: %v", err)
+			return diag.Errorf("restart app: %v", err)
 		}
 	}
 
@@ -301,7 +301,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, ForceHTTPS := d.GetChange("force_https")
 		_, err := client.AppsForceHTTPS(ctx, d.Id(), ForceHTTPS.(bool))
 		if err != nil {
-			return diag.Errorf("fail to set force HTTPS: %v", err)
+			return diag.Errorf("set force HTTPS: %v", err)
 		}
 	}
 
@@ -309,7 +309,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, RouterLogs := d.GetChange("router_logs")
 		_, err := client.AppsRouterLogs(ctx, d.Id(), RouterLogs.(bool))
 		if err != nil {
-			return diag.Errorf("fail to set Router Logs: %v", err)
+			return diag.Errorf("set Router Logs: %v", err)
 		}
 	}
 
@@ -317,7 +317,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, StickySession := d.GetChange("sticky_session")
 		_, err := client.AppsStickySession(ctx, d.Id(), StickySession.(bool))
 		if err != nil {
-			return diag.Errorf("fail to set Sticky Session: %v", err)
+			return diag.Errorf("set Sticky Session: %v", err)
 		}
 	}
 
@@ -325,7 +325,15 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, stackID := d.GetChange("stack_id")
 		_, err := client.AppsSetStack(ctx, d.Id(), stackID.(string))
 		if err != nil {
-			return diag.Errorf("fail to set application stack: %v", err)
+			return diag.Errorf("set application stack: %v", err)
+		}
+	}
+
+	if d.HasChange("project_id") {
+		_, stackID := d.GetChange("project_id")
+		_, err := client.AppsSetProject(ctx, d.Id(), stackID.(string))
+		if err != nil {
+			return diag.Errorf("set project ID: %v", err)
 		}
 	}
 
@@ -340,7 +348,7 @@ func resourceAppDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	err := client.AppsDestroy(ctx, id, name)
 	if err != nil {
-		return diag.Errorf("fail to destroy app: %v", err)
+		return diag.Errorf("destroy app: %v", err)
 	}
 	return nil
 }
@@ -357,7 +365,7 @@ func restartApp(ctx context.Context, client *scalingo.Client, id string) error {
 		location := res.Header.Get("Location")
 		err = waitOperation(ctx, client, location)
 		if err != nil {
-			return fmt.Errorf("fail to get wait for the operation to finish: %v", err)
+			return fmt.Errorf("get wait for the operation to finish: %v", err)
 		}
 	}
 	return nil
