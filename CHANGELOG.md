@@ -2,6 +2,8 @@
 
 ## To be Released
 
+# 2.6.0
+
 * resource(scaling_app): handle project ID update
 
 # 2.5.0
