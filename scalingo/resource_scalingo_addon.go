@@ -307,7 +307,7 @@ func addonPlanID(ctx context.Context, client *scalingo.Client, providerID, name 
 func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
-		return nil, fmt.Errorf("address should have the following format: <appID>:<addonID>")
+		return nil, fmt.Errorf("import block id should have the following format: <appID>:<addonID>")
 	}
 
 	d.SetId(ids[1])
