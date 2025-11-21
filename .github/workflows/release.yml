@@ -11,34 +11,53 @@
 #
 name: release
 on:
+  pull_request:
   push:
+    branches: [main, master, prod]
     tags:
-      - 'v*'
+      - "v*"
 jobs:
-  goreleaser:
-    runs-on: ubuntu-latest
+  linter:
+    name: Linter on a PR
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
     steps:
-      -
-        name: Checkout
+      - uses: Scalingo/actions/go-linter@main
+
+  tests:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: Scalingo/actions/go-tests@main
+
+  goreleaser:
+    runs-on: ubuntu-24.04
+    needs: [linter, tests]
+    steps:
+      - name: Checkout
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/checkout@v5
-      -
-        name: Unshallow
+      - name: Unshallow
+        if: startsWith(github.ref, 'refs/tags/')
         run: git fetch --prune --unshallow
-      -
-        name: Set up Go
+
+      - name: Set up Go
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/setup-go@v6
         with:
-          go-version-file: 'go.mod'
-      -
-        name: Import GPG key
+          go-version-file: "go.mod"
+
+      - name: Import GPG key
+        if: startsWith(github.ref, 'refs/tags/')
         id: import_gpg
         uses: Scalingo/ghaction-import-gpg@v1
         env:
           # These secrets will need to be configured for the repository:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
-      -
-        name: Run GoReleaser
+
+      - name: Run GoReleaser
+        if: startsWith(github.ref, 'refs/tags/')
         uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
