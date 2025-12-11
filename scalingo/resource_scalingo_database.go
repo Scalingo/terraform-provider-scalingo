@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -36,7 +37,7 @@ func resourceScalingoDatabase() *schema.Resource {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Required:    true,
-				Description: "technology of the Database NG",
+				Description: "Technology of the Database NG",
 			},
 			"plan": {
 				Type:        schema.TypeString,
@@ -75,7 +76,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 
 	planID, err := addonPlanID(ctx, client, technology, planName)
 	if err != nil {
-		return diag.Errorf("fail to get addon plan id: %v", err)
+		return diag.Errorf("get addon plan id: %v", err)
 	}
 
 	if err := d.Set("plan_id", planID); err != nil {
@@ -90,20 +91,20 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return diag.Errorf("fail to provision addon: %v", err)
+		return diag.Errorf("provision addon: %v", err)
 	}
 
-	res, err = waitUntilProvisionedPreview(ctx, client, res)
+	res, err = waitUntilDatabaseProvisioned(ctx, client, res)
 	if err != nil {
-		return diag.Errorf("fail to wait for the addon to be provisioned: %v", err)
+		return diag.Errorf("wait for the addon to be provisioned: %v", err)
 	}
 
 	d.SetId(res.ID)
 	if err := d.Set("app_id", res.App.ID); err != nil {
-		return diag.Errorf("fail to store app id: %v", err)
+		return diag.Errorf("store app id: %v", err)
 	}
 	if err := d.Set("database_id", res.Database.ID); err != nil {
-		return diag.Errorf("fail to store database id: %v", err)
+		return diag.Errorf("store database id: %v", err)
 	}
 
 	return nil
@@ -115,14 +116,14 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	database, err := previewClient.DatabaseShow(ctx, d.Id())
 	if err != nil {
-		return diag.Errorf("fail to get database details: %v", err)
+		return diag.Errorf("get database details: %v", err)
 	}
 
 	d.SetId(database.ID)
 
 	planID, err := addonPlanID(ctx, client, database.Technology, database.Plan)
 	if err != nil {
-		return diag.Errorf("fail to get addon plan id: %v", err)
+		return diag.Errorf("get addon plan id: %v", err)
 	}
 
 	err = SetAll(d, map[string]interface{}{
@@ -135,7 +136,7 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta inte
 		"database_id": database.Database.ID,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store database information: %v", err)
+		return diag.Errorf("store database information: %v", err)
 	}
 
 	return nil
@@ -147,7 +148,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 	database, err := previewClient.DatabaseShow(ctx, d.Id())
 	if err != nil {
-		return diag.Errorf("fail to get addon information for %v: %v", d.Id(), err)
+		return diag.Errorf("get addon information for %v: %v", d.Id(), err)
 	}
 
 	if d.HasChange("name") {
@@ -158,7 +159,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 		_, err = client.AppsRename(ctx, app.Name, d.Get("name").(string))
 		if err != nil {
-			return diag.Errorf("fail to rename database app: %v", err)
+			return diag.Errorf("rename database app: %v", err)
 		}
 	}
 
@@ -166,7 +167,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		_, stackID := d.GetChange("project_id")
 		_, err := client.AppsSetProject(ctx, database.App.ID, stackID.(string))
 		if err != nil {
-			return diag.Errorf("fail to set project ID: %v", err)
+			return diag.Errorf("set project ID: %v", err)
 		}
 	}
 
@@ -187,43 +188,19 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceDatabaseImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client, _ := meta.(*scalingo.Client)
-	previewClient := scalingo.NewPreviewClient(client)
-
-	databaseName := d.Id()
-
-	databases, err := previewClient.DatabasesList(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("fail to list databases: %v", err)
-	}
-
-	var foundDatabase *scalingo.DatabaseNG
-	for _, db := range databases {
-		if db.Name == databaseName {
-			foundDatabase = &db
-			break
-		}
-	}
-
-	if foundDatabase == nil {
-		return nil, fmt.Errorf("database with name %s not found", databaseName)
-	}
-
-	d.SetId(foundDatabase.ID)
-
 	diags := resourceDatabaseRead(ctx, d, meta)
 	if diags.HasError() {
-		return nil, fmt.Errorf("fail to read database: %v", diags)
+		return nil, fmt.Errorf("read database: %v", diags)
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func waitUntilProvisionedPreview(ctx context.Context, client *scalingo.Client, scalingo_database scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
+func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, scalingo_database scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
 	var err error
 	previewClient := scalingo.NewPreviewClient(client)
 
-	timer := time.NewTimer(5 * time.Minute)
+	timer := time.NewTimer(20 * time.Minute)
 	ticker := time.NewTicker(5 * time.Second)
 	defer timer.Stop()
 	defer ticker.Stop()
@@ -233,7 +210,7 @@ func waitUntilProvisionedPreview(ctx context.Context, client *scalingo.Client, s
 		if err != nil {
 			// Database might not be available immediately after creation, retry
 			if !strings.Contains(err.Error(), "not found") {
-				return scalingo_database, fmt.Errorf("fail to get the database: %w", err)
+				return scalingo_database, fmt.Errorf("get the database: %w", err)
 			}
 			// Continue waiting if database not found yet
 		} else if scalingo_database.Database.Status == scalingo.DatabaseStatusRunning {
@@ -241,7 +218,7 @@ func waitUntilProvisionedPreview(ctx context.Context, client *scalingo.Client, s
 		}
 		select {
 		case <-timer.C:
-			return scalingo_database, fmt.Errorf("database provisioning timed out")
+			return scalingo_database, errors.New("database provisioning timed out")
 		case <-ticker.C:
 		}
 	}
