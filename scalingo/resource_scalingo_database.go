@@ -78,7 +78,8 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("get addon plan id: %v", err)
 	}
 
-	if err := d.Set("plan_id", planID); err != nil {
+	err = d.Set("plan_id", planID)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -99,10 +100,14 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	d.SetId(res.ID)
-	if err := d.Set("app_id", res.App.ID); err != nil {
+
+	err = d.Set("app_id", res.App.ID)
+	if err != nil {
 		return diag.Errorf("store app id: %v", err)
 	}
-	if err := d.Set("database_id", res.Database.ID); err != nil {
+
+	err = d.Set("database_id", res.Database.ID)
+	if err != nil {
 		return diag.Errorf("store database id: %v", err)
 	}
 
