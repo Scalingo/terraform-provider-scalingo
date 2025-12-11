@@ -2,7 +2,6 @@ package scalingo
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -188,6 +187,27 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceDatabaseImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client, _ := meta.(*scalingo.Client)
+	previewClient := scalingo.NewPreviewClient(client)
+
+	// d.Id() contains the database name provided by the user during import corresponding to the app name
+	// We need to find the App ID associated with this app name to retrieve the database
+
+	appName := d.Id()
+
+	app, err := client.AppsShow(ctx, appName)
+	if err != nil {
+		return nil, fmt.Errorf("search database: %v", err)
+	}
+
+	database, err := previewClient.DatabaseShow(ctx, app.ID)
+	if err != nil {
+		return nil, fmt.Errorf("get database details: %v", err)
+	}
+
+	// Set the ID to the database ID for subsequent read operation
+	d.SetId(database.ID)
+
 	diags := resourceDatabaseRead(ctx, d, meta)
 	if diags.HasError() {
 		return nil, fmt.Errorf("read database: %v", diags)
@@ -218,7 +238,7 @@ func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, 
 		}
 		select {
 		case <-timer.C:
-			return scalingo_database, errors.New("database provisioning timed out")
+			return scalingo_database, fmt.Errorf("database provisioning timed out")
 		case <-ticker.C:
 		}
 	}
