@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -242,7 +243,7 @@ func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, 
 		}
 		select {
 		case <-timer.C:
-			return scalingo_database, fmt.Errorf("database provisioning timed out")
+			return scalingo_database, errors.New("database provisioning timed out")
 		case <-ticker.C:
 		}
 	}
