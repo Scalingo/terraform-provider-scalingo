@@ -34,7 +34,7 @@ func dataSourceScPrivateNetworkDomain() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     50,
-				Description: "Number of items per page (max 50)",
+				Description: "Number of items per page",
 			},
 		},
 	}
@@ -43,20 +43,23 @@ func dataSourceScPrivateNetworkDomain() *schema.Resource {
 func dataSourceScPrivateNetworkDomainsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	appID, _ := d.Get("app").(string)
+	appID, ok := d.Get("app").(string)
+	if !ok || appID == "" {
+		return diag.Errorf("app ID must be provided")
+	}
 	page, _ := d.Get("page").(uint)
 	pageSize, _ := d.Get("page_size").(uint)
 
 	domains, err := client.PrivateNetworksDomainsList(ctx, appID, page, pageSize)
 	if err != nil {
-		return diag.Errorf("fail to list project private network domains: %v", err)
+		return diag.Errorf("list project private network domains: %v", err)
 	}
 
 	err = SetAll(d, map[string]interface{}{
 		"domains": domains,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store project private network domains list: %v", err)
+		return diag.Errorf("store project private network domains list: %v", err)
 	}
 	d.SetId(appID)
 
