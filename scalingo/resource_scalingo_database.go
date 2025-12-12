@@ -14,6 +14,7 @@ import (
 )
 
 const PROVISIONING_TIMEOUT = 20 * time.Minute
+const PROVISIONING_POLL_INTERVAL = 5 * time.Second
 
 func resourceScalingoDatabase() *schema.Resource {
 	return &schema.Resource{
@@ -242,7 +243,7 @@ func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, 
 	previewClient := scalingo.NewPreviewClient(client)
 
 	timer := time.NewTimer(PROVISIONING_TIMEOUT)
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(PROVISIONING_POLL_INTERVAL)
 	defer timer.Stop()
 	defer ticker.Stop()
 
