@@ -200,8 +200,14 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	id := d.Get("app_id").(string)
-	name, _ := d.Get("name").(string)
+	id, ok := d.Get("app_id").(string)
+	if !ok {
+		return diag.Errorf("app_id must be a string")
+	}
+	name, ok := d.Get("name").(string)
+	if !ok {
+		return diag.Errorf("name must be a string")
+	}
 
 	err := client.AppsDestroy(ctx, id, name)
 	if err != nil {
