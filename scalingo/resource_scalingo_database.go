@@ -157,7 +157,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 	database, err := previewClient.DatabaseShow(ctx, d.Id())
 	if err != nil {
-		return diag.Errorf("get addon information for %v: %v", d.Id(), err)
+		return diag.Errorf("get database information for %v: %v", d.Id(), err)
 	}
 
 	if d.HasChange("name") {
