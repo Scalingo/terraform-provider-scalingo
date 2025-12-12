@@ -71,8 +71,22 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 	client, _ := meta.(*scalingo.Client)
 	previewClient := scalingo.NewPreviewClient(client)
 
-	technology, _ := d.Get("technology").(string)
-	planName, _ := d.Get("plan").(string)
+	technology, ok := d.Get("technology").(string)
+	if !ok {
+		return diag.Errorf("technology must be a string")
+	}
+	planName, ok := d.Get("plan").(string)
+	if !ok {
+		return diag.Errorf("plan must be a string")
+	}
+	name, ok := d.Get("name").(string)
+	if !ok {
+		return diag.Errorf("name must be a string")
+	}
+	projectID, ok := d.Get("project_id").(string)
+	if !ok {
+		return diag.Errorf("project_id must be a string")
+	}
 
 	planID, err := addonPlanID(ctx, client, technology, planName)
 	if err != nil {
@@ -87,8 +101,8 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 	res, err := previewClient.DatabaseCreate(ctx, scalingo.DatabaseCreateParams{
 		AddonProviderID: technology,
 		PlanID:          planID,
-		Name:            d.Get("name").(string),
-		ProjectID:       d.Get("project_id").(string),
+		Name:            name,
+		ProjectID:       projectID,
 	})
 	if err != nil {
 		return diag.Errorf("provision addon: %v", err)
@@ -156,12 +170,17 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("name") {
+		newName, ok := d.Get("name").(string)
+		if !ok {
+			return diag.Errorf("name must be a string")
+		}
+
 		app, err := client.AppsShow(ctx, database.App.ID)
 		if err != nil {
 			return diag.Errorf("fetch database application: %v", err)
 		}
 
-		_, err = client.AppsRename(ctx, app.Name, d.Get("name").(string))
+		_, err = client.AppsRename(ctx, app.Name, newName)
 		if err != nil {
 			return diag.Errorf("rename database app: %v", err)
 		}
