@@ -1,4 +1,4 @@
-# github.com/Scalingo/go-scalingo/v8 v8.7.1
+# github.com/Scalingo/go-scalingo/v8 v8.9.0
 ## explicit; go 1.24.0
 github.com/Scalingo/go-scalingo/v8
 github.com/Scalingo/go-scalingo/v8/billing
