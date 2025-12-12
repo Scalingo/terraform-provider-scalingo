@@ -178,8 +178,12 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("project_id") {
-		_, stackID := d.GetChange("project_id")
-		_, err := client.AppsSetProject(ctx, database.App.ID, stackID.(string))
+		_, rawProjectID := d.GetChange("project_id")
+		projectID, ok := rawProjectID.(string)
+		if !ok {
+			return diag.Errorf("cast project ID")
+		}
+		_, err := client.AppsSetProject(ctx, database.App.ID, projectID)
 		if err != nil {
 			return diag.Errorf("set project ID: %v", err)
 		}
