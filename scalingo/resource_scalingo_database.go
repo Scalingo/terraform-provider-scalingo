@@ -89,7 +89,6 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 		Name:            d.Get("name").(string),
 		ProjectID:       d.Get("project_id").(string),
 	})
-
 	if err != nil {
 		return diag.Errorf("provision addon: %v", err)
 	}
