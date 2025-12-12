@@ -188,9 +188,9 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 	if d.HasChange("project_id") {
 		_, stackID := d.GetChange("project_id")
-		_, setProjectErr := client.AppsSetProject(ctx, database.App.ID, stackID.(string))
-		if setProjectErr != nil {
-			return diag.Errorf("set project ID: %v", setProjectErr)
+		_, err := client.AppsSetProject(ctx, database.App.ID, stackID.(string))
+		if err != nil {
+			return diag.Errorf("set project ID: %v", err)
 		}
 	}
 
