@@ -13,6 +13,8 @@ import (
 	"github.com/Scalingo/go-scalingo/v8"
 )
 
+const PROVISIONING_TIMEOUT = 20 * time.Minute
+
 func resourceScalingoDatabase() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDatabaseCreate,
@@ -48,11 +50,6 @@ func resourceScalingoDatabase() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "ID of the plan of the Database NG to provision",
-			},
-			"app_id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "ID of the application automatically created with the Database NG",
 			},
 			"database_id": {
 				Type:        schema.TypeString,
@@ -105,7 +102,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 		ProjectID:       projectID,
 	})
 	if err != nil {
-		return diag.Errorf("provision addon: %v", err)
+		return diag.Errorf("provision database: %v", err)
 	}
 
 	res, err = waitUntilDatabaseProvisioned(ctx, client, res)
@@ -114,11 +111,6 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	d.SetId(res.ID)
-
-	err = d.Set("app_id", res.App.ID)
-	if err != nil {
-		return diag.Errorf("store app id: %v", err)
-	}
 
 	err = d.Set("database_id", res.Database.ID)
 	if err != nil {
@@ -137,12 +129,12 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("get database details: %v", err)
 	}
 
-	d.SetId(database.ID)
-
 	planID, err := addonPlanID(ctx, client, database.Technology, database.Plan)
 	if err != nil {
 		return diag.Errorf("get addon plan id: %v", err)
 	}
+
+	d.SetId(database.ID)
 
 	err = SetAll(d, map[string]interface{}{
 		"name":        database.Name,
@@ -150,7 +142,6 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta inte
 		"plan":        database.Plan,
 		"plan_id":     planID,
 		"project_id":  database.ProjectID,
-		"app_id":      database.App.ID,
 		"database_id": database.Database.ID,
 	})
 	if err != nil {
@@ -200,18 +191,14 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
-	id, ok := d.Get("app_id").(string)
-	if !ok {
-		return diag.Errorf("app_id must be a string")
-	}
 	name, ok := d.Get("name").(string)
 	if !ok {
 		return diag.Errorf("name must be a string")
 	}
 
-	err := client.AppsDestroy(ctx, id, name)
+	err := client.AppsDestroy(ctx, d.Id(), name)
 	if err != nil {
-		return diag.Errorf("destroy app: %v", err)
+		return diag.Errorf("destroy database: %v", err)
 	}
 	return nil
 }
@@ -246,31 +233,31 @@ func resourceDatabaseImport(ctx context.Context, d *schema.ResourceData, meta in
 	return []*schema.ResourceData{d}, nil
 }
 
-func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, scalingo_database scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
+func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
 	var err error
 	previewClient := scalingo.NewPreviewClient(client)
 
-	timer := time.NewTimer(20 * time.Minute)
+	timer := time.NewTimer(PROVISIONING_TIMEOUT)
 	ticker := time.NewTicker(5 * time.Second)
 	defer timer.Stop()
 	defer ticker.Stop()
 
-	for scalingo_database.Database.Status != scalingo.DatabaseStatusRunning {
-		scalingo_database, err = previewClient.DatabaseShow(ctx, scalingo_database.App.ID)
+	for scalingoDatabase.Database.Status != scalingo.DatabaseStatusRunning {
+		scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
 		if err != nil {
 			// Database might not be available immediately after creation, retry
 			if !strings.Contains(err.Error(), "not found") {
-				return scalingo_database, fmt.Errorf("get the database: %w", err)
+				return scalingoDatabase, fmt.Errorf("get the database: %w", err)
 			}
 			// Continue waiting if database not found yet
-		} else if scalingo_database.Database.Status == scalingo.DatabaseStatusRunning {
-			return scalingo_database, nil
+		} else if scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning {
+			return scalingoDatabase, nil
 		}
 		select {
 		case <-timer.C:
-			return scalingo_database, errors.New("database provisioning timed out")
+			return scalingoDatabase, errors.New("database provisioning timed out")
 		case <-ticker.C:
 		}
 	}
-	return scalingo_database, nil
+	return scalingoDatabase, nil
 }
