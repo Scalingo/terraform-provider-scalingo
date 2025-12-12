@@ -331,9 +331,10 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if d.HasChange("project_id") {
 		_, stackID := d.GetChange("project_id")
-		_, err := client.AppsSetProject(ctx, d.Id(), stackID.(string))
-		if err != nil {
-			return diag.Errorf("set project ID: %v", err)
+		var setProjectErr error
+		_, setProjectErr = client.AppsSetProject(ctx, d.Id(), stackID.(string))
+		if setProjectErr != nil {
+			return diag.Errorf("set project ID: %v", setProjectErr)
 		}
 	}
 
