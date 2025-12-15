@@ -194,7 +194,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if len(addons) == 0 {
-			return diag.Errorf("no addons found for database app %v", database.App.ID)
+			return diag.Errorf("no addons found for database application %v", database.App.ID)
 		}
 
 		addonID := addons[0].ID
@@ -202,10 +202,13 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		_, err = client.AddonUpgrade(ctx, database.App.ID, addonID, scalingo.AddonUpgradeParams{
 			PlanID: planID,
 		})
+		if err != nil {
+			return diag.Errorf("fail to upgrade database: %v", err)
+		}
 
 		database, err = waitUntilDatabaseProvisioned(ctx, client, database)
 		if err != nil {
-			return diag.Errorf("fail to wait for the addon to be provisioned: %v", err)
+			return diag.Errorf("fail to wait for the database to be provisioned: %v", err)
 		}
 	}
 
