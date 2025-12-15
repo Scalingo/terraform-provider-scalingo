@@ -180,6 +180,36 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
+	if d.HasChange("plan") {
+		technology, _ := d.Get("technology").(string)
+		planID, err := addonPlanID(ctx, client, technology, d.Get("plan").(string))
+
+		if err != nil {
+			return diag.Errorf("fail to get addon plan id: %v", err)
+		}
+
+		addons, err := client.AddonsList(ctx, database.App.ID)
+		if err != nil {
+			return diag.Errorf("fail to list addons: %v", err)
+		}
+
+		if len(addons) == 0 {
+			return diag.Errorf("no addons found for database app %v", database.App.ID)
+		}
+
+		addonID := addons[0].ID
+
+		_, err = client.AddonUpgrade(ctx, database.App.ID, addonID, scalingo.AddonUpgradeParams{
+			PlanID: planID,
+		})
+
+		database, err = waitUntilDatabaseProvisioned(ctx, client, database)
+		if err != nil {
+			return diag.Errorf("fail to wait for the addon to be provisioned: %v", err)
+		}
+	}
+
+
 	return nil
 }
 
