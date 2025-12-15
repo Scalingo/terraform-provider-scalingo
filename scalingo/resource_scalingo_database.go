@@ -242,7 +242,7 @@ func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, 
 		scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
 		if err != nil {
 			// Database might not be available immediately after creation, retry
-			if !strings.Contains(err.Error(), "not found") {
+			if !errors.Is(err, scalingo.ErrDatabaseNotFound) {
 				return scalingoDatabase, fmt.Errorf("get the database: %w", err)
 			}
 			// Continue waiting if database not found yet
