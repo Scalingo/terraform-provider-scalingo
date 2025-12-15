@@ -69,22 +69,13 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 	client, _ := meta.(*scalingo.Client)
 	previewClient := scalingo.NewPreviewClient(client)
 
-	technology, ok := d.Get("technology").(string)
-	if !ok {
-		return diag.Errorf("technology must be a string")
-	}
-	planName, ok := d.Get("plan").(string)
-	if !ok {
-		return diag.Errorf("plan must be a string")
-	}
-	name, ok := d.Get("name").(string)
-	if !ok {
-		return diag.Errorf("name must be a string")
-	}
-	projectID, ok := d.Get("project_id").(string)
-	if !ok {
-		return diag.Errorf("project_id must be a string")
-	}
+	//nolint:errcheck // type assertions cannot fail it's defined in the schema.
+	var (
+		technology = d.Get("technology").(string)
+		planName   = d.Get("plan").(string)
+		name       = d.Get("name").(string)
+		projectID  = d.Get("project_id").(string)
+	)
 
 	planID, err := addonPlanID(ctx, client, technology, planName)
 	if err != nil {
@@ -174,7 +165,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 		_, err = client.AppsRename(ctx, app.Name, newName)
 		if err != nil {
-			return diag.Errorf("rename database app: %v", err)
+			return diag.Errorf("rename database application: %v", err)
 		}
 	}
 
