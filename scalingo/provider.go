@@ -64,6 +64,7 @@ func Provider() *schema.Provider {
 			"scalingo_autoscaler":      resourceScalingoAutoscaler(),
 			"scalingo_collaborator":    resourceScalingoCollaborator(),
 			"scalingo_container_type":  resourceScalingoContainerType(),
+			"scalingo_database":        resourceScalingoDatabase(),
 			"scalingo_domain":          resourceScalingoDomain(),
 			"scalingo_log_drain":       resourceScalingoLogDrain(),
 			"scalingo_notifier":        resourceScalingoNotifier(),
