@@ -12,8 +12,10 @@ import (
 	"github.com/Scalingo/go-scalingo/v8"
 )
 
-const PROVISIONING_TIMEOUT = 20 * time.Minute
-const PROVISIONING_POLL_INTERVAL = 5 * time.Second
+// provisioningTimeout is set to 40 minutes as a safe timeout because
+// database provisioning and plan changes can take more than 30 minutes.
+const provisioningTimeout = 40 * time.Minute
+const provisioningPollInterval = 5 * time.Second
 
 func resourceScalingoDatabase() *schema.Resource {
 	return &schema.Resource{
@@ -180,7 +182,43 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	return nil
+	if d.HasChange("plan") {
+		technology, _ := d.Get("technology").(string)
+		planName, _ := d.Get("plan").(string)
+		planID, err := addonPlanID(ctx, client, technology, planName)
+		if err != nil {
+			return diag.Errorf("get addon plan id: %v", err)
+		}
+
+		addons, err := client.AddonsList(ctx, database.App.ID)
+		if err != nil {
+			return diag.Errorf("list addons: %v", err)
+		}
+
+		if len(addons) == 0 {
+			return diag.Errorf("no addons found for database application %v", database.App.ID)
+		}
+
+		addonID := addons[0].ID
+
+		_, err = client.AddonUpgrade(ctx, database.App.ID, addonID, scalingo.AddonUpgradeParams{
+			PlanID: planID,
+		})
+		if err != nil {
+			return diag.Errorf("upgrade database: %v", err)
+		}
+
+		database, err = waitUntilDatabasePlanChanged(ctx, client, database)
+		if err != nil {
+			return diag.Errorf("wait for database provisioning: %v", err)
+		}
+
+		if err := d.Set("plan_id", planID); err != nil {
+			return diag.Errorf("store plan id: %v", err)
+		}
+	}
+
+	return resourceDatabaseRead(ctx, d, meta)
 }
 
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -228,12 +266,38 @@ func resourceDatabaseImport(ctx context.Context, d *schema.ResourceData, meta in
 	return []*schema.ResourceData{d}, nil
 }
 
+func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
+	var err error
+	previewClient := scalingo.NewPreviewClient(client)
+
+	timer := time.NewTimer(provisioningTimeout)
+	ticker := time.NewTicker(provisioningPollInterval)
+	defer timer.Stop()
+	defer ticker.Stop()
+
+	// First, wait for the database to start updating (status != running)
+	for scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning {
+		select {
+		case <-timer.C:
+			return scalingoDatabase, errors.New("database plan change timed out waiting for update to start")
+		case <-ticker.C:
+			scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
+			if err != nil {
+				return scalingoDatabase, fmt.Errorf("get the database: %w", err)
+			}
+		}
+	}
+
+	// Then wait for the database to be running again
+	return waitUntilDatabaseProvisioned(ctx, client, scalingoDatabase)
+}
+
 func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
 	var err error
 	previewClient := scalingo.NewPreviewClient(client)
 
-	timer := time.NewTimer(PROVISIONING_TIMEOUT)
-	ticker := time.NewTicker(PROVISIONING_POLL_INTERVAL)
+	timer := time.NewTimer(provisioningTimeout)
+	ticker := time.NewTicker(provisioningPollInterval)
 	defer timer.Stop()
 	defer ticker.Stop()
 
