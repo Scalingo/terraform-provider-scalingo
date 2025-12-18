@@ -182,7 +182,8 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 	if d.HasChange("plan") {
 		technology, _ := d.Get("technology").(string)
-		planID, err := addonPlanID(ctx, client, technology, d.Get("plan").(string))
+		planName, _ := d.Get("plan").(string)
+		planID, err := addonPlanID(ctx, client, technology, planName)
 
 		if err != nil {
 			return diag.Errorf("fail to get addon plan id: %v", err)
@@ -210,10 +211,13 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return diag.Errorf("fail to wait for the database to be provisioned: %v", err)
 		}
+
+		if err := d.Set("plan_id", planID); err != nil {
+			return diag.Errorf("fail to store plan id: %v", err)
+		}
 	}
 
-
-	return nil
+	return resourceDatabaseRead(ctx, d, meta)
 }
 
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
