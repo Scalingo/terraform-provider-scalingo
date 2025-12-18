@@ -12,7 +12,9 @@ import (
 	"github.com/Scalingo/go-scalingo/v8"
 )
 
-const PROVISIONING_TIMEOUT = 20 * time.Minute
+// PROVISIONING_TIMEOUT is set to 40 minutes as a safe timeout because
+// database provisioning and plan changes can take more than 30 minutes.
+const PROVISIONING_TIMEOUT = 40 * time.Minute
 const PROVISIONING_POLL_INTERVAL = 5 * time.Second
 
 func resourceScalingoDatabase() *schema.Resource {
@@ -207,7 +209,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 			return diag.Errorf("fail to upgrade database: %v", err)
 		}
 
-		database, err = waitUntilDatabaseProvisioned(ctx, client, database)
+		database, err = waitUntilDatabasePlanChanged(ctx, client, database)
 		if err != nil {
 			return diag.Errorf("fail to wait for the database to be provisioned: %v", err)
 		}
@@ -263,6 +265,32 @@ func resourceDatabaseImport(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
+	var err error
+	previewClient := scalingo.NewPreviewClient(client)
+
+	timer := time.NewTimer(PROVISIONING_TIMEOUT)
+	ticker := time.NewTicker(PROVISIONING_POLL_INTERVAL)
+	defer timer.Stop()
+	defer ticker.Stop()
+
+	// First, wait for the database to start updating (status != running)
+	for scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning {
+		select {
+		case <-timer.C:
+			return scalingoDatabase, errors.New("database plan change timed out waiting for update to start")
+		case <-ticker.C:
+			scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
+			if err != nil {
+				return scalingoDatabase, fmt.Errorf("get the database: %w", err)
+			}
+		}
+	}
+
+	// Then wait for the database to be running again
+	return waitUntilDatabaseProvisioned(ctx, client, scalingoDatabase)
 }
 
 func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
