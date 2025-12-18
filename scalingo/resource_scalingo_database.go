@@ -186,14 +186,13 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		technology, _ := d.Get("technology").(string)
 		planName, _ := d.Get("plan").(string)
 		planID, err := addonPlanID(ctx, client, technology, planName)
-
 		if err != nil {
-			return diag.Errorf("fail to get addon plan id: %v", err)
+			return diag.Errorf("get addon plan id: %v", err)
 		}
 
 		addons, err := client.AddonsList(ctx, database.App.ID)
 		if err != nil {
-			return diag.Errorf("fail to list addons: %v", err)
+			return diag.Errorf("list addons: %v", err)
 		}
 
 		if len(addons) == 0 {
@@ -206,16 +205,16 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 			PlanID: planID,
 		})
 		if err != nil {
-			return diag.Errorf("fail to upgrade database: %v", err)
+			return diag.Errorf("upgrade database: %v", err)
 		}
 
 		database, err = waitUntilDatabasePlanChanged(ctx, client, database)
 		if err != nil {
-			return diag.Errorf("fail to wait for the database to be provisioned: %v", err)
+			return diag.Errorf("wait for database provisioning: %v", err)
 		}
 
 		if err := d.Set("plan_id", planID); err != nil {
-			return diag.Errorf("fail to store plan id: %v", err)
+			return diag.Errorf("store plan id: %v", err)
 		}
 	}
 
