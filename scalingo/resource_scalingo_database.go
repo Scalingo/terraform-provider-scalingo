@@ -12,10 +12,10 @@ import (
 	"github.com/Scalingo/go-scalingo/v8"
 )
 
-// PROVISIONING_TIMEOUT is set to 40 minutes as a safe timeout because
+// provisioningTimeout is set to 40 minutes as a safe timeout because
 // database provisioning and plan changes can take more than 30 minutes.
-const PROVISIONING_TIMEOUT = 40 * time.Minute
-const PROVISIONING_POLL_INTERVAL = 5 * time.Second
+const provisioningTimeout = 40 * time.Minute
+const provisioningPollInterval = 5 * time.Second
 
 func resourceScalingoDatabase() *schema.Resource {
 	return &schema.Resource{
@@ -271,8 +271,8 @@ func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, 
 	var err error
 	previewClient := scalingo.NewPreviewClient(client)
 
-	timer := time.NewTimer(PROVISIONING_TIMEOUT)
-	ticker := time.NewTicker(PROVISIONING_POLL_INTERVAL)
+	timer := time.NewTimer(provisioningTimeout)
+	ticker := time.NewTicker(provisioningPollInterval)
 	defer timer.Stop()
 	defer ticker.Stop()
 
@@ -297,8 +297,8 @@ func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, 
 	var err error
 	previewClient := scalingo.NewPreviewClient(client)
 
-	timer := time.NewTimer(PROVISIONING_TIMEOUT)
-	ticker := time.NewTicker(PROVISIONING_POLL_INTERVAL)
+	timer := time.NewTimer(provisioningTimeout)
+	ticker := time.NewTicker(provisioningPollInterval)
 	defer timer.Stop()
 	defer ticker.Stop()
 
