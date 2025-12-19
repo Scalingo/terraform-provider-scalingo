@@ -330,10 +330,15 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if d.HasChange("project_id") {
-		_, stackID := d.GetChange("project_id")
-		_, err := client.AppsSetProject(ctx, d.Id(), stackID.(string))
-		if err != nil {
-			return diag.Errorf("set project ID: %v", err)
+		_, newProjectID := d.GetChange("project_id")
+		projectID := newProjectID.(string)
+		// Skip API call if project_id is empty: the API rejects blank values,
+		// and an empty config value simply means "no project" rather than "unset project"
+		if projectID != "" {
+			_, err := client.AppsSetProject(ctx, d.Id(), projectID)
+			if err != nil {
+				return diag.Errorf("set project ID: %v", err)
+			}
 		}
 	}
 
