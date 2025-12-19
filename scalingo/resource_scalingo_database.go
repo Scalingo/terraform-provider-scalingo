@@ -321,9 +321,5 @@ func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, 
 		}
 		return scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning, nil
 	})
-	if err != nil {
-		return scalingoDatabase, err
-	}
-
-	return scalingoDatabase, nil
+	return scalingoDatabase, err
 }
