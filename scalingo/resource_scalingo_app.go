@@ -331,7 +331,10 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if d.HasChange("project_id") {
 		_, newProjectID := d.GetChange("project_id")
-		projectID := newProjectID.(string)
+		projectID, ok := newProjectID.(string)
+		if !ok {
+			return diag.Errorf("project_id must be a string")
+		}
 		// Skip API call if project_id is empty: the API rejects blank values,
 		// and an empty config value simply means "no project" rather than "unset project"
 		if projectID != "" {

@@ -2,7 +2,7 @@ package scalingo
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"time"
 )
 
@@ -15,7 +15,7 @@ type WaitOptions struct {
 
 func waitUntil(ctx context.Context, opts WaitOptions, check func() (bool, error)) error {
 	if opts.Interval <= 0 {
-		return fmt.Errorf("wait interval must be positive")
+		return errors.New("wait interval must be positive")
 	}
 
 	if opts.Immediate {
@@ -47,7 +47,7 @@ func waitUntil(ctx context.Context, opts WaitOptions, check func() (bool, error)
 			if opts.TimeoutErr != nil {
 				return opts.TimeoutErr
 			}
-			return fmt.Errorf("timed out waiting for condition")
+			return errors.New("timed out waiting for condition")
 		case <-ticker.C:
 			done, err := check()
 			if err != nil {

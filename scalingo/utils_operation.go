@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -16,7 +17,7 @@ func waitOperation(ctx context.Context, client *scalingo.Client, location string
 		Timeout:    5 * time.Minute,
 		Interval:   10 * time.Second,
 		Immediate:  true,
-		TimeoutErr: fmt.Errorf("restart operation timeout"),
+		TimeoutErr: errors.New("restart operation timeout"),
 	}, func() (bool, error) {
 		op, err = client.OperationsShowFromURL(ctx, location)
 		if err != nil {
