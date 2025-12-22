@@ -15,7 +15,6 @@ import (
 // provisioningTimeout is set to 40 minutes as a safe timeout because
 // database provisioning and plan changes can take more than 30 minutes.
 const provisioningTimeout = 40 * time.Minute
-const provisioningPollInterval = 5 * time.Second
 
 func resourceScalingoDatabase() *schema.Resource {
 	return &schema.Resource{
@@ -276,11 +275,10 @@ func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, 
 	// First, wait for the database to start updating (status != running)
 	if scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning {
 		var err error
-		err = waitUntil(ctx, WaitOptions{
-			Timeout:    provisioningTimeout,
-			Interval:   provisioningPollInterval,
-			Immediate:  false,
-			TimeoutErr: errors.New("database plan change timed out waiting for update to start"),
+		err = waitUntil(ctx, waitOptions{
+			timeout:    provisioningTimeout,
+			immediate:  false,
+			timeoutErr: errors.New("database plan change timed out waiting for update to start"),
 		}, func() (bool, error) {
 			scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
 			if err != nil {
@@ -305,11 +303,10 @@ func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, 
 	}
 
 	var err error
-	err = waitUntil(ctx, WaitOptions{
-		Timeout:    provisioningTimeout,
-		Interval:   provisioningPollInterval,
-		Immediate:  true,
-		TimeoutErr: errors.New("database provisioning timed out"),
+	err = waitUntil(ctx, waitOptions{
+		timeout:    provisioningTimeout,
+		immediate:  true,
+		timeoutErr: errors.New("database provisioning timed out"),
 	}, func() (bool, error) {
 		scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
 		if err != nil {

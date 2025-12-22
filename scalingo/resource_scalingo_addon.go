@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -325,10 +324,7 @@ func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta inter
 
 func waitUntilProvisioned(ctx context.Context, client *scalingo.Client, addon scalingo.Addon) error {
 	var err error
-	return waitUntil(ctx, WaitOptions{
-		Interval:  5 * time.Second,
-		Immediate: true,
-	}, func() (bool, error) {
+	return waitUntil(ctx, waitOptions{immediate: true}, func() (bool, error) {
 		addon, err = client.AddonShow(ctx, addon.AppID, addon.ID)
 		if err != nil {
 			return false, err
@@ -341,10 +337,7 @@ func waitUntilProvisioned(ctx context.Context, client *scalingo.Client, addon sc
 }
 
 func waitUntilDatabaseFeatureActivated(ctx context.Context, client *scalingo.Client, addon scalingo.Addon, feature string) error {
-	return waitUntil(ctx, WaitOptions{
-		Interval:  3 * time.Second,
-		Immediate: false,
-	}, func() (bool, error) {
+	return waitUntil(ctx, waitOptions{}, func() (bool, error) {
 		db, err := client.DatabaseShow(ctx, addon.AppID, addon.ID)
 		if err != nil {
 			return false, fmt.Errorf("refresh database metadata: %w", err)
