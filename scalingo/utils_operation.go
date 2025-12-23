@@ -15,7 +15,6 @@ func waitOperation(ctx context.Context, client *scalingo.Client, location string
 	op := &scalingo.Operation{}
 	return waitUntil(ctx, waitOptions{
 		timeout:    5 * time.Minute,
-		immediate:  true,
 		timeoutErr: errors.New("restart operation timeout"),
 	}, func() (bool, error) {
 		op, err = client.OperationsShowFromURL(ctx, location)

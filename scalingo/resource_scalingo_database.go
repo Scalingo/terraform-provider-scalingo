@@ -277,7 +277,6 @@ func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, 
 		var err error
 		err = waitUntil(ctx, waitOptions{
 			timeout:    provisioningTimeout,
-			immediate:  false,
 			timeoutErr: errors.New("database plan change timed out waiting for update to start"),
 		}, func() (bool, error) {
 			scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
@@ -298,14 +297,9 @@ func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, 
 func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
 	previewClient := scalingo.NewPreviewClient(client)
 
-	if scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning {
-		return scalingoDatabase, nil
-	}
-
 	var err error
 	err = waitUntil(ctx, waitOptions{
 		timeout:    provisioningTimeout,
-		immediate:  true,
 		timeoutErr: errors.New("database provisioning timed out"),
 	}, func() (bool, error) {
 		scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)

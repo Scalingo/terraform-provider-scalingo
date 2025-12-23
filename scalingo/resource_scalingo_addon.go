@@ -324,7 +324,7 @@ func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta inter
 
 func waitUntilProvisioned(ctx context.Context, client *scalingo.Client, addon scalingo.Addon) error {
 	var err error
-	return waitUntil(ctx, waitOptions{immediate: true}, func() (bool, error) {
+	return waitUntil(ctx, waitOptions{}, func() (bool, error) {
 		addon, err = client.AddonShow(ctx, addon.AppID, addon.ID)
 		if err != nil {
 			return false, err

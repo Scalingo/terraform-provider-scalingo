@@ -11,7 +11,6 @@ const defaultWaitInterval = 5 * time.Second
 type waitOptions struct {
 	timeout    time.Duration
 	interval   time.Duration
-	immediate  bool
 	timeoutErr error
 }
 
@@ -22,14 +21,12 @@ func waitUntil(ctx context.Context, opts waitOptions, check func() (bool, error)
 		return errors.New("wait interval must be positive")
 	}
 
-	if opts.immediate {
-		done, err := check()
-		if err != nil {
-			return err
-		}
-		if done {
-			return nil
-		}
+	done, err := check()
+	if err != nil {
+		return err
+	}
+	if done {
+		return nil
 	}
 
 	ticker := time.NewTicker(opts.interval)
