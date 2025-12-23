@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,28 +13,20 @@ func waitOperation(ctx context.Context, client *scalingo.Client, location string
 	var err error
 
 	op := &scalingo.Operation{}
-	timer := time.NewTimer(5 * time.Minute)
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-
-	for op.Status != scalingo.OperationStatusDone {
+	return waitUntil(ctx, waitOptions{
+		timeout:    5 * time.Minute,
+		timeoutErr: errors.New("restart operation timeout"),
+	}, func() (bool, error) {
 		op, err = client.OperationsShowFromURL(ctx, location)
 		if err != nil {
-			return err
+			return false, err
 		}
-		// Don't wait next tick
 		if op.Status == scalingo.OperationStatusDone {
-			break
+			return true, nil
 		}
 		if op.Status == scalingo.OperationStatusError {
-			return fmt.Errorf("restart operation failed %v", op.Error)
+			return false, fmt.Errorf("restart operation failed %v", op.Error)
 		}
-		select {
-		case <-timer.C:
-			return fmt.Errorf("restart operation timeout")
-		case <-ticker.C:
-			<-ticker.C
-		}
-	}
-	return nil
+		return false, nil
+	})
 }

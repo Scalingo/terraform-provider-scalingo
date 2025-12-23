@@ -15,7 +15,6 @@ import (
 // provisioningTimeout is set to 40 minutes as a safe timeout because
 // database provisioning and plan changes can take more than 30 minutes.
 const provisioningTimeout = 40 * time.Minute
-const provisioningPollInterval = 5 * time.Second
 
 func resourceScalingoDatabase() *schema.Resource {
 	return &schema.Resource{
@@ -24,6 +23,10 @@ func resourceScalingoDatabase() *schema.Resource {
 		UpdateContext: resourceDatabaseUpdate,
 		DeleteContext: resourceDatabaseDelete,
 		Description:   "Resource representing a Database NG on Scalingo",
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(provisioningTimeout),
+			Update: schema.DefaultTimeout(provisioningTimeout),
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -267,24 +270,23 @@ func resourceDatabaseImport(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
-	var err error
 	previewClient := scalingo.NewPreviewClient(client)
 
-	timer := time.NewTimer(provisioningTimeout)
-	ticker := time.NewTicker(provisioningPollInterval)
-	defer timer.Stop()
-	defer ticker.Stop()
-
 	// First, wait for the database to start updating (status != running)
-	for scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning {
-		select {
-		case <-timer.C:
-			return scalingoDatabase, errors.New("database plan change timed out waiting for update to start")
-		case <-ticker.C:
+	if scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning {
+		var err error
+		err = waitUntil(ctx, waitOptions{
+			timeout:    provisioningTimeout,
+			timeoutErr: errors.New("database plan change timed out waiting for update to start"),
+		}, func() (bool, error) {
 			scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
 			if err != nil {
-				return scalingoDatabase, fmt.Errorf("get the database: %w", err)
+				return false, fmt.Errorf("get the database: %w", err)
 			}
+			return scalingoDatabase.Database.Status != scalingo.DatabaseStatusRunning, nil
+		})
+		if err != nil {
+			return scalingoDatabase, err
 		}
 	}
 
@@ -293,30 +295,22 @@ func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, 
 }
 
 func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
-	var err error
 	previewClient := scalingo.NewPreviewClient(client)
 
-	timer := time.NewTimer(provisioningTimeout)
-	ticker := time.NewTicker(provisioningPollInterval)
-	defer timer.Stop()
-	defer ticker.Stop()
-
-	for scalingoDatabase.Database.Status != scalingo.DatabaseStatusRunning {
+	var err error
+	err = waitUntil(ctx, waitOptions{
+		timeout:    provisioningTimeout,
+		timeoutErr: errors.New("database provisioning timed out"),
+	}, func() (bool, error) {
 		scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
 		if err != nil {
-			// Database might not be available immediately after creation, retry
+			// Database might not be available immediately after creation, retry.
 			if !errors.Is(err, scalingo.ErrDatabaseNotFound) {
-				return scalingoDatabase, fmt.Errorf("get the database: %w", err)
+				return false, fmt.Errorf("get the database: %w", err)
 			}
-			// Continue waiting if database not found yet
-		} else if scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning {
-			return scalingoDatabase, nil
+			return false, nil
 		}
-		select {
-		case <-timer.C:
-			return scalingoDatabase, errors.New("database provisioning timed out")
-		case <-ticker.C:
-		}
-	}
-	return scalingoDatabase, nil
+		return scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning, nil
+	})
+	return scalingoDatabase, err
 }
