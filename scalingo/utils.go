@@ -1,10 +1,13 @@
 package scalingo
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/Scalingo/go-scalingo/v8"
 )
 
 func intAddr(i int) *int {
@@ -48,4 +51,28 @@ func DiagnosticError(diagnostics diag.Diagnostics) error {
 		}
 	}
 	return nil
+}
+
+func getDBAPIContext(ctx context.Context, client *scalingo.Client, databaseID string) (string, string, error) {
+	previewClient := scalingo.NewPreviewClient(client)
+
+	database, err := previewClient.DatabaseShow(ctx, databaseID)
+	if err != nil {
+		return "", "", fmt.Errorf("get database information for %v: %v", databaseID, err)
+	}
+
+	appID := database.App.ID
+	if appID == "" {
+		return "", "", fmt.Errorf("no app id found for database %v", databaseID)
+	}
+
+	addons, err := client.AddonsList(ctx, appID)
+	if err != nil {
+		return "", "", fmt.Errorf("list addons: %v", err)
+	}
+	if len(addons) == 0 {
+		return "", "", fmt.Errorf("no addons found for database application %v", appID)
+	}
+
+	return appID, addons[0].ID, nil
 }
