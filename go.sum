@@ -1,7 +1,5 @@
-github.com/Scalingo/go-scalingo/v8 v8.7.1 h1:Sqos+T77pVBR6iTQenG/7yafQoWMCNurBtdQD8Vg+MQ=
-github.com/Scalingo/go-scalingo/v8 v8.7.1/go.mod h1:C87ufsz8H4/tUutK6cAmUaLpM4HwV8QOGAyfZyRgFAA=
-github.com/Scalingo/go-scalingo/v8 v8.9.0 h1:r1yJxPenMjrvsG2C7K+aycDxjT06gbDNkZ8i6PIw9mM=
-github.com/Scalingo/go-scalingo/v8 v8.9.0/go.mod h1:C87ufsz8H4/tUutK6cAmUaLpM4HwV8QOGAyfZyRgFAA=
+github.com/Scalingo/go-scalingo/v8 v8.10.1 h1:HqCwzFah30mAGFcztLLl0cCiQxVFKeq0xBggUhJERO0=
+github.com/Scalingo/go-scalingo/v8 v8.10.1/go.mod h1:C87ufsz8H4/tUutK6cAmUaLpM4HwV8QOGAyfZyRgFAA=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1/go.mod h1:SbR1JuMtfAl+gpM7ahUW/c3Jm5MMzMAwJBk1pEHkVd8=
 github.com/Scalingo/go-utils/pagination v1.1.2 h1:DfHxWXK76F6+UyJqmJ/XIxTuwurMIJHRFfiejmPBC+8=
