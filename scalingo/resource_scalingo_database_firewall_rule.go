@@ -5,23 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/Scalingo/go-scalingo/v8"
 )
-
-const firewallRuleReadTimeout = 120 * time.Second
-
-// firewallRuleWaitOpts returns wait options for firewall rule operations.
-func firewallRuleWaitOpts(ruleID string) waitOptions {
-	return waitOptions{
-		timeout:    firewallRuleReadTimeout,
-		timeoutErr: fmt.Errorf("firewall rule %s not visible before timeout", ruleID),
-	}
-}
 
 func resourceScalingoDatabaseFirewallRule() *schema.Resource {
 	return &schema.Resource{
@@ -112,7 +101,18 @@ func resourceDatabaseFirewallRuleCreate(ctx context.Context, d *schema.ResourceD
 
 	d.SetId(rule.ID)
 
-	return resourceDatabaseFirewallRuleRead(ctx, d, meta)
+	err = SetAll(d, map[string]interface{}{
+		"database_id":      databaseID,
+		"cidr":             rule.CIDR,
+		"label":            rule.Label,
+		"managed_range_id": rule.RangeID,
+		"rule_type":        string(rule.Type),
+	})
+	if err != nil {
+		return diag.Errorf("store firewall rule information: %v", err)
+	}
+
+	return nil
 }
 
 func resourceDatabaseFirewallRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -126,19 +126,9 @@ func resourceDatabaseFirewallRuleRead(ctx context.Context, d *schema.ResourceDat
 		return diag.Errorf("resolve database context: %v", err)
 	}
 
-	var selected *scalingo.FirewallRule
-	if d.IsNewResource() {
-		var err error
-		selected, err = waitUntilFirewallRuleVisible(ctx, previewClient, appID, addonID, d.Id())
-		if err != nil {
-			return diag.Errorf("wait for firewall rule: %v", err)
-		}
-	} else {
-		var err error
-		selected, err = findFirewallRule(ctx, previewClient, appID, addonID, d.Id())
-		if err != nil {
-			return diag.Errorf("list firewall rules: %v", err)
-		}
+	selected, err := findFirewallRule(ctx, previewClient, appID, addonID, d.Id())
+	if err != nil {
+		return diag.Errorf("list firewall rules: %v", err)
 	}
 
 	if selected == nil {
@@ -216,22 +206,4 @@ func findFirewallRule(ctx context.Context, previewClient *scalingo.PreviewClient
 	}
 
 	return nil, nil
-}
-
-func waitUntilFirewallRuleVisible(ctx context.Context, previewClient *scalingo.PreviewClient, appID, addonID, ruleID string) (*scalingo.FirewallRule, error) {
-	var result *scalingo.FirewallRule
-
-	err := waitUntil(ctx, firewallRuleWaitOpts(ruleID), func() (bool, error) {
-		rule, err := findFirewallRule(ctx, previewClient, appID, addonID, ruleID)
-		if err != nil {
-			return false, err
-		}
-		if rule != nil {
-			result = rule
-			return true, nil
-		}
-		return false, nil
-	})
-
-	return result, err
 }

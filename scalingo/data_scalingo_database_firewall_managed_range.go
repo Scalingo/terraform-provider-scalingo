@@ -70,7 +70,7 @@ func dataSourceScDatabaseFirewallManagedRangeRead(ctx context.Context, d *schema
 		"id":          selected.ID,
 	})
 	if err != nil {
-		return diag.Errorf("fail to store managed range attributes: %v", err)
+		return diag.Errorf("store managed range attributes: %v", err)
 	}
 
 	return nil
