@@ -181,13 +181,13 @@ func resourceDatabaseFirewallRuleImport(ctx context.Context, d *schema.ResourceD
 	d.SetId(ruleID)
 	err := d.Set("database_id", databaseID)
 	if err != nil {
-		return nil, fmt.Errorf("fail to store database id: %v", err)
+		return nil, fmt.Errorf("store database id: %v", err)
 	}
 
 	diags := resourceDatabaseFirewallRuleRead(ctx, d, meta)
 	err = DiagnosticError(diags)
 	if err != nil {
-		return nil, fmt.Errorf("fail to read firewall rule: %v", err)
+		return nil, fmt.Errorf("read firewall rule: %v", err)
 	}
 
 	return []*schema.ResourceData{d}, nil
