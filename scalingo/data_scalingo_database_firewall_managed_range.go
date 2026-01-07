@@ -12,23 +12,23 @@ import (
 func dataSourceScDatabaseFirewallManagedRange() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceScDatabaseFirewallManagedRangeRead,
-		Description: "Database firewall managed range retrieved from the Database API",
+		Description: "Database firewall managed IP range retrieved from the Database API",
 
 		Schema: map[string]*schema.Schema{
 			"database_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "ID of the Database NG",
+				Description: "ID of the database",
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Name of the managed range to look up",
+				Description: "Name of the managed firewall IP range to look up",
 			},
 			"id": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "ID of the managed range",
+				Description: "ID of the managed firewall IP range",
 			},
 		},
 	}
