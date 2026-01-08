@@ -38,10 +38,11 @@ func resourceScalingoDatabaseFirewallRule() *schema.Resource {
 				Description:   "CIDR for a custom range firewall rule",
 			},
 			"label": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Label for a custom range firewall rule",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"managed_range_id"},
+				Description:   "Label for a custom range firewall rule",
 			},
 			"managed_range_id": {
 				Type:          schema.TypeString,
