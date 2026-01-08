@@ -286,7 +286,7 @@ func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func addonPlanID(ctx context.Context, client *scalingo.Client, providerID, name string) (string, error) {
-	plans, err := client.AddonProviderPlansList(ctx, providerID)
+	plans, err := client.AddonProviderPlansList(ctx, providerID, scalingo.AddonProviderPlansListOpts{})
 	if err != nil {
 		return "", err
 	}
