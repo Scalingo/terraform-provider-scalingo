@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v8"
+	"github.com/Scalingo/go-scalingo/v9"
 )
 
 func resourceScalingoAddon() *schema.Resource {
@@ -286,7 +286,7 @@ func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func addonPlanID(ctx context.Context, client *scalingo.Client, providerID, name string) (string, error) {
-	plans, err := client.AddonProviderPlansList(ctx, providerID)
+	plans, err := client.AddonProviderPlansList(ctx, providerID, scalingo.AddonProviderPlansListOpts{})
 	if err != nil {
 		return "", err
 	}
