@@ -5,6 +5,7 @@
 * resource(scalingo_database_firewall_rule): prevent label with managed ranges
 * doc(data_scalingo_database_firewall_managed_range): clarify managed firewall IP range description
 * chore(deps): bump github.com/Scalingo/go-scalingo/v9 to v9.0.3
+* feat(apps): support HDS resource on application creation
 
 # 2.6.0
 

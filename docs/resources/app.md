@@ -36,6 +36,7 @@ resource "scalingo_app" "test_app" {
 
 - `environment` (Map of String) Key-value map of environment variables attached to the application
 - `force_https` (Boolean) Redirect HTTP traffic to HTTPS + HSTS header if enabled
+- `hds_resource` (Boolean) Whether the application should be an HDS resource
 - `project_id` (String) ID of the project to which the application belongs to
 - `router_logs` (Boolean) Enable Router Logs to log all the connections made to your application
 - `stack_id` (String) ID of the base stack to use (scalingo-18/scalingo-20/scalingo-22)

@@ -82,6 +82,12 @@ func resourceScalingoApp() *schema.Resource {
 				Default:     "",
 				Description: "ID of the project to which the application belongs to",
 			},
+			"hds_resource": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether the application should be an HDS resource",
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
@@ -101,11 +107,13 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	createOpts.StackID, _ = d.Get("stack_id").(string)
 	createOpts.ProjectID, _ = d.Get("project_id").(string)
+	createOpts.HDSResource, _ = d.Get("hds_resource").(bool)
 
 	tflog.Info(ctx, "Creating Scalingo application", map[string]interface{}{
-		"name":       createOpts.Name,
-		"stack_id":   createOpts.StackID,
-		"project_id": createOpts.ProjectID,
+		"name":         createOpts.Name,
+		"stack_id":     createOpts.StackID,
+		"project_id":   createOpts.ProjectID,
+		"hds_resource": createOpts.HDSResource,
 	})
 	app, err := client.AppsCreate(ctx, createOpts)
 	if err != nil {
@@ -114,11 +122,12 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId(app.ID)
 	err = SetAll(d, map[string]interface{}{
-		"base_url":   app.BaseURL,
-		"url":        app.URL,
-		"git_url":    app.GitURL,
-		"stack_id":   app.StackID,
-		"project_id": app.Project.ID,
+		"base_url":     app.BaseURL,
+		"url":          app.URL,
+		"git_url":      app.GitURL,
+		"stack_id":     app.StackID,
+		"project_id":   app.Project.ID,
+		"hds_resource": app.HDSResource,
 	})
 
 	if err != nil {
@@ -195,6 +204,7 @@ func resourceAppRead(ctx context.Context, d *schema.ResourceData, meta interface
 		"sticky_session": app.StickySession,
 		"stack_id":       app.StackID,
 		"project_id":     app.Project.ID,
+		"hds_resource":   app.HDSResource,
 	})
 	if err != nil {
 		return diag.Errorf("store application information: %v", err)
