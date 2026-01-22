@@ -32,23 +32,20 @@ jobs:
 
   goreleaser:
     runs-on: ubuntu-24.04
-    needs: [linter, tests]
+    needs: [tests]
+    if: ${{ github.ref_type == 'tag' }}
     steps:
       - name: Checkout
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/checkout@v6
       - name: Unshallow
-        if: startsWith(github.ref, 'refs/tags/')
         run: git fetch --prune --unshallow
 
       - name: Set up Go
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/setup-go@v6
         with:
           go-version-file: "go.mod"
 
       - name: Import GPG key
-        if: startsWith(github.ref, 'refs/tags/')
         id: import_gpg
         uses: Scalingo/ghaction-import-gpg@v1
         env:
@@ -57,7 +54,6 @@ jobs:
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
 
       - name: Run GoReleaser
-        if: startsWith(github.ref, 'refs/tags/')
         uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
