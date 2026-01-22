@@ -5,4 +5,4 @@ flags = ["devops", "sdk", "tools"]
 languages = ["go"]
 owner = "team-infrastructure-services@scalingo.com"
 team = "IST"
-version = "2.6.0"
+version = "2.7.0"
