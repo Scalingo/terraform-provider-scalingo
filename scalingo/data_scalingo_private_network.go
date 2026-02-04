@@ -12,9 +12,6 @@ import (
 func dataSourceScPrivateNetworkDomain() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceScPrivateNetworkDomainsRead,
-		Importer: &schema.ResourceImporter{
-			StateContext: resourceDomainImporter,
-		},
 		Description: "Resource representing a the private network domains of an application",
 
 		Schema: map[string]*schema.Schema{
@@ -23,6 +20,14 @@ func dataSourceScPrivateNetworkDomain() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: "ID of the targeted application",
+			},
+			"domains": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "List of private network domains attached to the application",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"page": {
 				Type:        schema.TypeInt,
@@ -47,16 +52,16 @@ func dataSourceScPrivateNetworkDomainsRead(ctx context.Context, d *schema.Resour
 	if !ok || appID == "" {
 		return diag.Errorf("app ID must be provided")
 	}
-	page, _ := d.Get("page").(uint)
-	pageSize, _ := d.Get("page_size").(uint)
+	page, _ := d.Get("page").(int)
+	pageSize, _ := d.Get("page_size").(int)
 
-	domains, err := client.PrivateNetworksDomainsList(ctx, appID, page, pageSize)
+	domains, err := client.PrivateNetworksDomainsList(ctx, appID, uint(page), uint(pageSize))
 	if err != nil {
 		return diag.Errorf("list project private network domains: %v", err)
 	}
 
 	err = SetAll(d, map[string]interface{}{
-		"domains": domains,
+		"domains": domains.Data,
 	})
 	if err != nil {
 		return diag.Errorf("store project private network domains list: %v", err)
