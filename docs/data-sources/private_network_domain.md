@@ -26,4 +26,5 @@ Resource representing a the private network domains of an application
 
 ### Read-Only
 
+- `domains` (List of String) List of private network domains attached to the application
 - `id` (String) The ID of this resource.
