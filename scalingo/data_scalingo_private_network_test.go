@@ -1,6 +1,7 @@
 package scalingo
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -76,11 +77,11 @@ func testAccCheckDomainsCountMax(resourceName string, max int) resource.TestChec
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("resource not found: %s", resourceName)
+			return errors.New("resource not found: " + resourceName)
 		}
 		countStr, ok := rs.Primary.Attributes["domains.#"]
 		if !ok || countStr == "" {
-			return fmt.Errorf("domains.# not set")
+			return errors.New("domains.# not set")
 		}
 		count, err := strconv.Atoi(countStr)
 		if err != nil {

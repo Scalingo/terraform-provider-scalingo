@@ -8,7 +8,7 @@ import (
 )
 
 var testAccProviderFactories = map[string]func() (*schema.Provider, error){
-	"scalingo": func() (*schema.Provider, error) {
+	"scalingo": func() (*schema.Provider, error) { //nolint:unparam // required by terraform-plugin-sdk
 		return Provider(), nil
 	},
 }
