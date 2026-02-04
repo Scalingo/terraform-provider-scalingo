@@ -32,6 +32,7 @@ func TestAccDataSourcePrivateNetworkDomains(t *testing.T) {
 				Config: testAccPrivateNetworkDomainConfig(appID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "app", appID),
+					// ".#" is a Terraform convention for counting elements in a set or list attribute
 					resource.TestCheckResourceAttrSet(resourceName, "domains.#"),
 				),
 			},
