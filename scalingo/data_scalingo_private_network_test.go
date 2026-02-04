@@ -3,9 +3,11 @@ package scalingo
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func testAccPrivateNetworkAppID(t *testing.T) string {
@@ -16,7 +18,7 @@ func testAccPrivateNetworkAppID(t *testing.T) string {
 	return appID
 }
 
-func TestAccDataSourcePrivateNetworkDomain_basic(t *testing.T) {
+func TestAccDataSourcePrivateNetworkDomains(t *testing.T) {
 	appID := testAccPrivateNetworkAppID(t)
 	resourceName := "data.scalingo_private_network_domain.test"
 
@@ -33,6 +35,20 @@ func TestAccDataSourcePrivateNetworkDomain_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "domains.#"),
 				),
 			},
+			{
+				Config: testAccPrivateNetworkDomainPaginationConfig(appID, 1, 1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "app", appID),
+					testAccCheckDomainsCountMax(resourceName, 1),
+				),
+			},
+			{
+				Config: testAccPrivateNetworkDomainPaginationConfig(appID, 2, 1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "app", appID),
+					testAccCheckDomainsCountMax(resourceName, 1),
+				),
+			},
 		},
 	})
 }
@@ -43,4 +59,35 @@ data "scalingo_private_network_domain" "test" {
   app = "%s"
 }
 `, appID)
+}
+
+func testAccPrivateNetworkDomainPaginationConfig(appID string, page int, pageSize int) string {
+	return fmt.Sprintf(`
+data "scalingo_private_network_domain" "test" {
+  app       = "%s"
+  page      = %d
+  page_size = %d
+}
+`, appID, page, pageSize)
+}
+
+func testAccCheckDomainsCountMax(resourceName string, max int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+		countStr, ok := rs.Primary.Attributes["domains.#"]
+		if !ok || countStr == "" {
+			return fmt.Errorf("domains.# not set")
+		}
+		count, err := strconv.Atoi(countStr)
+		if err != nil {
+			return fmt.Errorf("invalid domains.# value %q: %v", countStr, err)
+		}
+		if count > max {
+			return fmt.Errorf("expected domains count <= %d, got %d", max, count)
+		}
+		return nil
+	}
 }

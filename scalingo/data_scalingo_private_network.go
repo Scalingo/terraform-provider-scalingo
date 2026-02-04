@@ -12,9 +12,6 @@ import (
 func dataSourceScPrivateNetworkDomain() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceScPrivateNetworkDomainsRead,
-		Importer: &schema.ResourceImporter{
-			StateContext: resourceDomainImporter,
-		},
 		Description: "Resource representing a the private network domains of an application",
 
 		Schema: map[string]*schema.Schema{
