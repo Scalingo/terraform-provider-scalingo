@@ -2,6 +2,10 @@
 
 ## To be Released
 
+# 2.7.1
+
+* fix(data_source/scalingo_private_network_domain): fix for private network domain data source
+
 # 2.7.0
 
 * resource(scalingo_database_firewall_rule): prevent label with managed ranges
