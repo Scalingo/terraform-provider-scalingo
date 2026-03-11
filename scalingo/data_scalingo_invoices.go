@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v9"
+	"github.com/Scalingo/go-scalingo/v10"
+	"github.com/Scalingo/go-utils/pagination"
 )
 
 func dataSourceScInvoice() *schema.Resource {
@@ -205,16 +206,13 @@ func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta i
 	currentPage := 1
 	var invoices []*scalingo.Invoice
 	for currentPage <= maxPage {
-		pageInvoices, pagination, err := client.InvoicesList(ctx, scalingo.PaginationOpts{
-			Page:    currentPage,
-			PerPage: PageSize,
-		})
+		pageInvoices, meta, err := client.InvoicesList(ctx, pagination.NewRequest(currentPage, PageSize))
 		if err != nil {
 			return diag.Errorf("fail to list invoices: %v", err)
 		}
 		if currentPage == 1 {
-			maxPage = pagination.TotalPages
-			invoices = make([]*scalingo.Invoice, 0, pagination.TotalCount)
+			maxPage = meta.TotalPages
+			invoices = make([]*scalingo.Invoice, 0, meta.TotalCount)
 		}
 		invoices = append(invoices, pageInvoices...)
 		currentPage++

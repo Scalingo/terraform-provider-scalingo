@@ -3,21 +3,21 @@ module github.com/Scalingo/terraform-provider-scalingo
 go 1.25.0
 
 require (
-	github.com/Scalingo/go-scalingo/v9 v9.2.0
+	github.com/Scalingo/go-scalingo/v10 v10.0.0
+	github.com/Scalingo/go-utils/pagination v1.2.0
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.39.0
 )
 
 require (
 	github.com/ProtonMail/go-crypto v1.3.0 // indirect
-	github.com/Scalingo/go-utils/errors/v2 v2.5.1 // indirect
-	github.com/Scalingo/go-utils/pagination v1.1.2 // indirect
+	github.com/Scalingo/go-utils/errors/v3 v3.2.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/go-test/deep v1.1.1 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
+	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
