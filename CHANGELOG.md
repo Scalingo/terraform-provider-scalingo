@@ -2,6 +2,11 @@
 
 ## To be Released
 
+# 2.7.2
+
+* build(deps): various minor updates
+* build(deps): update `github.com/Scalingo/go-scalingo` from v9 to v10
+
 # 2.7.1
 
 * fix(data_source/scalingo_private_network_domain): fix for private network domain data source
