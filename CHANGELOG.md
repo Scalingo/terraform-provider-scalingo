@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* chore(action): Use Scalingo/actions/gpg-key-import action
+
 # 2.7.2
 
 * build(deps): various minor updates
