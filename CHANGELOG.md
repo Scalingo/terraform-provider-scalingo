@@ -2,6 +2,10 @@
 
 ## To be Released
 
+# 2.7.4
+
+- fix(build): Drop windows/arm6 support
+
 # 2.7.3
 
 * chore(upgrade): Upgrade to Go 1.26
