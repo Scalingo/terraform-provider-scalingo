@@ -79,13 +79,13 @@ func Provider() *schema.Provider {
 	}
 }
 
-func providerConfigure(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func providerConfigure(ctx context.Context, data *schema.ResourceData) (any, diag.Diagnostics) {
 	client, err := scalingo.New(ctx, providerClientConfig(data))
 	if err != nil {
 		return nil, diag.Diagnostics{
 			{
 				Severity: diag.Error,
-				Summary:  fmt.Sprintf("fail to initialize Scalingo client: %v", err),
+				Summary:  fmt.Sprintf("initialize Scalingo client: %v", err),
 			},
 		}
 	}
