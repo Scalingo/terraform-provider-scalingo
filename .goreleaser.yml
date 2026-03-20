@@ -16,7 +16,7 @@ builds:
   flags:
     - -trimpath
   ldflags:
-    - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+    - '-s -w -X github.com/Scalingo/terraform-provider-scalingo/scalingo.Version={{.Version}}'
   goos:
     - freebsd
     - windows
