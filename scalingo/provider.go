@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v10"
+	scalingo "github.com/Scalingo/go-scalingo/v10"
 )
 
 func Provider() *schema.Provider {
@@ -79,28 +79,33 @@ func Provider() *schema.Provider {
 	}
 }
 
-func providerConfigure(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func providerConfigure(ctx context.Context, data *schema.ResourceData) (any, diag.Diagnostics) {
+	client, err := scalingo.New(ctx, providerClientConfig(data))
+	if err != nil {
+		return nil, diag.Diagnostics{
+			{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("initialize Scalingo client: %v", err),
+			},
+		}
+	}
+
+	return client, nil
+}
+
+func providerClientConfig(data *schema.ResourceData) scalingo.ClientConfig {
 	apiURL, _ := data.Get("api_url").(string)
 	authAPIURL, _ := data.Get("auth_api_url").(string)
 	dbAPIURL, _ := data.Get("db_api_url").(string)
 	apiToken, _ := data.Get("api_token").(string)
 	region, _ := data.Get("region").(string)
 
-	client, err := scalingo.New(ctx, scalingo.ClientConfig{
+	return scalingo.ClientConfig{
 		Region:              region,
 		APIToken:            apiToken,
 		APIEndpoint:         apiURL,
 		DatabaseAPIEndpoint: dbAPIURL,
 		AuthEndpoint:        authAPIURL,
-	})
-	if err != nil {
-		return nil, diag.Diagnostics{
-			{
-				Severity: diag.Error,
-				Summary:  fmt.Sprintf("fail to initialize Scalingo client: %v", err),
-			},
-		}
+		UserAgent:           "Scalingo Terraform Provider v" + Version,
 	}
-
-	return client, nil
 }
