@@ -6,7 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v10"
+	"github.com/Scalingo/go-utils/pagination"
+
+	"github.com/Scalingo/go-scalingo/v11"
 )
 
 func dataSourceScPrivateNetworkDomain() *schema.Resource {
@@ -55,7 +57,10 @@ func dataSourceScPrivateNetworkDomainsRead(ctx context.Context, d *schema.Resour
 	page, _ := d.Get("page").(int)
 	pageSize, _ := d.Get("page_size").(int)
 
-	domains, err := client.PrivateNetworksDomainsList(ctx, appID, uint(page), uint(pageSize))
+	domains, err := client.PrivateNetworksDomainsList(ctx, appID, pagination.Request{
+		Page:    page,
+		PerPage: pageSize,
+	})
 	if err != nil {
 		return diag.Errorf("list project private network domains: %v", err)
 	}

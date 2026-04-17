@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v10"
+	"github.com/Scalingo/go-scalingo/v11"
 )
 
 func resourceScalingoContainerType() *schema.Resource {
@@ -55,7 +55,7 @@ func resourceContainerTypeCreate(ctx context.Context, d *schema.ResourceData, me
 	appID, _ := d.Get("app").(string)
 	ctName, _ := d.Get("name").(string)
 
-	resp, err := client.AppsScale(ctx, appID, &scalingo.AppsScaleParams{
+	_, _, err := client.AppsScale(ctx, appID, &scalingo.AppsScaleParams{
 		Containers: []scalingo.ContainerType{{
 			Name:   ctName,
 			Size:   d.Get("size").(string),
@@ -65,7 +65,6 @@ func resourceContainerTypeCreate(ctx context.Context, d *schema.ResourceData, me
 	if err != nil {
 		return diag.Errorf("fail to scale application: %v", err)
 	}
-	defer resp.Body.Close()
 
 	d.SetId(appID + ":" + ctName)
 
@@ -106,7 +105,7 @@ func resourceContainerTypeUpdate(ctx context.Context, d *schema.ResourceData, me
 	appID, _ := d.Get("app").(string)
 	ctName, _ := d.Get("name").(string)
 
-	resp, err := client.AppsScale(ctx, appID, &scalingo.AppsScaleParams{
+	_, _, err := client.AppsScale(ctx, appID, &scalingo.AppsScaleParams{
 		Containers: []scalingo.ContainerType{{
 			Name:   ctName,
 			Size:   d.Get("size").(string),
@@ -116,7 +115,6 @@ func resourceContainerTypeUpdate(ctx context.Context, d *schema.ResourceData, me
 	if err != nil {
 		return diag.Errorf("fail to scale application: %v", err)
 	}
-	defer resp.Body.Close()
 
 	return nil
 }
