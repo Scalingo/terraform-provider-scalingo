@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/Scalingo/go-scalingo/v10"
+	"github.com/Scalingo/go-scalingo/v11"
 )
 
 func resourceScalingoApp() *schema.Resource {
@@ -144,7 +144,7 @@ func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 			})
 		}
 
-		_, _, err := client.VariableMultipleSet(ctx, d.Id(), variables)
+		_, err := client.VariableMultipleSet(ctx, d.Id(), variables)
 		if err != nil {
 			return diag.Errorf("set environment variables: %v", err)
 		}
@@ -286,7 +286,7 @@ func resourceAppUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 			})
 		}
 
-		_, _, err = client.VariableMultipleSet(ctx, d.Id(), variablesToSet)
+		_, err = client.VariableMultipleSet(ctx, d.Id(), variablesToSet)
 		if err != nil {
 			return diag.Errorf("set variables: %v", err)
 		}
@@ -377,10 +377,8 @@ func restartApp(ctx context.Context, client *scalingo.Client, id string) error {
 	// later.
 	// If the restart occurred, wait synchronously until the end of the restart
 	// to validate that everything went fine
-	res, err := client.AppsRestart(ctx, id, nil)
-	if err == nil && res.StatusCode == 202 {
-		defer res.Body.Close()
-		location := res.Header.Get("Location")
+	location, err := client.AppsRestart(ctx, id, nil)
+	if err == nil && location != "" {
 		err = waitOperation(ctx, client, location)
 		if err != nil {
 			return fmt.Errorf("get wait for the operation to finish: %v", err)
