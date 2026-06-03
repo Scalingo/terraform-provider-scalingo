@@ -18,7 +18,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: Scalingo/actions/go-linter@main
+      - uses: Scalingo/actions/go-linter@feat/40/golangci-lint_2.12.2
 
   tests:
     name: Unit Tests
