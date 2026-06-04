@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* build(deps): update `github.com/Scalingo/go-scalingo` from v10 to v11
+
 # 2.7.4
 
 - fix(build): Drop windows/arm6 support
