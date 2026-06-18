@@ -58,13 +58,13 @@ func resourceScalingoAlert() *schema.Resource {
 				Optional:         true,
 				Default:          "0s",
 				Description:      "Delay before triggering the alert when the threshold is reached",
-				DiffSuppressFunc: DurationDiffSuppressFunc,
+				DiffSuppressFunc: durationDiffSuppressFunc,
 			},
 			"remind_every": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Description:      "Duration after which the alert will be re-triggered and sent to the notifiers",
-				DiffSuppressFunc: DurationDiffSuppressFunc,
+				DiffSuppressFunc: durationDiffSuppressFunc,
 			},
 			"notifiers": {
 				Type:        schema.TypeList,

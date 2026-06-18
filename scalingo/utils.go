@@ -54,10 +54,10 @@ func DiagnosticError(diagnostics diag.Diagnostics) error {
 	return nil
 }
 
-// DurationDiffSuppressFunc compares duration values semantically rather than
+// durationDiffSuppressFunc compares duration values semantically rather than
 // lexically so equivalent values (for example "5m" and "5m0s") do not trigger
 // Terraform diffs.
-func DurationDiffSuppressFunc(k, oldValue, newValue string, d *schema.ResourceData) bool {
+func durationDiffSuppressFunc(k, oldValue, newValue string, d *schema.ResourceData) bool {
 	oldDuration, oldErr := time.ParseDuration(oldValue)
 	newDuration, newErr := time.ParseDuration(newValue)
 
