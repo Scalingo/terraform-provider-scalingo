@@ -32,7 +32,7 @@ jobs:
     if: ${{ github.ref_type == 'tag' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Unshallow
         run: git fetch --prune --unshallow
 
