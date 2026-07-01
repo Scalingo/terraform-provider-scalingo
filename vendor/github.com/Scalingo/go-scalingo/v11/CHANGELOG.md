@@ -2,6 +2,15 @@
 
 ## To Be Released
 
+## 11.1.1
+
+* feat(events): add database continuous backup events
+
+## 11.1.0
+
+* feat: list database endpoints
+* task: create metadata.toml file
+
 ## 11.0.3
 
 * fix(run): add JSON tag for `OperationURL`
