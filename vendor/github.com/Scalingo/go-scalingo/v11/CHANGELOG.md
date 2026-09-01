@@ -2,6 +2,15 @@
 
 ## To Be Released
 
+## 11.3.0
+
+* feat(databases): Add new method to get recovery window for PITR
+
+## 11.2.0
+
+* fix(databases): Fix PITR restore return
+* feat(databases): Add new method to restore PITR
+
 ## 11.1.1
 
 * feat(events): add database continuous backup events
