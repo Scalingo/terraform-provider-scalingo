@@ -30,6 +30,7 @@ github.com/Scalingo/go-scalingo/v11/debug
 github.com/Scalingo/go-scalingo/v11/http
 github.com/Scalingo/go-scalingo/v11/http/httpmock
 github.com/Scalingo/go-scalingo/v11/io
+github.com/Scalingo/go-scalingo/v11/scalingomock
 # github.com/Scalingo/go-utils/errors/v3 v3.2.1
 ## explicit; go 1.24
 github.com/Scalingo/go-utils/errors/v3
@@ -238,6 +239,13 @@ github.com/oklog/run
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
+# github.com/stretchr/testify v1.12.1
+## explicit; go 1.17
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/assert/yaml
+github.com/stretchr/testify/internal/difflib
+github.com/stretchr/testify/internal/spew
+github.com/stretchr/testify/require
 # github.com/vmihailenco/msgpack v4.0.4+incompatible
 ## explicit
 github.com/vmihailenco/msgpack
@@ -266,6 +274,9 @@ github.com/zclconf/go-cty/cty/set
 # go.uber.org/mock v0.6.0
 ## explicit; go 1.23.0
 go.uber.org/mock/gomock
+# go.yaml.in/yaml/v3 v3.0.5
+## explicit; go 1.16
+go.yaml.in/yaml/v3
 # golang.org/x/crypto v0.55.0
 ## explicit; go 1.25.0
 golang.org/x/crypto/argon2
