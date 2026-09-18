@@ -98,16 +98,20 @@ func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.Errorf("store addon resource id: %v", err)
 	}
 
-	databaseFeatures, _ := d.Get("database_features").([]interface{})
-	for _, feature := range databaseFeatures {
-		featureStr, _ := feature.(string)
-		_, err := client.DatabaseEnableFeature(ctx, appID, res.Addon.ID, featureStr)
+	databaseFeaturesRaw, databaseFeaturesConfigured := d.GetOk("database_features")
+	if databaseFeaturesConfigured {
+		db, err := client.DatabaseShow(ctx, res.Addon.AppID, res.Addon.ID)
 		if err != nil {
-			return diag.Errorf("add feature on database addon id: %v", err)
+			return diag.Errorf("get database metadata from addon %v: %v", res.Addon.ID, err)
 		}
-		err = waitUntilDatabaseFeatureActivated(ctx, client, res.Addon, featureStr)
+
+		databaseFeatures, ok := databaseFeaturesRaw.([]any)
+		if !ok {
+			return diag.Errorf("database_features has unexpected type %T", databaseFeaturesRaw)
+		}
+		err = compareAndApplyDatabaseFeatures(ctx, client, res.Addon, db, databaseFeatures)
 		if err != nil {
-			return diag.Errorf("activate feature on database addon id: %v", err)
+			return diag.Errorf("compare and apply database features of %v: %v", res.Addon.ID, err)
 		}
 	}
 
