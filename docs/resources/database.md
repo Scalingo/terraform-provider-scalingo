@@ -37,6 +37,7 @@ resource "scalingo_database" "test_postgres" {
 ### Read-Only
 
 - `database_id` (String) ID of the Database NG on DBAPI side
+- `database_url` (String, Sensitive) Full database connection URL, including scheme, credentials, host, port, database name and connection options
 - `id` (String) The ID of this resource.
 - `plan_id` (String) ID of the plan of the Database NG to provision
 
