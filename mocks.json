@@ -1,0 +1,12 @@
+{
+  "base_package": "github.com/Scalingo/terraform-provider-scalingo",
+  "mocks": [
+    {
+      "interface": "DatabasesPreviewService",
+      "src_package": "github.com/Scalingo/go-scalingo/v11",
+      "dst_package": "scalingo",
+      "mock_file": "scalingo/databasespreviewservice_mock_test.go",
+      "external": true
+    }
+  ]
+}

@@ -7,35 +7,27 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/mock/gomock"
+
 	"github.com/Scalingo/go-scalingo/v11"
 )
-
-type databasePreviewStub struct {
-	scalingo.DatabasesPreviewService
-
-	show func(context.Context, string) (scalingo.DatabaseNG, error)
-}
-
-func (s databasePreviewStub) DatabaseShow(ctx context.Context, id string) (scalingo.DatabaseNG, error) {
-	return s.show(ctx, id)
-}
 
 func TestWaitUntilDatabaseProvisioned(t *testing.T) {
 	for _, transientNotFound := range []bool{false, true} {
 		t.Run(fmt.Sprintf("transient_not_found=%t", transientNotFound), func(t *testing.T) {
 			// The create endpoint supplies the app ID in ID, but leaves App empty.
 			created := scalingo.DatabaseNG{ID: "app-id", Name: "test-db"}
-			calls := 0
-			client := databasePreviewStub{show: func(_ context.Context, id string) (scalingo.DatabaseNG, error) {
-				calls++
-				if id != created.ID {
-					t.Fatalf("lookup ID = %q, want %q", id, created.ID)
-				}
-				if transientNotFound && calls == 1 {
-					return scalingo.DatabaseNG{}, fmt.Errorf("search database: %w", scalingo.ErrDatabaseNotFound)
-				}
-				return scalingo.DatabaseNG{ID: created.ID, Database: scalingo.Database{Status: scalingo.DatabaseStatusRunning}}, nil
-			}}
+			client := NewMockDatabasesPreviewService(gomock.NewController(t))
+			var notFound *gomock.Call
+			if transientNotFound {
+				notFound = client.EXPECT().DatabaseShow(gomock.Any(), created.ID).
+					Return(scalingo.DatabaseNG{}, fmt.Errorf("search database: %w", scalingo.ErrDatabaseNotFound))
+			}
+			running := client.EXPECT().DatabaseShow(gomock.Any(), created.ID).
+				Return(scalingo.DatabaseNG{ID: created.ID, Database: scalingo.Database{Status: scalingo.DatabaseStatusRunning}}, nil)
+			if transientNotFound {
+				gomock.InOrder(notFound, running)
+			}
 			ctx, cancel := context.WithTimeout(t.Context(), 2*defaultWaitInterval)
 			defer cancel()
 			got, err := waitUntilDatabaseProvisioned(ctx, client, created)
@@ -44,13 +36,6 @@ func TestWaitUntilDatabaseProvisioned(t *testing.T) {
 			}
 			if got.ID != created.ID || got.Database.Status != scalingo.DatabaseStatusRunning {
 				t.Fatalf("unexpected database: %+v", got)
-			}
-			wantCalls := 1
-			if transientNotFound {
-				wantCalls = 2
-			}
-			if calls != wantCalls {
-				t.Fatalf("calls = %d, want %d", calls, wantCalls)
 			}
 		})
 	}
@@ -66,16 +51,16 @@ func TestWaitUntilDatabaseProvisionedPreservesResourceOnError(t *testing.T) {
 			if canceled {
 				wantErr = context.Canceled
 			}
-			client := databasePreviewStub{show: func(_ context.Context, id string) (scalingo.DatabaseNG, error) {
-				if id != created.ID {
-					t.Fatalf("lookup ID = %q, want %q", id, created.ID)
-				}
-				if canceled {
+			client := NewMockDatabasesPreviewService(gomock.NewController(t))
+			show := client.EXPECT().DatabaseShow(gomock.Any(), created.ID)
+			if canceled {
+				show.DoAndReturn(func(context.Context, string) (scalingo.DatabaseNG, error) {
 					cancel()
 					return scalingo.DatabaseNG{}, scalingo.ErrDatabaseNotFound
-				}
-				return scalingo.DatabaseNG{}, wantErr
-			}}
+				})
+			} else {
+				show.Return(scalingo.DatabaseNG{}, wantErr)
+			}
 			got, err := waitUntilDatabaseProvisioned(ctx, client, created)
 			if !errors.Is(err, wantErr) {
 				t.Fatalf("error = %v, want %v", err, wantErr)

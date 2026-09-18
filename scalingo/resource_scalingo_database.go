@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -138,12 +137,17 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("get addon plan id: %v", err)
 	}
 
-	variables, err := client.VariablesList(ctx, database.App.ID)
+	variables, err := client.VariablesList(ctx, database.ID)
 	if err != nil {
 		return diag.Errorf("get database environment variables: %v", err)
 	}
 
-	variableName := "SCALINGO_" + strings.ToUpper(strings.TrimSuffix(database.Technology, "-ng")) + "_URL"
+	dbTypeName, err := toDatabaseTypeName(ctx, database)
+	if err != nil {
+		return diag.Errorf("to database type name: %v", err)
+	}
+
+	variableName := "SCALINGO_" + dbTypeName + "_URL"
 	databaseURL, ok := variables.Contains(variableName)
 	if !ok || databaseURL.Value == "" {
 		return diag.Errorf("database connection URL variable %s is missing or empty", variableName)
