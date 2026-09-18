@@ -61,6 +61,12 @@ func resourceScalingoDatabase() *schema.Resource {
 				Computed:    true,
 				Description: "ID of the Database NG on DBAPI side",
 			},
+			"database_url": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "Full database connection URL, including scheme, credentials, host, port, database name and connection options",
+			},
 		},
 
 		Importer: &schema.ResourceImporter{
@@ -101,19 +107,20 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("provision database: %v", err)
 	}
 
-	res, err = waitUntilDatabaseProvisioned(ctx, client, res)
+	// Keep the created resource in state even if provisioning fails or is interrupted.
+	d.SetId(res.ID)
+
+	res, err = waitUntilDatabaseProvisioned(ctx, previewClient, res)
 	if err != nil {
 		return diag.Errorf("wait for the addon to be provisioned: %v", err)
 	}
-
-	d.SetId(res.ID)
 
 	err = d.Set("database_id", res.Database.ID)
 	if err != nil {
 		return diag.Errorf("store database id: %v", err)
 	}
 
-	return nil
+	return resourceDatabaseRead(ctx, d, meta)
 }
 
 func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -130,15 +137,32 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("get addon plan id: %v", err)
 	}
 
+	variables, err := client.VariablesList(ctx, database.ID)
+	if err != nil {
+		return diag.Errorf("get database environment variables: %v", err)
+	}
+
+	dbTypeName, err := toDatabaseTypeName(ctx, database)
+	if err != nil {
+		return diag.Errorf("to database type name: %v", err)
+	}
+
+	variableName := "SCALINGO_" + dbTypeName + "_URL"
+	databaseURL, ok := variables.Contains(variableName)
+	if !ok || databaseURL.Value == "" {
+		return diag.Errorf("database connection URL variable %s is missing or empty", variableName)
+	}
+
 	d.SetId(database.ID)
 
 	err = SetAll(d, map[string]interface{}{
-		"name":        database.Name,
-		"technology":  database.Technology,
-		"plan":        database.Plan,
-		"plan_id":     planID,
-		"project_id":  database.ProjectID,
-		"database_id": database.Database.ID,
+		"name":         database.Name,
+		"technology":   database.Technology,
+		"plan":         database.Plan,
+		"plan_id":      planID,
+		"project_id":   database.ProjectID,
+		"database_id":  database.Database.ID,
+		"database_url": databaseURL.Value,
 	})
 	if err != nil {
 		return diag.Errorf("store database information: %v", err)
@@ -279,7 +303,7 @@ func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, 
 			timeout:    provisioningTimeout,
 			timeoutErr: errors.New("database plan change timed out waiting for update to start"),
 		}, func() (bool, error) {
-			scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
+			scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.ID)
 			if err != nil {
 				return false, fmt.Errorf("get the database: %w", err)
 			}
@@ -291,18 +315,18 @@ func waitUntilDatabasePlanChanged(ctx context.Context, client *scalingo.Client, 
 	}
 
 	// Then wait for the database to be running again
-	return waitUntilDatabaseProvisioned(ctx, client, scalingoDatabase)
+	return waitUntilDatabaseProvisioned(ctx, previewClient, scalingoDatabase)
 }
 
-func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
-	previewClient := scalingo.NewPreviewClient(client)
-
-	var err error
-	err = waitUntil(ctx, waitOptions{
+func waitUntilDatabaseProvisioned(ctx context.Context, previewClient scalingo.DatabasesPreviewService, scalingoDatabase scalingo.DatabaseNG) (scalingo.DatabaseNG, error) {
+	// DatabaseNG.ID is currently the app ID expected by the preview API.
+	// Creation responses do not populate App, so App.ID cannot be used here.
+	appID := scalingoDatabase.ID
+	err := waitUntil(ctx, waitOptions{
 		timeout:    provisioningTimeout,
 		timeoutErr: errors.New("database provisioning timed out"),
 	}, func() (bool, error) {
-		scalingoDatabase, err = previewClient.DatabaseShow(ctx, scalingoDatabase.App.ID)
+		database, err := previewClient.DatabaseShow(ctx, appID)
 		if err != nil {
 			// Database might not be available immediately after creation, retry.
 			if !errors.Is(err, scalingo.ErrDatabaseNotFound) {
@@ -310,7 +334,13 @@ func waitUntilDatabaseProvisioned(ctx context.Context, client *scalingo.Client, 
 			}
 			return false, nil
 		}
-		return scalingoDatabase.Database.Status == scalingo.DatabaseStatusRunning, nil
+		// Only replace the saved resource after a successful lookup. On a temporary
+		// not-found error, DatabaseShow returns an empty DatabaseNG; assigning it
+		// would erase the saved ID. Previously, subsequent lookups read that ID
+		// and kept searching with an empty ID. Retaining the resource and capturing
+		// appID before polling prevents this.
+		scalingoDatabase = database
+		return database.Database.Status == scalingo.DatabaseStatusRunning, nil
 	})
 	return scalingoDatabase, err
 }

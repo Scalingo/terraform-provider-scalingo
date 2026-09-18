@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* feat(scalingo_database): Expose a `database_url` field
 * fix(resource/scalingo_scm_repo_link): don't omit attributes anymore when creating repo link with review apps disabled
 * build(deps): update `github.com/Scalingo/go-scalingo` from v10 to v11
 

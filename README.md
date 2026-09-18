@@ -115,6 +115,20 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 $ make testacc
 ```
 
+### Generating test mocks
+
+Mocks are configured in `mocks.json` and generated with
+[Scalingo's gomock generator](https://github.com/Scalingo/go-utils/tree/master/gomock_generator).
+Install the generator and its required tools, with `$GOPATH/bin` on your `$PATH`:
+
+```sh
+go install github.com/Scalingo/go-utils/gomock_generator@v1.5.1
+make mocks
+```
+
+Run `make mocks` after changing a mocked interface or `mocks.json`, and commit the
+generated mocks and `mocks_sig.json` signature cache.
+
 ### Testing the plugin against the development environment
 
 First you will need to create a terraform configuration file defining the plugin installation path
