@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/Scalingo/go-scalingo/v11"
+	scalingohttp "github.com/Scalingo/go-scalingo/v11/http"
 )
 
 func resourceScalingoAddon() *schema.Resource {
@@ -229,51 +231,80 @@ func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 }
 
 func compareAndApplyDatabaseFeatures(ctx context.Context, client *scalingo.Client, addon scalingo.Addon, db scalingo.Database, databaseFeatures []any) error {
-	featuresToAdd := []string{}
-	featuresToRemove := []string{}
+	featuresToAdd, featuresToRemove, err := databaseFeatureChanges(db.Features, databaseFeatures)
+	if err != nil {
+		return fmt.Errorf("determine database feature changes: %v", err)
+	}
 
-	for _, feature := range databaseFeatures {
-		toAdd := true
-		for _, dbFeature := range db.Features {
-			if dbFeature.Name == feature.(string) {
-				toAdd = false
-			}
+	for _, featureName := range featuresToAdd {
+		_, err := client.DatabaseEnableFeature(ctx, addon.AppID, addon.ID, featureName)
+		if err != nil && !databaseFeatureAlreadySetup(err, featureName) {
+			return fmt.Errorf("enable database feature for addon %v: %v", addon.ID, featureName)
 		}
-		if toAdd {
-			featuresToAdd = append(featuresToAdd, feature.(string))
+		err = waitUntilDatabaseFeatureActivated(ctx, client, addon, featureName)
+		if err != nil {
+			return fmt.Errorf("wait until database feature '%v' is enabled %v: %v", featureName, addon.ID, err)
 		}
 	}
 
-	for _, dbFeature := range db.Features {
-		toRemove := true
-		for _, feature := range databaseFeatures {
-			if dbFeature.Name == feature.(string) {
-				toRemove = false
-			}
-		}
-		if toRemove {
-			featuresToRemove = append(featuresToRemove, dbFeature.Name)
-		}
-	}
-
-	for _, feature := range featuresToAdd {
-		_, err := client.DatabaseEnableFeature(ctx, addon.AppID, addon.ID, feature)
+	for _, featureName := range featuresToRemove {
+		_, err := client.DatabaseDisableFeature(ctx, addon.AppID, addon.ID, featureName)
 		if err != nil {
-			return fmt.Errorf("enable database feature for addon %v: %v", addon.ID, feature)
-		}
-		err = waitUntilDatabaseFeatureActivated(ctx, client, addon, feature)
-		if err != nil {
-			return fmt.Errorf("wait until database feature '%v' is enabled %v: %v", feature, addon.ID, err)
-		}
-	}
-
-	for _, feature := range featuresToRemove {
-		_, err := client.DatabaseDisableFeature(ctx, addon.AppID, addon.ID, feature)
-		if err != nil {
-			return fmt.Errorf("disable feature '%v' for %v: %v", feature, addon.ID, err)
+			return fmt.Errorf("disable feature '%v' for %v: %v", featureName, addon.ID, err)
 		}
 	}
 	return nil
+}
+
+func databaseFeatureChanges(currentFeatures []scalingo.DatabaseFeature, configuredFeatures []any) ([]string, []string, error) {
+	currentFeatureNames := make(map[string]struct{}, len(currentFeatures))
+	for _, feature := range currentFeatures {
+		currentFeatureNames[feature.Name] = struct{}{}
+	}
+
+	configuredFeatureNames := make(map[string]struct{}, len(configuredFeatures))
+	featuresToAdd := []string{}
+	for _, feature := range configuredFeatures {
+		featureName, ok := feature.(string)
+		if !ok {
+			return nil, nil, fmt.Errorf("database feature has unexpected type %T", feature)
+		}
+
+		// check if the same feature is configured twice
+		_, alreadyConfigured := configuredFeatureNames[featureName]
+		if alreadyConfigured {
+			continue
+		}
+		configuredFeatureNames[featureName] = struct{}{}
+
+		_, alreadyEnabled := currentFeatureNames[featureName]
+		if !alreadyEnabled {
+			featuresToAdd = append(featuresToAdd, featureName)
+		}
+	}
+
+	featuresToRemove := []string{}
+	for _, feature := range currentFeatures {
+		if _, configured := configuredFeatureNames[feature.Name]; !configured {
+			featuresToRemove = append(featuresToRemove, feature.Name)
+		}
+	}
+
+	return featuresToAdd, featuresToRemove, nil
+}
+
+func databaseFeatureAlreadySetup(err error, feature string) bool {
+	var requestFailedError *scalingohttp.RequestFailedError
+	if !errors.As(err, &requestFailedError) {
+		return false
+	}
+
+	var badRequestError scalingohttp.BadRequestError
+	if !errors.As(requestFailedError.APIError, &badRequestError) {
+		return false
+	}
+
+	return badRequestError.ErrMessage == fmt.Sprintf("feature '%s' is already setup on this database", feature)
 }
 
 func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
