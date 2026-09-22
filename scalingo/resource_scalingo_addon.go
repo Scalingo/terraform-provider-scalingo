@@ -285,7 +285,8 @@ func databaseFeatureChanges(currentFeatures []scalingo.DatabaseFeature, configur
 
 	featuresToRemove := []string{}
 	for _, feature := range currentFeatures {
-		if _, configured := configuredFeatureNames[feature.Name]; !configured {
+		_, configured := configuredFeatureNames[feature.Name]
+		if !configured {
 			featuresToRemove = append(featuresToRemove, feature.Name)
 		}
 	}
