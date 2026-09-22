@@ -64,7 +64,7 @@ func resourceScalingoAddon() *schema.Resource {
 	}
 }
 
-func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
 	providerID, _ := d.Get("provider_id").(string)
@@ -98,23 +98,27 @@ func resourceAddonCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.Errorf("store addon resource id: %v", err)
 	}
 
-	databaseFeatures, _ := d.Get("database_features").([]interface{})
-	for _, feature := range databaseFeatures {
-		featureStr, _ := feature.(string)
-		_, err := client.DatabaseEnableFeature(ctx, appID, res.Addon.ID, featureStr)
+	databaseFeaturesRaw, databaseFeaturesConfigured := d.GetOk("database_features")
+	if databaseFeaturesConfigured {
+		db, err := client.DatabaseShow(ctx, res.Addon.AppID, res.Addon.ID)
 		if err != nil {
-			return diag.Errorf("add feature on database addon id: %v", err)
+			return diag.Errorf("get database metadata from addon %v: %v", res.Addon.ID, err)
 		}
-		err = waitUntilDatabaseFeatureActivated(ctx, client, res.Addon, featureStr)
+
+		databaseFeatures, ok := databaseFeaturesRaw.([]any)
+		if !ok {
+			return diag.Errorf("database_features has unexpected type %T", databaseFeaturesRaw)
+		}
+		err = compareAndApplyDatabaseFeatures(ctx, client, res.Addon, db, databaseFeatures)
 		if err != nil {
-			return diag.Errorf("activate feature on database addon id: %v", err)
+			return diag.Errorf("compare and apply database features of %v: %v", res.Addon.ID, err)
 		}
 	}
 
 	return nil
 }
 
-func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
 	appID, _ := d.Get("app").(string)
@@ -128,7 +132,7 @@ func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.Errorf("get addon details: %v", err)
 	}
 
-	err = SetAll(d, map[string]interface{}{
+	err = SetAll(d, map[string]any{
 		"resource_id": addon.ResourceID,
 		"plan":        addon.Plan.Name,
 		"plan_id":     addon.Plan.ID,
@@ -173,7 +177,7 @@ func addonIsDatabase(providers []*scalingo.AddonProvider, addon scalingo.Addon) 
 	return strings.HasPrefix(strings.ToLower(addonProviders[0].Category.Name), "database")
 }
 
-func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
 	appID, _ := d.Get("app").(string)
@@ -213,7 +217,7 @@ func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		if err != nil {
 			return diag.Errorf("get database metadata from addon %v: %v", addon.ID, err)
 		}
-		databaseFeatures, _ := d.Get("database_features").([]interface{})
+		databaseFeatures, _ := d.Get("database_features").([]any)
 
 		err = compareAndApplyDatabaseFeatures(ctx, client, addon, db, databaseFeatures)
 		if err != nil {
@@ -224,7 +228,7 @@ func resourceAddonUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func compareAndApplyDatabaseFeatures(ctx context.Context, client *scalingo.Client, addon scalingo.Addon, db scalingo.Database, databaseFeatures []interface{}) error {
+func compareAndApplyDatabaseFeatures(ctx context.Context, client *scalingo.Client, addon scalingo.Addon, db scalingo.Database, databaseFeatures []any) error {
 	featuresToAdd := []string{}
 	featuresToRemove := []string{}
 
@@ -272,7 +276,7 @@ func compareAndApplyDatabaseFeatures(ctx context.Context, client *scalingo.Clien
 	return nil
 }
 
-func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAddonDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
 	appID, _ := d.Get("app").(string)
@@ -303,7 +307,7 @@ func addonPlanID(ctx context.Context, client *scalingo.Client, providerID, name 
 	return "", fmt.Errorf("Invalid plan name, possible values are: %s", planList)
 }
 
-func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceAddonImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
 		return nil, fmt.Errorf("import block id should have the following format: <appID>:<addonID>")
