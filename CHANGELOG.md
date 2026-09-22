@@ -2,6 +2,8 @@
 
 ## To be Released
 
+# 2.7.5
+
 * fix(resource_scalingo_addon): ignore error if a feature is already enabled
 * fix(resource_scalingo_addon): compare and apply DB features during creation
 * fix(resource/scalingo_scm_repo_link): don't omit attributes anymore when creating repo link with review apps disabled
