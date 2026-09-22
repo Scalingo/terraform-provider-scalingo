@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* fix(resource_scalingo_addon): ignore error if a feature is already enabled
 * fix(resource_scalingo_addon): compare and apply DB features during creation
 * fix(resource/scalingo_scm_repo_link): don't omit attributes anymore when creating repo link with review apps disabled
 * build(deps): update `github.com/Scalingo/go-scalingo` from v10 to v11
