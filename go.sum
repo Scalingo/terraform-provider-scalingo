@@ -8,6 +8,8 @@ github.com/Scalingo/go-scalingo/v11 v11.3.0 h1:e37g1agAmTzqCgh1qTOSIMeMAXWDURHwG
 github.com/Scalingo/go-scalingo/v11 v11.3.0/go.mod h1:188AcoLrztIhk3BQPaYHKJesSYXxBwWQvKWQoewKww0=
 github.com/Scalingo/go-scalingo/v11 v11.5.1-0.20260922154412-4ccc81e7e00d h1:b376RkoW5XGEtmGoOdZxD3Tw9/qwgrPuknSPeytHBuU=
 github.com/Scalingo/go-scalingo/v11 v11.5.1-0.20260922154412-4ccc81e7e00d/go.mod h1:HqA3+BPLXmXQoqyX0cPB5TIIl83O1RV/THniq2k1Q4k=
+github.com/Scalingo/go-scalingo/v11 v11.6.0 h1:uskT7cPjIakTzT0UC3+JVtge0IuCYhjZc7dQGQKDtc0=
+github.com/Scalingo/go-scalingo/v11 v11.6.0/go.mod h1:HqA3+BPLXmXQoqyX0cPB5TIIl83O1RV/THniq2k1Q4k=
 github.com/Scalingo/go-utils/errors/v3 v3.2.1 h1:2w3qUz6MxJa3aqx/biz2G3JquSKsFnfz/E7wrNf/LPc=
 github.com/Scalingo/go-utils/errors/v3 v3.2.1/go.mod h1:jVVNoOdYFjuNkR/BeEZWNWJVvu4jmyLY4udlsQQyBss=
 github.com/Scalingo/go-utils/pagination v1.2.0 h1:dTvce+thcZXH/S13HF5dxGNPCMdGALNsW6p2EYe2Pno=
