@@ -9,6 +9,8 @@ import (
 	"github.com/Scalingo/go-scalingo/v11"
 )
 
+const databaseIDDescription = "ID of the database"
+
 // dataSourceScDatabaseEndpoints lists endpoints, optionally filtering by type:
 //
 //	data "scalingo_database_endpoint" "public" {
@@ -32,7 +34,7 @@ func dataSourceScDatabaseEndpoints() *schema.Resource {
 			"database_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "ID of the database",
+				Description: databaseIDDescription,
 			},
 			"type": {
 				Type:        schema.TypeString,
@@ -59,7 +61,7 @@ func dataSourceScDatabaseEndpoints() *schema.Resource {
 						"database_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "ID of the database",
+							Description: databaseIDDescription,
 						},
 						"type": {
 							Type:        schema.TypeString,
@@ -94,7 +96,7 @@ func dataSourceScDatabaseEndpoints() *schema.Resource {
 	}
 }
 
-func dataSourceScDatabaseEndpointsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceScDatabaseEndpointsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
 	databaseID, _ := d.Get("database_id").(string)
@@ -126,7 +128,7 @@ func dataSourceScDatabaseEndpointsRead(ctx context.Context, d *schema.ResourceDa
 		return diag.Errorf("no endpoints found for database %q", databaseID)
 	}
 
-	endpointState := func(endpoint scalingo.DatabaseEndpoint) map[string]interface{} {
+	endpointState := func(endpoint scalingo.DatabaseEndpoint) map[string]any {
 		username, password := "", ""
 		if endpoint.Credentials != nil {
 			username = endpoint.Credentials.Username
@@ -137,7 +139,7 @@ func dataSourceScDatabaseEndpointsRead(ctx context.Context, d *schema.ResourceDa
 			endpointDatabaseID = databaseID
 		}
 
-		return map[string]interface{}{
+		return map[string]any{
 			"id":          endpoint.ID,
 			"database_id": endpointDatabaseID,
 			"type":        string(endpoint.Type),
@@ -148,12 +150,12 @@ func dataSourceScDatabaseEndpointsRead(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	endpointsState := make([]map[string]interface{}, 0, len(selectedEndpoints))
+	endpointsState := make([]map[string]any, 0, len(selectedEndpoints))
 	for _, endpoint := range selectedEndpoints {
 		endpointsState = append(endpointsState, endpointState(endpoint))
 	}
 
-	err = SetAll(d, map[string]interface{}{
+	err = SetAll(d, map[string]any{
 		"database_id": databaseID,
 		"endpoints":   endpointsState,
 	})

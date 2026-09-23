@@ -48,7 +48,8 @@ func TestReadDatabaseEndpoint(t *testing.T) {
 				},
 			},
 		}
-		if err := json.NewEncoder(w).Encode(response); err != nil {
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
 			t.Errorf("encode response: %v", err)
 		}
 	}))
@@ -65,7 +66,8 @@ func TestReadDatabaseEndpoint(t *testing.T) {
 		"include_default_credentials": true,
 	})
 	diagnostics := dataSourceScDatabaseEndpointsRead(t.Context(), data, client)
-	if err := DiagnosticError(diagnostics); err != nil {
+	err = DiagnosticError(diagnostics)
+	if err != nil {
 		t.Fatalf("read database endpoint: %v", err)
 	}
 
@@ -104,7 +106,8 @@ func TestReadDatabaseEndpointsReturnsMultipleMatches(t *testing.T) {
 				{ID: "public-endpoint-id-2", Type: goscalingo.DatabaseEndpointTypePublicRW},
 			},
 		}
-		if err := json.NewEncoder(w).Encode(response); err != nil {
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
 			t.Errorf("encode response: %v", err)
 		}
 	}))
@@ -122,7 +125,8 @@ func TestReadDatabaseEndpointsReturnsMultipleMatches(t *testing.T) {
 		}
 		data := schema.TestResourceDataRaw(t, dataSourceScDatabaseEndpoints().Schema, config)
 		diagnostics := dataSourceScDatabaseEndpointsRead(t.Context(), data, client)
-		if err := DiagnosticError(diagnostics); err != nil {
+		err := DiagnosticError(diagnostics)
+		if err != nil {
 			t.Fatalf("read database endpoints with type %q: %v", endpointType, err)
 		}
 
@@ -151,7 +155,8 @@ func TestReadDatabaseEndpointWithoutType(t *testing.T) {
 				},
 			},
 		}
-		if err := json.NewEncoder(w).Encode(response); err != nil {
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
 			t.Errorf("encode response: %v", err)
 		}
 	}))
@@ -166,7 +171,8 @@ func TestReadDatabaseEndpointWithoutType(t *testing.T) {
 		"database_id": "database-id",
 	})
 	diagnostics := dataSourceScDatabaseEndpointsRead(t.Context(), data, client)
-	if err := DiagnosticError(diagnostics); err != nil {
+	err = DiagnosticError(diagnostics)
+	if err != nil {
 		t.Fatalf("read database endpoint: %v", err)
 	}
 
