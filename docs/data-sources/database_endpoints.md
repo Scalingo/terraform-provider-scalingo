@@ -66,7 +66,10 @@ output "database_endpoints" {
 ### Optional
 
 - `include_default_credentials` (Boolean) Whether to include the default endpoint credentials
-- `type` (String) Type of the database endpoint. When specified, it filters the endpoint list; multiple matches are returned.
+- `type` (String) Type of the database endpoint. When specified, it filters the
+  endpoint list; multiple matches are returned. Example of values are:
+  `public-rw` or `private-peering-rw`, Full
+  [Documentation](https://doc.scalingo.com/databases/postgresql/dedicated-resources/getting-started/endpoints#breadcrumb)
 
 ### Read-Only
 

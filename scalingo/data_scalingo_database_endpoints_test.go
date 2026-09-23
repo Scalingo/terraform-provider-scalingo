@@ -60,7 +60,7 @@ func TestReadDatabaseEndpoint(t *testing.T) {
 		t.Fatalf("create client: %v", err)
 	}
 
-	data := schema.TestResourceDataRaw(t, dataSourceScDatabaseEndpoints().Schema, map[string]interface{}{
+	data := schema.TestResourceDataRaw(t, dataSourceScDatabaseEndpoints().Schema, map[string]any{
 		"database_id":                 "database-id",
 		"type":                        "public-rw",
 		"include_default_credentials": true,
@@ -74,18 +74,18 @@ func TestReadDatabaseEndpoint(t *testing.T) {
 	if data.Id() != "database-id" {
 		t.Errorf("data source ID = %q, want database-id", data.Id())
 	}
-	endpoints, ok := data.Get("endpoints").([]interface{})
+	endpoints, ok := data.Get("endpoints").([]any)
 	if !ok {
 		t.Fatalf("endpoints has type %T, want []interface{}", data.Get("endpoints"))
 	}
 	if len(endpoints) != 1 {
 		t.Fatalf("endpoints count = %d, want 1", len(endpoints))
 	}
-	endpoint, ok := endpoints[0].(map[string]interface{})
+	endpoint, ok := endpoints[0].(map[string]any)
 	if !ok {
 		t.Fatalf("endpoint has type %T, want map[string]interface{}", endpoints[0])
 	}
-	for field, want := range map[string]interface{}{
+	for field, want := range map[string]any{
 		"id":       "public-endpoint-id",
 		"hostname": "public.example.com",
 		"port":     5432,
@@ -119,7 +119,7 @@ func TestReadDatabaseEndpointsReturnsMultipleMatches(t *testing.T) {
 	}
 
 	for _, endpointType := range []string{"", "public-rw"} {
-		config := map[string]interface{}{"database_id": "database-id"}
+		config := map[string]any{"database_id": "database-id"}
 		if endpointType != "" {
 			config["type"] = endpointType
 		}
@@ -133,7 +133,7 @@ func TestReadDatabaseEndpointsReturnsMultipleMatches(t *testing.T) {
 		if data.Id() != "database-id" {
 			t.Errorf("data source ID = %q, want database-id", data.Id())
 		}
-		endpoints, ok := data.Get("endpoints").([]interface{})
+		endpoints, ok := data.Get("endpoints").([]any)
 		if !ok {
 			t.Fatalf("endpoints has type %T, want []interface{}", data.Get("endpoints"))
 		}
@@ -167,7 +167,7 @@ func TestReadDatabaseEndpointWithoutType(t *testing.T) {
 		t.Fatalf("create client: %v", err)
 	}
 
-	data := schema.TestResourceDataRaw(t, dataSourceScDatabaseEndpoints().Schema, map[string]interface{}{
+	data := schema.TestResourceDataRaw(t, dataSourceScDatabaseEndpoints().Schema, map[string]any{
 		"database_id": "database-id",
 	})
 	diagnostics := dataSourceScDatabaseEndpointsRead(t.Context(), data, client)
@@ -179,14 +179,14 @@ func TestReadDatabaseEndpointWithoutType(t *testing.T) {
 	if data.Id() != "database-id" {
 		t.Errorf("data source ID = %q, want database-id", data.Id())
 	}
-	endpoints, ok := data.Get("endpoints").([]interface{})
+	endpoints, ok := data.Get("endpoints").([]any)
 	if !ok {
 		t.Fatalf("endpoints has type %T, want []interface{}", data.Get("endpoints"))
 	}
 	if len(endpoints) != 1 {
 		t.Fatalf("endpoints count = %d, want 1", len(endpoints))
 	}
-	endpoint, ok := endpoints[0].(map[string]interface{})
+	endpoint, ok := endpoints[0].(map[string]any)
 	if !ok {
 		t.Fatalf("endpoint has type %T, want map[string]interface{}", endpoints[0])
 	}

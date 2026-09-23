@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -219,8 +220,8 @@ func dataSourceScInvoiceRead(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// filtering invoices with the current config
-	filteredInvoices := keepIf(invoices, func(invoice *scalingo.Invoice) bool {
-		return isInTimeRange(afterTime, beforeTime, time.Time(invoice.BillingMonth))
+	filteredInvoices := slices.DeleteFunc(invoices, func(invoice *scalingo.Invoice) bool {
+		return !isInTimeRange(afterTime, beforeTime, time.Time(invoice.BillingMonth))
 	})
 
 	// mapping invoices list to raw json struct before saving in the state to keep json fields

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -169,8 +170,8 @@ func resourceAddonRead(ctx context.Context, d *schema.ResourceData, meta any) di
 }
 
 func addonIsDatabase(providers []*scalingo.AddonProvider, addon scalingo.Addon) bool {
-	addonProviders := keepIf(providers, func(p *scalingo.AddonProvider) bool {
-		return p.ID == addon.AddonProvider.ID
+	addonProviders := slices.DeleteFunc(providers, func(p *scalingo.AddonProvider) bool {
+		return p.ID != addon.AddonProvider.ID
 	})
 	if len(addonProviders) == 0 {
 		return false

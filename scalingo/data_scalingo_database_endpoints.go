@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -96,6 +97,29 @@ func dataSourceScDatabaseEndpoints() *schema.Resource {
 	}
 }
 
+// databaseEndpointState returns the Terraform state representation of an endpoint.
+func databaseEndpointState(endpoint scalingo.DatabaseEndpoint, databaseID string) map[string]any {
+	username, password := "", ""
+	if endpoint.Credentials != nil {
+		username = endpoint.Credentials.Username
+		password = endpoint.Credentials.Password
+	}
+	endpointDatabaseID := endpoint.DatabaseID
+	if endpointDatabaseID == "" {
+		endpointDatabaseID = databaseID
+	}
+
+	return map[string]any{
+		"id":          endpoint.ID,
+		"database_id": endpointDatabaseID,
+		"type":        string(endpoint.Type),
+		"hostname":    endpoint.Hostname,
+		"port":        endpoint.Port,
+		"username":    username,
+		"password":    password,
+	}
+}
+
 func dataSourceScDatabaseEndpointsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
@@ -117,8 +141,8 @@ func dataSourceScDatabaseEndpointsRead(ctx context.Context, d *schema.ResourceDa
 
 	selectedEndpoints := endpoints
 	if endpointType != "" {
-		selectedEndpoints = keepIf(endpoints, func(endpoint scalingo.DatabaseEndpoint) bool {
-			return string(endpoint.Type) == endpointType
+		selectedEndpoints = slices.DeleteFunc(endpoints, func(endpoint scalingo.DatabaseEndpoint) bool {
+			return string(endpoint.Type) != endpointType
 		})
 	}
 	if len(selectedEndpoints) == 0 {
@@ -128,31 +152,9 @@ func dataSourceScDatabaseEndpointsRead(ctx context.Context, d *schema.ResourceDa
 		return diag.Errorf("no endpoints found for database %q", databaseID)
 	}
 
-	endpointState := func(endpoint scalingo.DatabaseEndpoint) map[string]any {
-		username, password := "", ""
-		if endpoint.Credentials != nil {
-			username = endpoint.Credentials.Username
-			password = endpoint.Credentials.Password
-		}
-		endpointDatabaseID := endpoint.DatabaseID
-		if endpointDatabaseID == "" {
-			endpointDatabaseID = databaseID
-		}
-
-		return map[string]any{
-			"id":          endpoint.ID,
-			"database_id": endpointDatabaseID,
-			"type":        string(endpoint.Type),
-			"hostname":    endpoint.Hostname,
-			"port":        endpoint.Port,
-			"username":    username,
-			"password":    password,
-		}
-	}
-
 	endpointsState := make([]map[string]any, 0, len(selectedEndpoints))
 	for _, endpoint := range selectedEndpoints {
-		endpointsState = append(endpointsState, endpointState(endpoint))
+		endpointsState = append(endpointsState, databaseEndpointState(endpoint, databaseID))
 	}
 
 	err = SetAll(d, map[string]any{

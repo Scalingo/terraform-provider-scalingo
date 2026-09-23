@@ -3,6 +3,7 @@ package scalingo
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -62,8 +63,8 @@ func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 	if err != nil {
 		return diag.Errorf("fail to get list of ssh keys: %v", err)
 	}
-	filteredKeys := keepIf(keysList, func(k scalingo.Key) bool {
-		return k.ID == keyID
+	filteredKeys := slices.DeleteFunc(keysList, func(k scalingo.Key) bool {
+		return k.ID != keyID
 	})
 
 	if len(filteredKeys) != 1 {
