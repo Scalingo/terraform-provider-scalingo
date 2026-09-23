@@ -18,6 +18,10 @@ func (pev *Event) Specialize() DetailedEvent {
 		e = &EventNewAppType{Event: ev}
 	case EventEditApp:
 		e = &EventEditAppType{Event: ev}
+	case EventNewAppFirewallRule:
+		e = &EventNewAppFirewallRuleType{Event: ev}
+	case EventDeleteAppFirewallRule:
+		e = &EventDeleteAppFirewallRuleType{Event: ev}
 	case EventDeleteApp:
 		e = &EventDeleteAppType{Event: ev}
 	case EventRenameApp:
@@ -184,6 +188,8 @@ func (pev *Event) Specialize() DetailedEvent {
 		e = &EventStartDatabaseMaintenanceType{Event: ev}
 	case EventCompleteDatabaseMaintenance:
 		e = &EventCompleteDatabaseMaintenanceType{Event: ev}
+	case EventMissedDatabaseMaintenance:
+		e = &EventMissedDatabaseMaintenanceType{Event: ev}
 	case EventLinkGithub:
 		e = &EventLinkGithubType{Event: ev}
 	case EventUnlinkGithub:
