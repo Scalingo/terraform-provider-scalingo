@@ -3,6 +3,7 @@ package scalingo
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -143,8 +144,8 @@ func resourceAlertsRead(ctx context.Context, d *schema.ResourceData, meta interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	filteredAlerts := keepIf(alerts, func(a *scalingo.Alert) bool {
-		return a.ID == d.Id()
+	filteredAlerts := slices.DeleteFunc(alerts, func(a *scalingo.Alert) bool {
+		return a.ID != d.Id()
 	})
 	if len(filteredAlerts) != 1 {
 		return diag.Errorf("fail to get alerts information: %v", err)

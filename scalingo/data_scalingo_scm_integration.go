@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -70,15 +71,9 @@ func dataSourceScScmIntegrationRead(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("fail to fetch integrations: %v", err)
 	}
 
-	selectedIntegrations := keepIf(integrations, func(integration scalingo.SCMIntegration) bool {
-		selected := true
-		if scmType != "" {
-			selected = selected && (scalingo.SCMType(scmType) == integration.SCMType)
-		}
-		if url != "" {
-			selected = selected && (url == integration.URL)
-		}
-		return selected
+	selectedIntegrations := slices.DeleteFunc(integrations, func(integration scalingo.SCMIntegration) bool {
+		return (scmType != "" && scalingo.SCMType(scmType) != integration.SCMType) ||
+			(url != "" && url != integration.URL)
 	})
 
 	if len(selectedIntegrations) != 1 {

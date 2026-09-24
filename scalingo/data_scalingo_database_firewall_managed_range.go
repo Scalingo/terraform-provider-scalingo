@@ -18,7 +18,7 @@ func dataSourceScDatabaseFirewallManagedRange() *schema.Resource {
 			"database_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "ID of the database",
+				Description: databaseIDDescription,
 			},
 			"name": {
 				Type:        schema.TypeString,

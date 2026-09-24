@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(data/database_endpoints) Add data_scalingo_database_endpoints data source with the ability to get default user credentials
+
 # 2.7.5
 
 * fix(resource_scalingo_addon): ignore error if a feature is already enabled

@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 			"scalingo_addon_providers":                 dataSourceScAddonProvider(),
 			"scalingo_container_size":                  dataSourceScContainerSize(),
 			"scalingo_database_firewall_managed_range": dataSourceScDatabaseFirewallManagedRange(),
+			"scalingo_database_endpoints":              dataSourceScDatabaseEndpoints(),
 			"scalingo_invoices":                        dataSourceScInvoice(),
 			"scalingo_notification_platform":           dataSourceScNotificationPlatform(),
 			"scalingo_private_network_domain":          dataSourceScPrivateNetworkDomain(),

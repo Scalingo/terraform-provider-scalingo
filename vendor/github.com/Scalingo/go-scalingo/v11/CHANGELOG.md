@@ -2,6 +2,18 @@
 
 ## To Be Released
 
+## 11.6.0
+
+* feat(preview/database-endpoints/credentials) Allow asking for default credentials to the API when listing endpoints
+
+## 11.5.0
+
+* feat(firewall rules) Add application firewall rules
+
+## 11.4.0
+
+* feat: add `MissedDatabaseMaintenance` event
+
 ## 11.3.0
 
 * feat(databases): Add new method to get recovery window for PITR
