@@ -63,6 +63,7 @@ func Provider() *schema.Provider {
 			"scalingo_addon":                  resourceScalingoAddon(),
 			"scalingo_alert":                  resourceScalingoAlert(),
 			"scalingo_app":                    resourceScalingoApp(),
+			"scalingo_app_firewall_rule":      resourceScalingoAppFirewallRule(),
 			"scalingo_autoscaler":             resourceScalingoAutoscaler(),
 			"scalingo_collaborator":           resourceScalingoCollaborator(),
 			"scalingo_container_type":         resourceScalingoContainerType(),
