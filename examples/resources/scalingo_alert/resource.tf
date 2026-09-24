@@ -2,7 +2,7 @@ resource "scalingo_app" "test_app" {
   name = "terraform-test-alert"
 }
 
-data_source "scalingo_notification_platform" "email" {
+data "scalingo_notification_platform" "email" {
   name = "email"
 }
 
