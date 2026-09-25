@@ -14,7 +14,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/Scalingo/go-scalingo/v11"
-	httpclient "github.com/Scalingo/go-scalingo/v11/http"
+	scalingohttp "github.com/Scalingo/go-scalingo/v11/http"
 	"github.com/Scalingo/go-scalingo/v11/scalingomock"
 )
 
@@ -106,7 +106,7 @@ func TestAppFirewallRuleAPIErrors(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", operation.name, status), func(t *testing.T) {
 				ctx := t.Context()
 				client := scalingomock.NewMockAppsService(gomock.NewController(t))
-				apiErr := &httpclient.RequestFailedError{Code: status, APIError: errors.New("API failure")}
+				apiErr := &scalingohttp.RequestFailedError{Code: status, APIError: errors.New("API failure")}
 				switch operation.name {
 				case "create":
 					client.EXPECT().AppsFirewallRuleCreate(ctx, "app-123", scalingo.AppFirewallRuleParams{

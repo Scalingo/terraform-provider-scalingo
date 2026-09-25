@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/Scalingo/go-scalingo/v11"
-	httpclient "github.com/Scalingo/go-scalingo/v11/http"
+	scalingohttp "github.com/Scalingo/go-scalingo/v11/http"
 )
 
 func resourceScalingoAppFirewallRule() *schema.Resource {
@@ -77,7 +77,7 @@ func resourceAppFirewallRuleRead(ctx context.Context, d *schema.ResourceData, me
 
 	rule, err := client.AppsFirewallRuleShow(ctx, appID, d.Id())
 	if err != nil {
-		var requestErr *httpclient.RequestFailedError
+		var requestErr *scalingohttp.RequestFailedError
 		if errors.As(err, &requestErr) && requestErr.Code == http.StatusNotFound {
 			d.SetId("")
 			return nil
@@ -101,7 +101,7 @@ func resourceAppFirewallRuleDelete(ctx context.Context, d *schema.ResourceData, 
 
 	err := client.AppsFirewallRuleDelete(ctx, appID, d.Id())
 	if err != nil {
-		var requestErr *httpclient.RequestFailedError
+		var requestErr *scalingohttp.RequestFailedError
 		if !errors.As(err, &requestErr) || requestErr.Code != http.StatusNotFound {
 			return diag.Errorf("delete app firewall rule: %v", err)
 		}
