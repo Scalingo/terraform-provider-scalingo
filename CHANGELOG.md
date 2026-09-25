@@ -3,6 +3,7 @@
 ## To be Released
 
 * feat(data/database_endpoints) Add data_scalingo_database_endpoints data source with the ability to get default user credentials
+* feature(resource_app_firewall_rule): Add support for application firewall rules
 
 # 2.7.5
 
