@@ -13,6 +13,10 @@ Resource representing an application firewall rule. Changing the application, CI
 ## Example Usage
 
 ```terraform
+resource "scalingo_app" "test_app" {
+  name = "terraform-test-firewall_rules"
+}
+
 resource "scalingo_app_firewall_rule" "office" {
   app   = scalingo_app.test_app.id
   cidr  = "192.0.2.0/24"
@@ -40,11 +44,3 @@ resource "scalingo_app_firewall_rule" "single_ip" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-## Import
-
-Import using the application ID and firewall rule ID, separated by a colon:
-
-```shell
-terraform import scalingo_app_firewall_rule.office '<app ID>:<firewall rule ID>'
-```
