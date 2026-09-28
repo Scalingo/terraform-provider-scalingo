@@ -8,51 +8,38 @@ description: |-
 
 # scalingo_database_endpoints (Data Source)
 
-Lists database endpoints and optionally filters them by type. Matching endpoints are always returned as a list in the `endpoints` attribute; multiple endpoints may match a type filter.
-
-The singular `scalingo_database_endpoint` data source name is also supported as an alias.
+Database endpoints retrieved from the Database API
 
 ## Example Usage
 
-### Look up one endpoint by type
-
 ```terraform
-data "scalingo_database_endpoints" "public" {
-  database_id                  = scalingo_database.db.database_id
-  type                         = "public-rw"
-  include_default_credentials = true
+variable "database_id" {
+  type        = string
+  description = "ID of the Scalingo database to read endpoints from"
 }
 
-output "hostname" {
-  value = data.scalingo_database_endpoints.public.endpoints[0].hostname
-}
-
-output "port" {
-  value = data.scalingo_database_endpoints.public.endpoints[0].port
-}
-
-output "username" {
-  value = data.scalingo_database_endpoints.public.endpoints[0].username
-}
-
-output "password" {
-  value     = data.scalingo_database_endpoints.public.endpoints[0].password
-  sensitive = true
-}
-```
-
-### Return all endpoints
-
-Omit `type` to return every endpoint. Each object in `endpoints` contains its ID, type, hostname, port, and credentials when requested.
-
-```terraform
 data "scalingo_database_endpoints" "all" {
-  database_id                  = scalingo_database.db.database_id
+  database_id                 = var.database_id
   include_default_credentials = true
 }
 
-output "database_endpoints" {
-  value = data.scalingo_database_endpoints.all.endpoints
+data "scalingo_database_endpoints" "public" {
+  database_id                 = var.database_id
+  type                        = "public-rw"
+  include_default_credentials = true
+}
+
+output "database_endpoint_hostnames" {
+  value = [for endpoint in data.scalingo_database_endpoints.all.endpoints : endpoint.hostname]
+}
+
+output "public_endpoint_hostname" {
+  value = data.scalingo_database_endpoints.public.endpoints.0.hostname
+}
+
+output "public_endpoint_passwords" {
+  value = data.scalingo_database_endpoints.public.endpoints.0.password
+  sensitive = true
 }
 ```
 
@@ -66,19 +53,22 @@ output "database_endpoints" {
 ### Optional
 
 - `include_default_credentials` (Boolean) Whether to include the default endpoint credentials
-- `type` (String) Type of the database endpoint. When specified, it filters the
-  endpoint list; multiple matches are returned. Example of values are:
-  `public-rw` or `private-peering-rw`, Full
-  [Documentation](https://doc.scalingo.com/databases/postgresql/dedicated-resources/getting-started/endpoints#breadcrumb)
+- `type` (String) Type of the database endpoint
 
 ### Read-Only
 
-- `endpoints` (List of Object) Database endpoints matching the filters. Each endpoint object has the following attributes:
-  - `database_id` (String) ID of the database
-  - `hostname` (String) Hostname of the database endpoint
-  - `id` (String) ID of the database endpoint
-  - `password` (String, Sensitive) Password of the database endpoint
-  - `port` (Number) Port of the database endpoint
-  - `type` (String) Type of the database endpoint
-  - `username` (String) Username of the database endpoint
-- `id` (String) ID of the database
+- `endpoints` (List of Object) Database endpoints matching the filters (see [below for nested schema](#nestedatt--endpoints))
+- `id` (String) The ID of this resource.
+
+<a id="nestedatt--endpoints"></a>
+### Nested Schema for `endpoints`
+
+Read-Only:
+
+- `database_id` (String)
+- `hostname` (String)
+- `id` (String)
+- `password` (String)
+- `port` (Number)
+- `type` (String)
+- `username` (String)

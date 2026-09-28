@@ -2,59 +2,61 @@
 
 ## To be Released
 
-* feat(data/database_endpoints) Add data_scalingo_database_endpoints data source with the ability to get default user credentials
-* feature(resource_app_firewall_rule): Add support for application firewall rules
+## 2.8.0
 
-# 2.7.5
+* feat(data/database_endpoints): add `data_scalingo_database_endpoints` data source with the ability to get default user credentials
+* feat(resource_app_firewall_rule): add support for application firewall rules
+
+## 2.7.5
 
 * fix(resource_scalingo_addon): ignore error if a feature is already enabled
 * fix(resource_scalingo_addon): compare and apply DB features during creation
 * fix(resource/scalingo_scm_repo_link): don't omit attributes anymore when creating repo link with review apps disabled
 * build(deps): update `github.com/Scalingo/go-scalingo` from v10 to v11
 
-# 2.7.4
+## 2.7.4
 
 - fix(build): Drop windows/arm6 support
 
-# 2.7.3
+## 2.7.3
 
 * chore(upgrade): Upgrade to Go 1.26
 * chore(action): Use Scalingo/actions/gpg-key-import action
 
-# 2.7.2
+## 2.7.2
 
 * build(deps): various minor updates
 * build(deps): update `github.com/Scalingo/go-scalingo` from v9 to v10
 
-# 2.7.1
+## 2.7.1
 
 * fix(data_source/scalingo_private_network_domain): fix for private network domain data source
 
-# 2.7.0
+## 2.7.0
 
 * resource(scalingo_database_firewall_rule): prevent label with managed ranges
 * doc(data_scalingo_database_firewall_managed_range): clarify managed firewall IP range description
 * chore(deps): bump github.com/Scalingo/go-scalingo/v9 to v9.0.3
 * feat(apps): support HDS resource on application creation
 
-# 2.6.0
+## 2.6.0
 
 * resource(scaling_app): handle project ID update
 
-# 2.5.0
+## 2.5.0
 
 * resource(scalingo_project): create the `project` schema with all methods
 * data_provider(scalingo_project): add the `project` source
 
-# 2.4.2
+## 2.4.2
 
 * fix(ci): migrate goreleaser to v2
 
-# 2.4.1
+## 2.4.1
 
 * fix(ci): fix goreleaser CI deprecated option
 
-# 2.4.0
+## 2.4.0
 
 * chore(go): use go 1.24
 * resource(scalingo_collaborator): add capacity to update a collaborator to limited #231
