@@ -29,7 +29,7 @@ func dataSourceScProject() *schema.Resource {
 			},
 			"id": {
 				Type:        schema.TypeString,
-				Computed:    true,
+				Required:    true,
 				Description: "ID of the project",
 			},
 		},
