@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(data/scalingo_project): Allow to provide project ID
+
 ## 2.8.1
 
 * chore(go): build the provider with Go 1.27.3
