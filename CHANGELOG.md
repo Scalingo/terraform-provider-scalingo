@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* chore(go): build the provider with Go 1.27.3
+
 ## 2.8.0
 
 * feat(data/database_endpoints): add `data_scalingo_database_endpoints` data source with the ability to get default user credentials
