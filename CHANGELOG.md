@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## 2.8.1
+
 * chore(go): build the provider with Go 1.27.3
 
 ## 2.8.0
