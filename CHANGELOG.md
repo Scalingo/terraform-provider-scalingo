@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(resource_database_resource): add new `ip_range` parameter for DB creation
+
 ## 2.8.1
 
 * chore(go): build the provider with Go 1.27.3

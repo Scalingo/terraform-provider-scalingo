@@ -51,6 +51,12 @@ func resourceScalingoDatabase() *schema.Resource {
 				Required:    true,
 				Description: "Name of the plan of the Database NG to provision",
 			},
+			"ip_range": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "IP Range (min /25) where the database is deployed",
+			},
 			"plan_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -69,7 +75,7 @@ func resourceScalingoDatabase() *schema.Resource {
 	}
 }
 
-func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 	previewClient := scalingo.NewPreviewClient(client)
 
@@ -79,6 +85,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 		planName   = d.Get("plan").(string)
 		name       = d.Get("name").(string)
 		projectID  = d.Get("project_id").(string)
+		ipRange    = d.Get("ip_range").(string)
 	)
 
 	planID, err := addonPlanID(ctx, client, technology, planName)
@@ -96,6 +103,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 		PlanID:          planID,
 		Name:            name,
 		ProjectID:       projectID,
+		IPRange:         ipRange,
 	})
 	if err != nil {
 		return diag.Errorf("provision database: %v", err)
@@ -116,7 +124,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 	previewClient := scalingo.NewPreviewClient(client)
 
@@ -132,7 +140,7 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	d.SetId(database.ID)
 
-	err = SetAll(d, map[string]interface{}{
+	err = SetAll(d, map[string]any{
 		"name":        database.Name,
 		"technology":  database.Technology,
 		"plan":        database.Plan,
@@ -147,7 +155,7 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 	previewClient := scalingo.NewPreviewClient(client)
 
@@ -224,7 +232,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceDatabaseRead(ctx, d, meta)
 }
 
-func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, _ := meta.(*scalingo.Client)
 
 	name, ok := d.Get("name").(string)
@@ -239,7 +247,7 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceDatabaseImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDatabaseImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, _ := meta.(*scalingo.Client)
 	previewClient := scalingo.NewPreviewClient(client)
 
