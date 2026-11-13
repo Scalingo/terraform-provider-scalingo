@@ -31,6 +31,7 @@ resource "scalingo_database" "test_postgres" {
 
 ### Optional
 
+- `ip_range` (String) IP Range (min /25) where the database is deployed
 - `project_id` (String) ID of the project to which the Database NG belongs to
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
