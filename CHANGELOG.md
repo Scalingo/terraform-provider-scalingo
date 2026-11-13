@@ -3,6 +3,7 @@
 ## To be Released
 
 * feat(resource_database_resource): add new `ip_range` parameter for DB creation
+* fix(data/scalingo_project): Allow to provide project ID
 
 ## 2.8.1
 
