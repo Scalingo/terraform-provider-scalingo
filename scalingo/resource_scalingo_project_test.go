@@ -169,8 +169,9 @@ func newFakeProjectAPI(t *testing.T, projects map[string]map[string]any) *httpte
 var fakeProjectAPIs sync.Map
 
 func fakeProjectAPIFor(serverURL string) *fakeProjectAPI {
-	api, _ := fakeProjectAPIs.Load(serverURL)
-	return api.(*fakeProjectAPI)
+	value, _ := fakeProjectAPIs.Load(serverURL)
+	api, _ := value.(*fakeProjectAPI)
+	return api
 }
 
 func (api *fakeProjectAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -197,13 +198,14 @@ func (api *fakeProjectAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodPost && r.URL.Path == "/v1/projects":
 		params, _ := body["project"].(map[string]any)
 		api.nextID++
+		newProjectID := fmt.Sprintf("prj-%d", api.nextID)
 		project := map[string]any{
-			"id":              fmt.Sprintf("prj-%d", api.nextID),
+			"id":              newProjectID,
 			"name":            params["name"],
 			"default":         params["default"],
 			"organization_id": params["organization_id"],
 		}
-		api.projects[project["id"].(string)] = project
+		api.projects[newProjectID] = project
 		api.writeJSON(w, http.StatusCreated, map[string]any{"project": project})
 	case api.projects[projectID] == nil:
 		api.writeJSON(w, http.StatusNotFound, map[string]any{"error": "not found"})

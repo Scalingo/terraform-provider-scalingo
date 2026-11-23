@@ -145,8 +145,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	if d.HasChange("organization") {
 		// Keep the previous state: without it, the SDK stores the refused organization.
 		d.Partial(true)
-		oldOrganization, newOrganization := d.GetChange("organization")
-		return diag.FromErr(projectOrganizationChangeError(oldOrganization.(string), newOrganization.(string)))
+		return diag.FromErr(projectOrganizationChangeError(d.GetChange("organization")))
 	}
 
 	var newProjectNamePtr *string
@@ -182,23 +181,22 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceProjectCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func resourceProjectCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	if d.Id() == "" || !d.NewValueKnown("organization") || !d.HasChange("organization") {
 		return nil
 	}
 
-	oldOrganization, newOrganization := d.GetChange("organization")
-	return projectOrganizationChangeError(oldOrganization.(string), newOrganization.(string))
+	return projectOrganizationChangeError(d.GetChange("organization"))
 }
 
-func projectOrganizationChangeError(oldOrganization, newOrganization string) error {
+func projectOrganizationChangeError(oldOrganization, newOrganization any) error {
 	return fmt.Errorf(
 		"organization can only be set when the project is created (stored: %q, configured: %q): restore the stored value or remove the argument",
 		oldOrganization, newOrganization,
 	)
 }
 
-func validateProjectOrganization(value interface{}, path cty.Path) diag.Diagnostics {
+func validateProjectOrganization(value any, path cty.Path) diag.Diagnostics {
 	organization, _ := value.(string)
 	if strings.TrimSpace(organization) == "" {
 		return diag.Diagnostics{{
