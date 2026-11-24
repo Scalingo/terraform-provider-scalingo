@@ -2,6 +2,7 @@ package scalingo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -41,9 +42,7 @@ func resourceScalingoProject() *schema.Resource {
 				// Computed keeps the stored slug when the argument is removed from the configuration.
 				Computed:         true,
 				ValidateDiagFunc: validateProjectOrganization,
-				Description: "Slug of the organization in which the project is created. Omit it to create a personal project. " +
-					"The slug is only used at creation and is kept in the state as configured: it is not read back from the API. " +
-					"Removing the argument has no effect, while adding or changing it on an existing project is refused.",
+				Description:      "Slug of the organization used to create the project. Changing it on an existing project is refused.",
 			},
 			"id": {
 				Type:        schema.TypeString,
@@ -58,8 +57,15 @@ func resourceScalingoProject() *schema.Resource {
 	}
 }
 
+var errProjectOrganizationChange = errors.New("organization can only be set when the project is created")
+
+type projectCreateClient interface {
+	scalingo.ProjectsService
+	scalingo.OrganizationsService
+}
+
 func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, _ := meta.(scalingo.API)
+	client, _ := meta.(projectCreateClient)
 
 	params := scalingo.ProjectAddParams{
 		Name:    d.Get("name").(string),
@@ -109,7 +115,7 @@ func projectOrganizationID(ctx context.Context, client scalingo.OrganizationsSer
 }
 
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, _ := meta.(scalingo.API)
+	client, _ := meta.(*scalingo.Client)
 
 	project, err := client.ProjectGet(ctx, d.Id())
 	if err != nil {
@@ -128,7 +134,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, _ := meta.(scalingo.API)
+	client, _ := meta.(*scalingo.Client)
 
 	err := client.ProjectDelete(ctx, d.Id())
 	if err != nil {
@@ -139,13 +145,13 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, _ := meta.(scalingo.API)
+	client, _ := meta.(scalingo.ProjectsService)
 
 	// The plan check is skipped when the organization is unknown at plan time.
 	if d.HasChange("organization") {
 		// Keep the previous state: without it, the SDK stores the refused organization.
 		d.Partial(true)
-		return diag.FromErr(projectOrganizationChangeError(d.GetChange("organization")))
+		return diag.FromErr(errProjectOrganizationChange)
 	}
 
 	var newProjectNamePtr *string
@@ -186,14 +192,7 @@ func resourceProjectCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ a
 		return nil
 	}
 
-	return projectOrganizationChangeError(d.GetChange("organization"))
-}
-
-func projectOrganizationChangeError(oldOrganization, newOrganization any) error {
-	return fmt.Errorf(
-		"organization can only be set when the project is created (stored: %q, configured: %q): restore the stored value or remove the argument",
-		oldOrganization, newOrganization,
-	)
+	return errProjectOrganizationChange
 }
 
 func validateProjectOrganization(value any, path cty.Path) diag.Diagnostics {
