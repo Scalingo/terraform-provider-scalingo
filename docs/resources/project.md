@@ -35,7 +35,7 @@ resource "scalingo_project" "organization_project" {
 ### Optional
 
 - `default` (Boolean) Whether or not the project is a default project
-- `organization` (String) Slug of the organization used to create the project. Changing it on an existing project is refused.
+- `organization` (String) Organization slug used when creating the project. Omit it to create a personal project. Removing it from an existing configuration leaves the project in its current organization. Setting a different slug on an existing project is refused.
 
 ### Read-Only
 

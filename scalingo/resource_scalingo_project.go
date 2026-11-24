@@ -42,7 +42,9 @@ func resourceScalingoProject() *schema.Resource {
 				// Computed keeps the stored slug when the argument is removed from the configuration.
 				Computed:         true,
 				ValidateDiagFunc: validateProjectOrganization,
-				Description:      "Slug of the organization used to create the project. Changing it on an existing project is refused.",
+				Description: "Organization slug used when creating the project. Omit it to create a personal project. " +
+					"Removing it from an existing configuration leaves the project in its current organization. " +
+					"Setting a different slug on an existing project is refused.",
 			},
 			"id": {
 				Type:        schema.TypeString,
