@@ -3,6 +3,8 @@
 ## To be Released
 
 * fix(data/scalingo_project): Allow to provide project ID
+* feat(organizations): add the optional `organization` slug to create a project in an organization
+* build(deps): update `github.com/Scalingo/go-scalingo/v11` from v11.8.1 to v11.11.0
 
 ## 2.8.1
 

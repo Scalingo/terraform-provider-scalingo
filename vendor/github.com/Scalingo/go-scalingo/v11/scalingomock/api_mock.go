@@ -397,6 +397,21 @@ func (mr *MockAPIMockRecorder) AppsList(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppsList", reflect.TypeOf((*MockAPI)(nil).AppsList), ctx)
 }
 
+// AppsListByOrganization mocks base method.
+func (m *MockAPI) AppsListByOrganization(ctx context.Context, organizationID string) ([]*scalingo.App, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AppsListByOrganization", ctx, organizationID)
+	ret0, _ := ret[0].([]*scalingo.App)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AppsListByOrganization indicates an expected call of AppsListByOrganization.
+func (mr *MockAPIMockRecorder) AppsListByOrganization(ctx, organizationID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppsListByOrganization", reflect.TypeOf((*MockAPI)(nil).AppsListByOrganization), ctx, organizationID)
+}
+
 // AppsRename mocks base method.
 func (m *MockAPI) AppsRename(ctx context.Context, name, newName string) (*scalingo.App, error) {
 	m.ctrl.T.Helper()
@@ -1547,6 +1562,21 @@ func (mr *MockAPIMockRecorder) OperationsShow(ctx, app, opID any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OperationsShow", reflect.TypeOf((*MockAPI)(nil).OperationsShow), ctx, app, opID)
 }
 
+// OrganizationsList mocks base method.
+func (m *MockAPI) OrganizationsList(ctx context.Context) ([]scalingo.Organization, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OrganizationsList", ctx)
+	ret0, _ := ret[0].([]scalingo.Organization)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OrganizationsList indicates an expected call of OrganizationsList.
+func (mr *MockAPIMockRecorder) OrganizationsList(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrganizationsList", reflect.TypeOf((*MockAPI)(nil).OrganizationsList), ctx)
+}
+
 // PrivateNetworksDomainsList mocks base method.
 func (m *MockAPI) PrivateNetworksDomainsList(ctx context.Context, app string, paginationReq pagination.Request) (pagination.Paginated[[]scalingo.PrivateNetworkDomain], error) {
 	m.ctrl.T.Helper()
@@ -1560,6 +1590,110 @@ func (m *MockAPI) PrivateNetworksDomainsList(ctx context.Context, app string, pa
 func (mr *MockAPIMockRecorder) PrivateNetworksDomainsList(ctx, app, paginationReq any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateNetworksDomainsList", reflect.TypeOf((*MockAPI)(nil).PrivateNetworksDomainsList), ctx, app, paginationReq)
+}
+
+// ProjectAdd mocks base method.
+func (m *MockAPI) ProjectAdd(ctx context.Context, params scalingo.ProjectAddParams) (scalingo.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProjectAdd", ctx, params)
+	ret0, _ := ret[0].(scalingo.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProjectAdd indicates an expected call of ProjectAdd.
+func (mr *MockAPIMockRecorder) ProjectAdd(ctx, params any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProjectAdd", reflect.TypeOf((*MockAPI)(nil).ProjectAdd), ctx, params)
+}
+
+// ProjectDelete mocks base method.
+func (m *MockAPI) ProjectDelete(ctx context.Context, projectID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProjectDelete", ctx, projectID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ProjectDelete indicates an expected call of ProjectDelete.
+func (mr *MockAPIMockRecorder) ProjectDelete(ctx, projectID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProjectDelete", reflect.TypeOf((*MockAPI)(nil).ProjectDelete), ctx, projectID)
+}
+
+// ProjectGet mocks base method.
+func (m *MockAPI) ProjectGet(ctx context.Context, projectID string) (scalingo.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProjectGet", ctx, projectID)
+	ret0, _ := ret[0].(scalingo.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProjectGet indicates an expected call of ProjectGet.
+func (mr *MockAPIMockRecorder) ProjectGet(ctx, projectID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProjectGet", reflect.TypeOf((*MockAPI)(nil).ProjectGet), ctx, projectID)
+}
+
+// ProjectPrivateNetworkGet mocks base method.
+func (m *MockAPI) ProjectPrivateNetworkGet(ctx context.Context, projectID string) (scalingo.ProjectPrivateNetwork, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProjectPrivateNetworkGet", ctx, projectID)
+	ret0, _ := ret[0].(scalingo.ProjectPrivateNetwork)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProjectPrivateNetworkGet indicates an expected call of ProjectPrivateNetworkGet.
+func (mr *MockAPIMockRecorder) ProjectPrivateNetworkGet(ctx, projectID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProjectPrivateNetworkGet", reflect.TypeOf((*MockAPI)(nil).ProjectPrivateNetworkGet), ctx, projectID)
+}
+
+// ProjectUpdate mocks base method.
+func (m *MockAPI) ProjectUpdate(ctx context.Context, projectID string, params scalingo.ProjectUpdateParams) (scalingo.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProjectUpdate", ctx, projectID, params)
+	ret0, _ := ret[0].(scalingo.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProjectUpdate indicates an expected call of ProjectUpdate.
+func (mr *MockAPIMockRecorder) ProjectUpdate(ctx, projectID, params any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProjectUpdate", reflect.TypeOf((*MockAPI)(nil).ProjectUpdate), ctx, projectID, params)
+}
+
+// ProjectsList mocks base method.
+func (m *MockAPI) ProjectsList(ctx context.Context) ([]scalingo.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProjectsList", ctx)
+	ret0, _ := ret[0].([]scalingo.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProjectsList indicates an expected call of ProjectsList.
+func (mr *MockAPIMockRecorder) ProjectsList(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProjectsList", reflect.TypeOf((*MockAPI)(nil).ProjectsList), ctx)
+}
+
+// ProjectsListByOrganization mocks base method.
+func (m *MockAPI) ProjectsListByOrganization(ctx context.Context, organizationID string) ([]scalingo.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProjectsListByOrganization", ctx, organizationID)
+	ret0, _ := ret[0].([]scalingo.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProjectsListByOrganization indicates an expected call of ProjectsListByOrganization.
+func (mr *MockAPIMockRecorder) ProjectsListByOrganization(ctx, organizationID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProjectsListByOrganization", reflect.TypeOf((*MockAPI)(nil).ProjectsListByOrganization), ctx, organizationID)
 }
 
 // RegionsList mocks base method.

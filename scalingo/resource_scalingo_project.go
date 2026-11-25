@@ -2,7 +2,11 @@ package scalingo
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"strings"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -15,6 +19,7 @@ func resourceScalingoProject() *schema.Resource {
 		ReadContext:   resourceProjectRead,
 		DeleteContext: resourceProjectDelete,
 		UpdateContext: resourceProjectUpdate,
+		CustomizeDiff: resourceProjectCustomizeDiff,
 
 		Description: "Resource representing a project",
 
@@ -31,6 +36,16 @@ func resourceScalingoProject() *schema.Resource {
 				Default:     false,
 				Description: "Whether or not the project is a default project",
 			},
+			"organization": {
+				Type:     schema.TypeString,
+				Optional: true,
+				// Computed keeps the stored slug when the argument is removed from the configuration.
+				Computed:         true,
+				ValidateDiagFunc: validateProjectOrganization,
+				Description: "Organization slug used when creating the project. Omit it to create a personal project. " +
+					"Removing it from an existing configuration leaves the project in its current organization. " +
+					"Setting a different slug on an existing project is refused.",
+			},
 			"id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -44,27 +59,61 @@ func resourceScalingoProject() *schema.Resource {
 	}
 }
 
-func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, _ := meta.(*scalingo.Client)
+var errProjectOrganizationChange = errors.New("organization can only be set when the project is created")
 
-	project, err := client.ProjectAdd(ctx, scalingo.ProjectAddParams{
+type projectCreateClient interface {
+	scalingo.ProjectsService
+	scalingo.OrganizationsService
+}
+
+func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, _ := meta.(projectCreateClient)
+
+	params := scalingo.ProjectAddParams{
 		Name:    d.Get("name").(string),
 		Default: d.Get("default").(bool),
-	})
+	}
+
+	organizationSlug, _ := d.Get("organization").(string)
+	if organizationSlug != "" {
+		organizationID, err := projectOrganizationID(ctx, client, organizationSlug)
+		if err != nil {
+			return diag.Errorf("create project: %v", err)
+		}
+		params.OrganizationID = organizationID
+	}
+
+	project, err := client.ProjectAdd(ctx, params)
 	if err != nil {
 		return diag.Errorf("create project: %v", err)
 	}
 
 	d.SetId(project.ID)
 	err = SetAll(d, map[string]interface{}{
-		"name":    project.Name,
-		"default": project.Default,
+		"name":         project.Name,
+		"default":      project.Default,
+		"organization": organizationSlug,
 	})
 	if err != nil {
 		return diag.Errorf("store project information: %v", err)
 	}
 
 	return nil
+}
+
+func projectOrganizationID(ctx context.Context, client scalingo.OrganizationsService, organizationSlug string) (string, error) {
+	organizations, err := client.OrganizationsList(ctx)
+	if err != nil {
+		return "", fmt.Errorf("list organizations: %w", err)
+	}
+
+	for _, organization := range organizations {
+		if organization.Slug == organizationSlug {
+			return organization.ID, nil
+		}
+	}
+
+	return "", fmt.Errorf("organization %q not found", organizationSlug)
 }
 
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -98,7 +147,14 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, _ := meta.(*scalingo.Client)
+	client, _ := meta.(scalingo.ProjectsService)
+
+	// The plan check is skipped when the organization is unknown at plan time.
+	if d.HasChange("organization") {
+		// Keep the previous state: without it, the SDK stores the refused organization.
+		d.Partial(true)
+		return diag.FromErr(errProjectOrganizationChange)
+	}
 
 	var newProjectNamePtr *string
 	// Only set a new project name if a new name was provided
@@ -130,5 +186,26 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("store project information: %v", err)
 	}
 
+	return nil
+}
+
+func resourceProjectCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+	if d.Id() == "" || !d.NewValueKnown("organization") || !d.HasChange("organization") {
+		return nil
+	}
+
+	return errProjectOrganizationChange
+}
+
+func validateProjectOrganization(value any, path cty.Path) diag.Diagnostics {
+	organization, _ := value.(string)
+	if strings.TrimSpace(organization) == "" {
+		return diag.Diagnostics{{
+			Severity:      diag.Error,
+			Summary:       "organization must not be empty",
+			Detail:        "Provide an organization slug, or omit the argument to create a personal project.",
+			AttributePath: path,
+		}}
+	}
 	return nil
 }

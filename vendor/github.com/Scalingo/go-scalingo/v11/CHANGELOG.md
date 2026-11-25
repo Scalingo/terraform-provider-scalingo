@@ -2,6 +2,27 @@
 
 ## To Be Released
 
+## 11.11.0
+
+* feat(organizations): add `AppsListByOrganization` and `DatabasesListByOrganization` method to list the resources of an organization
+* feat(organizations): add `OrganizationID` field to `ProjectAddParams` to allow creating a project in an organization
+
+## 11.10.1
+
+* build(mocks): add ProjectsService mocks and include ProjectsService in the API interface
+
+## 11.10.0
+
+* feat(projects): add `OrganizationID` field to `Project` and `ProjectsListByOrganization` method to list the projects of an organization
+
+## 11.9.1
+
+* build(mocks): add preview interfaces mocks
+
+## 11.9.0
+
+* feat(organizations): add `OrganizationsList` method to list the organizations of the current user
+
 ## 11.8.1
 
 * feat(apps): add `AppsRouterDisableMultipartUpload` and `AppsRouterEnableMultipartUpload` methods and `RouterDisableMultipartUpload` field on `App`

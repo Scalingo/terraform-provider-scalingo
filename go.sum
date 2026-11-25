@@ -4,8 +4,8 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/ProtonMail/go-crypto v1.5.2 h1:cucYnvqcY7UOXVD//mSyjeaPY0SSN3v5cDkYPxumINk=
 github.com/ProtonMail/go-crypto v1.5.2/go.mod h1:/RaSu30DaKO4RY+XdV/ACcCcZkGr7AhUIduq5sjzzCo=
-github.com/Scalingo/go-scalingo/v11 v11.8.1 h1:mukF8XVwIJKNzrzNRWaEUqXbRTM4TYsmEpwehLNYV9g=
-github.com/Scalingo/go-scalingo/v11 v11.8.1/go.mod h1:CFTjdLuGJyCg0b1WShTbKC1cjbczj5kpGT55pUXZj0k=
+github.com/Scalingo/go-scalingo/v11 v11.11.0 h1:wllMYXLrW74+2CLXJVfPO9UVCQOVaWN4gfQPZlzUhkY=
+github.com/Scalingo/go-scalingo/v11 v11.11.0/go.mod h1:eWwajKddWEWZoGxHy1Tda/O8ZOkJSKA34RVSQq+3AJM=
 github.com/Scalingo/go-utils/errors/v3 v3.2.1 h1:2w3qUz6MxJa3aqx/biz2G3JquSKsFnfz/E7wrNf/LPc=
 github.com/Scalingo/go-utils/errors/v3 v3.2.1/go.mod h1:jVVNoOdYFjuNkR/BeEZWNWJVvu4jmyLY4udlsQQyBss=
 github.com/Scalingo/go-utils/pagination v1.2.0 h1:dTvce+thcZXH/S13HF5dxGNPCMdGALNsW6p2EYe2Pno=

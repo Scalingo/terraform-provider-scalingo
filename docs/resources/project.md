@@ -14,8 +14,14 @@ Resource representing a project
 
 ```terraform
 resource "scalingo_project" "test_project" {
-    name = "test-project"
-    default = true
+  name    = "test-project"
+  default = true
+}
+
+# The organization slug is used to create the project in an organization.
+resource "scalingo_project" "organization_project" {
+  name         = "organization-project"
+  organization = "my-organization"
 }
 ```
 
@@ -29,6 +35,7 @@ resource "scalingo_project" "test_project" {
 ### Optional
 
 - `default` (Boolean) Whether or not the project is a default project
+- `organization` (String) Organization slug used when creating the project. Omit it to create a personal project. Removing it from an existing configuration leaves the project in its current organization. Setting a different slug on an existing project is refused.
 
 ### Read-Only
 
