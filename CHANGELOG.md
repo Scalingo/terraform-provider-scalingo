@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* feat(resource_database_resource): add new `ip_range` parameter for DB creation
 * fix(data/scalingo_project): Allow to provide project ID
 * feat(organizations): add the optional `organization` slug to create a project in an organization
 * build(deps): update `github.com/Scalingo/go-scalingo/v11` from v11.8.1 to v11.11.0
